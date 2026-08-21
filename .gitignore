@@ -4,3 +4,10 @@ vendor/
 .env
 node_modules/
 build/
+.composer/
+composer.phar
+composer-setup.php
+composer-setup.sig
+public/build/
+storage/*.key
+storage/logs/*.log
