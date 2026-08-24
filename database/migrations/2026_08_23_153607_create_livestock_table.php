@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('livestock', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('farm_id')->constrained()->onDelete('cascade');
-            $table->string('tag_number')->unique(); // animal identification
+            $table->foreignId('farm_id')->constrained('farms')->cascadeOnDelete();
+            $table->string('tag_number'); // animal identification
             $table->string('species'); // e.g. Cattle, Goat, Poultry
             $table->string('breed')->nullable();
             $table->enum('sex', ['Male', 'Female']);
@@ -20,11 +20,13 @@ return new class extends Migration
             $table->string('status')->default('Active'); // Active, Sold, Deceased
             $table->decimal('current_weight_kg', 8, 2)->nullable();
             $table->timestamps();
+
+            $table->unique(['farm_id', 'tag_number']);
         });
 
         Schema::create('livestock_vaccinations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('livestock_id')->constrained('livestock')->onDelete('cascade');
+            $table->foreignId('livestock_id')->constrained('livestock')->cascadeOnDelete();
             $table->string('vaccine_name');
             $table->date('date_administered');
             $table->date('next_due_date')->nullable();
@@ -33,7 +35,7 @@ return new class extends Migration
 
         Schema::create('livestock_health_records', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('livestock_id')->constrained('livestock')->onDelete('cascade');
+            $table->foreignId('livestock_id')->constrained('livestock')->cascadeOnDelete();
             $table->string('condition'); // disease/injury name
             $table->text('treatment')->nullable();
             $table->date('date_recorded');
@@ -42,7 +44,7 @@ return new class extends Migration
 
         Schema::create('livestock_breeding_records', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('livestock_id')->constrained('livestock')->onDelete('cascade');
+            $table->foreignId('livestock_id')->constrained('livestock')->cascadeOnDelete();
             $table->date('breeding_date');
             $table->date('expected_birth_date')->nullable();
             $table->integer('offspring_count')->nullable();
