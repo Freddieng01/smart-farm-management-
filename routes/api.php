@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\FarmController;
@@ -32,4 +33,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('sales-orders.items', SalesOrderItemController::class)->shallow();
     Route::apiResource('invoices', InvoiceController::class);
     Route::apiResource('invoices.payments', PaymentController::class)->shallow();
+    
+    // Admin-only user management
+    Route::middleware('role:Admin')->group(function () {
+        Route::apiResource('users', UserController::class);
+    });
 });
