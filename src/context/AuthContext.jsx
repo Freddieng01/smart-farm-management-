@@ -32,7 +32,7 @@ export function AuthProvider({ children }) {
     const [token, setToken] = useState(() => window.localStorage.getItem(TOKEN_KEY));
     const [user, setUser] = useState(readStoredUser);
     const [authError, setAuthError] = useState(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (token) {
@@ -43,10 +43,17 @@ export function AuthProvider({ children }) {
     }, [token]);
 
     const persistSession = useCallback((payload) => {
-        window.localStorage.setItem(TOKEN_KEY, payload.access_token);
-        window.localStorage.setItem(USER_KEY, JSON.stringify(payload.user));
-        setToken(payload.access_token);
-        setUser(payload.user);
+        const nextToken = payload.access_token || payload.token;
+        const nextUser = payload.user;
+
+        if (!nextToken || !nextUser) {
+            throw new Error('Invalid authentication payload.');
+        }
+
+        window.localStorage.setItem(TOKEN_KEY, nextToken);
+        window.localStorage.setItem(USER_KEY, JSON.stringify(nextUser));
+        setToken(nextToken);
+        setUser(nextUser);
     }, []);
 
     const clearSession = useCallback(() => {
@@ -55,6 +62,45 @@ export function AuthProvider({ children }) {
         setToken(null);
         setUser(null);
     }, []);
+
+    useEffect(() => {
+        let active = true;
+
+        async function bootstrapAuth() {
+            if (!token) {
+                if (active) {
+                    setLoading(false);
+                }
+                return;
+            }
+
+            try {
+                const response = await api.get('/me');
+                const currentUser = response.data.user || response.data;
+
+                if (!active) {
+                    return;
+                }
+
+                setUser(currentUser);
+                window.localStorage.setItem(USER_KEY, JSON.stringify(currentUser));
+            } catch {
+                if (active) {
+                    clearSession();
+                }
+            } finally {
+                if (active) {
+                    setLoading(false);
+                }
+            }
+        }
+
+        bootstrapAuth();
+
+        return () => {
+            active = false;
+        };
+    }, [clearSession, token]);
 
     const login = useCallback(async (credentials) => {
         setLoading(true);
