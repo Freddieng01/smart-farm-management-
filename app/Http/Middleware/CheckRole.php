@@ -8,15 +8,6 @@ use Illuminate\Http\JsonResponse;
 
 class CheckRole
 {
-    /**
-     * Handle an incoming request.
-     * Accepts multiple role parameters (e.g., role:Admin,Moderator)
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @param  mixed  ...$roles
-     * @return mixed
-     */
     public function handle(Request $request, Closure $next, ...$roles)
     {
         $user = $request->user();
@@ -25,11 +16,10 @@ class CheckRole
             return response()->json(['message' => 'Unauthorized access for this role.'], 403);
         }
 
-        // Normalize roles and user's role for comparison
-        $normalizedRoles = array_map('strval', $roles);
         $userRole = (string) ($user->role ?? '');
+        $allowedRoles = array_map('strval', $roles);
 
-        if (! in_array($userRole, $normalizedRoles, true)) {
+        if (! in_array($userRole, $allowedRoles, true)) {
             return response()->json(['message' => 'Unauthorized access for this role.'], 403);
         }
 

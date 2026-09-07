@@ -21,6 +21,7 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/me', [AuthController::class, 'me']);
     Route::get('/dashboard/summary', [DashboardController::class, 'summary']);
 
     Route::apiResource('farms', FarmController::class);
@@ -33,8 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('sales-orders.items', SalesOrderItemController::class)->shallow();
     Route::apiResource('invoices', InvoiceController::class);
     Route::apiResource('invoices.payments', PaymentController::class)->shallow();
-    
-    // Admin-only user management
+
     Route::middleware('role:Admin')->group(function () {
         Route::apiResource('users', UserController::class);
     });

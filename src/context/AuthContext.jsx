@@ -103,6 +103,12 @@ export function AuthProvider({ children }) {
         }
     }, [clearSession, token]);
 
+    const hasRole = useCallback((roles) => {
+        if (!user) return false;
+        const roleArray = Array.isArray(roles) ? roles : [roles];
+        return roleArray.includes(user.role);
+    }, [user]);
+
     const value = useMemo(() => ({
         api,
         token,
@@ -114,7 +120,8 @@ export function AuthProvider({ children }) {
         login,
         register,
         logout,
-    }), [authError, loading, login, logout, register, token, user]);
+        hasRole,
+    }), [authError, hasRole, loading, login, logout, register, token, user]);
 
     return (
         <AuthContext.Provider value={value}>
