@@ -3,6 +3,13 @@ import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import Dashboard from './components/Dashboard.jsx';
 import LoginPage from './pages/Login.jsx';
 import UserManagement from './pages/UserManagement.jsx';
+import FarmManagement from './pages/FarmManagement.jsx';
+import FieldManagement from './pages/FieldManagement.jsx';
+import EmployeeManagement from './pages/EmployeeManagement.jsx';
+import TaskTracking from './pages/TaskTracking.jsx';
+import ProductionLogging from './pages/ProductionLogging.jsx';
+import ExpenseTracking from './pages/ExpenseTracking.jsx';
+import ProtectedRoute from './components/ProtectedRoute.jsx';
 
 function Unauthorized() {
     return (
@@ -20,24 +27,94 @@ function Unauthorized() {
 }
 
 function AppRoutes() {
-    const { isAuthenticated } = useAuth();
+    const { user } = useAuth();
 
     return (
         <Routes>
-            {!isAuthenticated ? (
-                <>
-                    <Route path="/login" element={<LoginPage />} />
-                    <Route path="*" element={<Navigate to="/login" replace />} />
-                </>
-            ) : (
-                <>
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/users" element={<UserManagement />} />
-                    <Route path="/unauthorized" element={<Unauthorized />} />
-                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                    <Route path="*" element={<Navigate to="/dashboard" replace />} />
-                </>
-            )}
+            {/* Public Routes */}
+            <Route 
+                path="/login" 
+                element={!user ? <LoginPage /> : <Navigate to="/dashboard" replace />} 
+            />
+
+            {/* Protected Routes */}
+            <Route
+                path="/dashboard"
+                element={
+                    <ProtectedRoute>
+                        <Dashboard />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/farms"
+                element={
+                    <ProtectedRoute>
+                        <FarmManagement />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/farms/:farmId/fields"
+                element={
+                    <ProtectedRoute>
+                        <FieldManagement />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/employees"
+                element={
+                    <ProtectedRoute>
+                        <EmployeeManagement />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/tasks"
+                element={
+                    <ProtectedRoute>
+                        <TaskTracking />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/production"
+                element={
+                    <ProtectedRoute>
+                        <ProductionLogging />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/expenses"
+                element={
+                    <ProtectedRoute>
+                        <ExpenseTracking />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/users"
+                element={
+                    <ProtectedRoute allowedRoles={['Admin']}>
+                        <UserManagement />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route path="/unauthorized" element={<Unauthorized />} />
+            
+            {/* Root and Fallback */}
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
     );
 }

@@ -1,187 +1,72 @@
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 const AuthContext = createContext(null);
-const TOKEN_KEY = 'ffms.auth.token';
-const USER_KEY = 'ffms.auth.user';
 
+// Create a base axios instance for API calls
 const api = axios.create({
-    baseURL: '/api',
+    baseURL: '/',
     headers: {
-        Accept: 'application/json',
+        'Accept': 'application/json',
         'Content-Type': 'application/json',
     },
 });
 
-function readStoredUser() {
-    const storedUser = window.localStorage.getItem(USER_KEY);
-
-    if (!storedUser) {
-        return null;
-    }
-
-    try {
-        return JSON.parse(storedUser);
-    } catch {
-        window.localStorage.removeItem(USER_KEY);
-        return null;
-    }
-}
-
-export function AuthProvider({ children }) {
-    const [token, setToken] = useState(() => window.localStorage.getItem(TOKEN_KEY));
-    const [user, setUser] = useState(readStoredUser);
-    const [authError, setAuthError] = useState(null);
+export const AuthProvider = ({ children }) => {
+    const [user, setUser] = useState(null);
+    const [token, setToken] = useState(localStorage.getItem('token'));
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (token) {
-            api.defaults.headers.common.Authorization = `Bearer ${token}`;
-        } else {
-            delete api.defaults.headers.common.Authorization;
-        }
+        const initializeAuth = async () => {
+            if (token) {
+                try {
+                    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                    const response = await api.get('/api/me');
+                    setUser(response.data.user);
+                } catch (error) {
+                    console.error('Session expired or invalid token');
+                    logout();
+                }
+            }
+            setLoading(false);
+        };
+
+        initializeAuth();
     }, [token]);
 
-    const persistSession = useCallback((payload) => {
-        const nextToken = payload.access_token || payload.token;
-        const nextUser = payload.user;
+    const login = async (email, password) => {
+        const response = await axios.post('/api/login', { email, password });
+        const { token: newToken, user: userData } = response.data;
 
-        if (!nextToken || !nextUser) {
-            throw new Error('Invalid authentication payload.');
-        }
+        localStorage.setItem('token', newToken);
+        api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
 
-        window.localStorage.setItem(TOKEN_KEY, nextToken);
-        window.localStorage.setItem(USER_KEY, JSON.stringify(nextUser));
-        setToken(nextToken);
-        setUser(nextUser);
-    }, []);
+        setToken(newToken);
+        setUser(userData);
+        return { success: true };
+    };
 
-    const clearSession = useCallback(() => {
-        window.localStorage.removeItem(TOKEN_KEY);
-        window.localStorage.removeItem(USER_KEY);
+    const logout = () => {
+        localStorage.removeItem('token');
+        delete api.defaults.headers.common['Authorization'];
         setToken(null);
         setUser(null);
-    }, []);
+    };
 
-    useEffect(() => {
-        let active = true;
-
-        async function bootstrapAuth() {
-            if (!token) {
-                if (active) {
-                    setLoading(false);
-                }
-                return;
-            }
-
-            try {
-                const response = await api.get('/me');
-                const currentUser = response.data.user || response.data;
-
-                if (!active) {
-                    return;
-                }
-
-                setUser(currentUser);
-                window.localStorage.setItem(USER_KEY, JSON.stringify(currentUser));
-            } catch {
-                if (active) {
-                    clearSession();
-                }
-            } finally {
-                if (active) {
-                    setLoading(false);
-                }
-            }
+    const hasRole = (allowedRoles) => {
+        if (!user || !user.role) return false;
+        if (Array.isArray(allowedRoles)) {
+            return allowedRoles.includes(user.role);
         }
-
-        bootstrapAuth();
-
-        return () => {
-            active = false;
-        };
-    }, [clearSession, token]);
-
-    const login = useCallback(async (credentials) => {
-        setLoading(true);
-        setAuthError(null);
-
-        try {
-            const response = await api.post('/login', credentials);
-            persistSession(response.data);
-            return response.data.user;
-        } catch (error) {
-            const message = error.response?.data?.message || 'Login failed. Check your credentials and try again.';
-            setAuthError(message);
-            throw error;
-        } finally {
-            setLoading(false);
-        }
-    }, [persistSession]);
-
-    const register = useCallback(async (payload) => {
-        setLoading(true);
-        setAuthError(null);
-
-        try {
-            const response = await api.post('/register', payload);
-            persistSession(response.data);
-            return response.data.user;
-        } catch (error) {
-            const message = error.response?.data?.message || 'Registration failed. Review the form and try again.';
-            setAuthError(message);
-            throw error;
-        } finally {
-            setLoading(false);
-        }
-    }, [persistSession]);
-
-    const logout = useCallback(async () => {
-        setLoading(true);
-
-        try {
-            if (token) {
-                await api.post('/logout');
-            }
-        } finally {
-            clearSession();
-            setLoading(false);
-        }
-    }, [clearSession, token]);
-
-    const hasRole = useCallback((roles) => {
-        if (!user) return false;
-        const roleArray = Array.isArray(roles) ? roles : [roles];
-        return roleArray.includes(user.role);
-    }, [user]);
-
-    const value = useMemo(() => ({
-        api,
-        token,
-        user,
-        role: user?.role || null,
-        authError,
-        loading,
-        isAuthenticated: Boolean(token && user),
-        login,
-        register,
-        logout,
-        hasRole,
-    }), [authError, hasRole, loading, login, logout, register, token, user]);
+        return user.role === allowedRoles;
+    };
 
     return (
-        <AuthContext.Provider value={value}>
-            {children}
+        <AuthContext.Provider value={{ user, token, loading, login, logout, hasRole, api }}>
+            {!loading && children}
         </AuthContext.Provider>
     );
-}
+};
 
-export function useAuth() {
-    const context = useContext(AuthContext);
-
-    if (!context) {
-        throw new Error('useAuth must be used inside AuthProvider');
-    }
-
-    return context;
-}
+export const useAuth = () => useContext(AuthContext);

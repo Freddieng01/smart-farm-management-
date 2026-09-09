@@ -6,6 +6,9 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\FarmController;
 use App\Http\Controllers\Api\FieldController;
+use App\Http\Controllers\Api\DailyTaskController;
+use App\Http\Controllers\Api\CropProductionController;
+use App\Http\Controllers\Api\FarmExpenseController;
 use App\Http\Controllers\Api\LivestockController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\MarketPriceController;
@@ -24,6 +27,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::get('/dashboard/summary', [DashboardController::class, 'summary']);
 
+    Route::apiResource('daily-tasks', DailyTaskController::class);
+    Route::apiResource('crop-productions', CropProductionController::class);
+    Route::apiResource('farm-expenses', FarmExpenseController::class);
     Route::apiResource('farms', FarmController::class);
     Route::apiResource('farms.fields', FieldController::class)->shallow();
     Route::apiResource('employees', EmployeeController::class);

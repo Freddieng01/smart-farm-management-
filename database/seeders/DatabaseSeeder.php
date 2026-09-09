@@ -27,5 +27,41 @@ class DatabaseSeeder extends Seeder
                 'role' => 'Worker',
             ]
         );
+
+        User::updateOrCreate(
+            ['email' => 'accountant@ffms.com'],
+            [
+                'name' => 'Financial Accountant',
+                'password' => Hash::make('password123'),
+                'role' => 'Accountant',
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'manager@ffms.com'],
+            [
+                'name' => 'Farm Manager',
+                'password' => Hash::make('password123'),
+                'role' => 'Manager',
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'agronomist@ffms.com'],
+            [
+                'name' => 'Lead Agronomist',
+                'password' => Hash::make('password123'),
+                'role' => 'Agronomist',
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'owner@ffms.com'],
+            [
+                'name' => 'Farm Owner',
+                'password' => Hash::make('password123'),
+                'role' => 'Farm-owner',
+            ]
+        );
     }
 }

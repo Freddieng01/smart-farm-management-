@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useNavigate } from 'react-router-dom';
 
 const initialSummary = {
     farms: 0,
@@ -8,7 +9,8 @@ const initialSummary = {
 };
 
 export default function Dashboard() {
-    const { api, user, role, logout } = useAuth();
+    const { api, user, logout } = useAuth();
+    const navigate = useNavigate();
     const [summary, setSummary] = useState(initialSummary);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -21,7 +23,7 @@ export default function Dashboard() {
             setError(null);
 
             try {
-                const response = await api.get('/dashboard/summary');
+                const response = await api.get('/api/dashboard/summary');
 
                 if (!ignore) {
                     setSummary(response.data.data || initialSummary);
@@ -45,10 +47,19 @@ export default function Dashboard() {
     }, [api]);
 
     const cards = [
-        { label: 'Farms', value: summary.farms },
-        { label: 'Fields', value: summary.fields },
-        { label: 'Active Users', value: summary.active_users },
-    ];
+        { label: 'Farms', value: summary.farms, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
+        { label: 'Fields', value: summary.fields, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
+        { label: 'Active Users', value: summary.active_users, roles: ['Admin', 'Manager', 'Accountant'] },
+    ].filter(card => card.roles.includes(user?.role));
+
+    const actions = [
+        { label: 'Manage Farms', path: '/farms', roles: ['Admin', 'Manager', 'Agronomist'] },
+        { label: 'Manage Employees', path: '/employees', roles: ['Admin', 'Manager'] },
+        { label: 'Task Tracking', path: '/tasks', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
+        { label: 'Production Logs', path: '/production', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
+        { label: 'Expense Tracking', path: '/expenses', roles: ['Admin', 'Accountant'] },
+        { label: 'Manage Users', path: '/users', roles: ['Admin'] },
+    ].filter(action => action.roles.includes(user?.role));
 
     return (
         <main className="min-h-screen bg-[#f7faf7]">
@@ -59,10 +70,11 @@ export default function Dashboard() {
                         <h1 className="mt-1 text-xl font-semibold text-[#172316]">Farm Operations</h1>
                     </div>
 
+
                     <div className="flex items-center gap-4">
                         <div className="text-right">
                             <p className="text-sm font-medium text-[#172316]">{user?.name}</p>
-                            <p className="text-xs text-[#647260]">{role}</p>
+                            <p className="text-xs text-[#647260]">{user?.role}</p>
                         </div>
                         <button
                             className="rounded-md border border-[#cbd8ca] px-3 py-2 text-sm font-medium text-[#243322] transition hover:bg-[#eef5ee]"
@@ -89,24 +101,36 @@ export default function Dashboard() {
                     ))}
                 </div>
 
-                <div className="mt-8 rounded-lg border border-[#dfe9de] bg-white p-6 shadow-sm">
-                    <h2 className="text-lg font-semibold text-[#172316]">Phase 1 Modules</h2>
-                    <div className="mt-4 grid gap-3 md:grid-cols-2">
-                        <div className="rounded-md border border-[#e3ebe2] p-4">
-                            <p className="font-medium text-[#243322]">Security & User Management</p>
-                            <p className="mt-1 text-sm text-[#647260]">Sanctum authentication and role-aware sessions are active.</p>
+                <div className="mt-8 grid gap-6 md:grid-cols-3">
+                    <div className="md:col-span-2 rounded-lg border border-[#dfe9de] bg-white p-6 shadow-sm">
+                        <h2 className="mb-4 text-lg font-semibold text-[#172316]">Quick Actions</h2>
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            {actions.map(action => (
+                                <button
+                                    key={action.path}
+                                    onClick={() => navigate(action.path)}
+                                    className="flex items-center justify-between rounded-md border border-[#e3ebe2] p-3 text-sm font-medium text-[#243322] transition hover:bg-[#fcfdfc] hover:border-[#4d7a39]"
+                                >
+                                    {action.label}
+                                    <span className="text-xs text-[#647260]">→</span>
+                                </button>
+                            ))}
                         </div>
-                        <div className="rounded-md border border-[#e3ebe2] p-4">
-                            <p className="font-medium text-[#243322]">Farm & Field Management</p>
-                            <p className="mt-1 text-sm text-[#647260]">Farms contain GPS, acreage, and nested field records.</p>
-                        </div>
-                        <div className="rounded-md border border-[#e3ebe2] p-4">
-                            <p className="font-medium text-[#243322]">Labour & Employee Management</p>
-                            <p className="mt-1 text-sm text-[#647260]">Employees link user accounts to farms, rates, and assignments.</p>
-                        </div>
-                        <div className="rounded-md border border-[#e3ebe2] p-4">
-                            <p className="font-medium text-[#243322]">Farm Dashboard</p>
-                            <p className="mt-1 text-sm text-[#647260]">Operational counts are served by the protected API summary endpoint.</p>
+                    </div>
+                    <div className="rounded-lg border border-[#dfe9de] bg-white p-6 shadow-sm">
+                        <h2 className="mb-4 text-lg font-semibold text-[#172316]">Status</h2>
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between text-sm">
+                                <span className="text-[#647260]">System Health</span>
+                                <span className="flex items-center gap-1.5 font-medium text-green-600">
+                                    <span className="h-2 w-2 rounded-full bg-green-600"></span>
+                                    Online
+                                </span>
+                            </div>
+                            <div className="flex items-center justify-between text-sm">
+                                <span className="text-[#647260]">Role</span>
+                                <span className="font-medium text-[#172316]">{user?.role}</span>
+                            </div>
                         </div>
                     </div>
                 </div>

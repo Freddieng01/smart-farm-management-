@@ -11,3 +11,4 @@ composer-setup.sig
 public/build/
 storage/*.key
 storage/logs/*.log
+.aider*
