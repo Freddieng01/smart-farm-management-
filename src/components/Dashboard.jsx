@@ -3,9 +3,9 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
 
 const initialSummary = {
-    farms: 0,
-    fields: 0,
-    active_users: 0,
+    infrastructure: { farms: 0, fields: 0, active_users: 0, total_acreage: 0 },
+    financials: { total_expenses: 0, total_labor_cost: 0, total_outflow: 0 },
+    production: { total_quantity: 0 },
 };
 
 export default function Dashboard() {
@@ -47,9 +47,13 @@ export default function Dashboard() {
     }, [api]);
 
     const cards = [
-        { label: 'Farms', value: summary.farms, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
-        { label: 'Fields', value: summary.fields, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
-        { label: 'Active Users', value: summary.active_users, roles: ['Admin', 'Manager', 'Accountant'] },
+        { label: 'Total Farms', value: summary.infrastructure?.farms, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
+        { label: 'Total Fields', value: summary.infrastructure?.fields, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
+        { label: 'Total Acreage', value: summary.infrastructure?.total_acreage, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
+        { label: 'Active Users', value: summary.infrastructure?.active_users, roles: ['Admin', 'Manager', 'Accountant'] },
+        { label: 'Total Expenses', value: summary.financials?.total_expenses, roles: ['Admin', 'Accountant'] },
+        { label: 'Labour Costs', value: summary.financials?.total_labor_cost, roles: ['Admin', 'Manager', 'Accountant'] },
+        { label: 'Total Production', value: summary.production?.total_quantity, roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
     ].filter(card => card.roles.includes(user?.role));
 
     const actions = [
