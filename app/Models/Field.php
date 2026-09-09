@@ -27,4 +27,16 @@ class Field extends Model
     {
         return $this->belongsTo(Farm::class);
     }
+
+    // --- Added for Resource/Finance module (additive only, nothing above changed) ---
+
+    public function resources()
+    {
+        return $this->hasMany(Resource::class);
+    }
+
+    public function financialTransactions()
+    {
+        return $this->hasMany(FinancialTransaction::class);
+    }
 }
