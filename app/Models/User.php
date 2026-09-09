@@ -37,4 +37,16 @@ class User extends Authenticatable
     {
         return $this->hasOne(Employee::class);
     }
+
+    // --- Added for Resource/Finance module (additive only, nothing above changed) ---
+
+    public function resourceTransactions()
+    {
+        return $this->hasMany(ResourceTransaction::class, 'recorded_by');
+    }
+
+    public function financialTransactions()
+    {
+        return $this->hasMany(FinancialTransaction::class, 'recorded_by');
+    }
 }
