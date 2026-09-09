@@ -22,9 +22,12 @@ export default function Login() {
         event.preventDefault();
         setFieldErrors({});
 
+        console.log('Login submit:', form);
         try {
-            await login(form);
+            const result = await login(form.email, form.password);
+            console.log('Login successful:', result);
         } catch (error) {
+            console.error('Login error:', error);
             setFieldErrors(error.response?.data?.errors || {});
         }
     }
