@@ -10,6 +10,11 @@ use App\Http\Controllers\Api\DailyTaskController;
 use App\Http\Controllers\Api\CropProductionController;
 use App\Http\Controllers\Api\FarmExpenseController;
 use App\Http\Controllers\Api\LivestockController;
+use App\Http\Controllers\Api\SupplierController;
+use App\Http\Controllers\Api\SupplierQuotationController;
+use App\Http\Controllers\Api\PurchaseOrderController;
+use App\Http\Controllers\Api\PurchaseOrderItemController;
+use App\Http\Controllers\Api\PurchasePaymentController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\MarketPriceController;
 use App\Http\Controllers\Api\SalesOrderController;
@@ -34,11 +39,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('daily-tasks', DailyTaskController::class);
     Route::apiResource('crop-productions', CropProductionController::class);
     Route::apiResource('farm-expenses', FarmExpenseController::class);
+
     // Farm Management
     Route::apiResource('farms', FarmController::class);
     Route::apiResource('farms.fields', FieldController::class)->shallow();
     Route::apiResource('employees', EmployeeController::class);
     Route::apiResource('livestock', LivestockController::class);
+
+    // Supplier & Procurement
+    Route::apiResource('suppliers', SupplierController::class);
+    Route::apiResource('suppliers.quotations', SupplierQuotationController::class)->shallow();
+    Route::apiResource('purchase-orders', PurchaseOrderController::class);
+    Route::apiResource('purchase-orders.items', PurchaseOrderItemController::class)->shallow();
+    Route::apiResource('purchase-orders.payments', PurchasePaymentController::class)->shallow();
 
     // Sales & Market
     Route::apiResource('customers', CustomerController::class);
