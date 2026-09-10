@@ -29,6 +29,8 @@ use App\Http\Controllers\Api\StorageFacilityController;
 use App\Http\Controllers\Api\StoredProduceController;
 use App\Http\Controllers\Api\StockMovementController;
 use App\Http\Controllers\Api\DispatchRecordController;
+use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\AlertRuleController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -88,4 +90,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('stored-produce', StoredProduceController::class);
     Route::apiResource('stored-produce.stock-movements', StockMovementController::class)->shallow();
     Route::apiResource('stored-produce.dispatch-records', DispatchRecordController::class)->shallow();
+       
+        
+        // Notifications & Alerts
+    Route::apiResource('notifications', NotificationController::class);
+    Route::post('notifications/{notification}/mark-as-read', [NotificationController::class, 'markAsRead']);
+    Route::apiResource('alert-rules', AlertRuleController::class);
 });
