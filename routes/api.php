@@ -25,6 +25,10 @@ use App\Http\Controllers\Api\FinanceReportController;
 use App\Http\Controllers\Api\FinancialTransactionController;
 use App\Http\Controllers\Api\ResourceController;
 use App\Http\Controllers\Api\BudgetController;
+use App\Http\Controllers\Api\StorageFacilityController;
+use App\Http\Controllers\Api\StoredProduceController;
+use App\Http\Controllers\Api\StockMovementController;
+use App\Http\Controllers\Api\DispatchRecordController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -77,4 +81,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('finance/cost-per-hectare', [FinanceReportController::class, 'costPerHectare']);
     Route::get('finance/cost-per-kilogram', [FinanceReportController::class, 'costPerKilogram']);
     Route::get('finance/budget-vs-actual', [FinanceReportController::class, 'budgetVsActual']);
+
+
+        // Storage & Post-Harvest
+    Route::apiResource('storage-facilities', StorageFacilityController::class);
+    Route::apiResource('stored-produce', StoredProduceController::class);
+    Route::apiResource('stored-produce.stock-movements', StockMovementController::class)->shallow();
+    Route::apiResource('stored-produce.dispatch-records', DispatchRecordController::class)->shallow();
 });
