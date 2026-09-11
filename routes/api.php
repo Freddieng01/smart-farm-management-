@@ -30,6 +30,7 @@ use App\Http\Controllers\Api\PumpMonitoringController;
 use App\Http\Controllers\Api\ScoutingRecordController;
 use App\Http\Controllers\Api\SprayingScheduleController;
 use App\Http\Controllers\Api\OutbreakAlertController;
+use App\Http\Controllers\Api\WeatherController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -52,7 +53,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('scouting-records', ScoutingRecordController::class);
     Route::apiResource('spraying-schedules', SprayingScheduleController::class);
     Route::apiResource('outbreak-alerts', OutbreakAlertController::class);
-    
+
 
     Route::apiResource('farm-expenses', FarmExpenseController::class);
     // Farm Management
@@ -85,4 +86,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('finance/cost-per-hectare', [FinanceReportController::class, 'costPerHectare']);
     Route::get('finance/cost-per-kilogram', [FinanceReportController::class, 'costPerKilogram']);
     Route::get('finance/budget-vs-actual', [FinanceReportController::class, 'budgetVsActual']);
+
+
+    Route::get('weather/current', [WeatherController::class, 'current']);
+    Route::get('weather/forecast', [WeatherController::class, 'forecast']);
+    Route::get('weather/alerts', [WeatherController::class, 'alerts']);
 });
