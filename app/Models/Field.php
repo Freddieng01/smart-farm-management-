@@ -52,4 +52,21 @@ class Field extends Model
     {
         return $this->hasMany(IrrigationSchedule::class);
     }
-} 
+
+    // --- Added for Pest & Disease Management ---
+
+    public function scoutingRecords(): HasMany
+    {
+        return $this->hasMany(ScoutingRecord::class);
+    }
+
+    public function sprayingSchedules(): HasMany
+    {
+        return $this->hasMany(SprayingSchedule::class);
+    }
+
+    public function outbreakAlerts(): HasMany
+    {
+        return $this->hasMany(OutbreakAlert::class);
+    }
+}

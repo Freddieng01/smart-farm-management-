@@ -1,5 +1,6 @@
 <?php
 
+
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Api\DashboardController;
@@ -26,6 +27,9 @@ use App\Http\Controllers\Api\CropMonitoringController;
 use App\Http\Controllers\Api\WaterSourceController;
 use App\Http\Controllers\Api\IrrigationScheduleController;
 use App\Http\Controllers\Api\PumpMonitoringController;
+use App\Http\Controllers\Api\ScoutingRecordController;
+use App\Http\Controllers\Api\SprayingScheduleController;
+use App\Http\Controllers\Api\OutbreakAlertController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -45,6 +49,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('water-sources', WaterSourceController::class);
     Route::apiResource('irrigation-schedules', IrrigationScheduleController::class);
     Route::apiResource('pump-monitoring', PumpMonitoringController::class);
+    Route::apiResource('scouting-records', ScoutingRecordController::class);
+    Route::apiResource('spraying-schedules', SprayingScheduleController::class);
+    Route::apiResource('outbreak-alerts', OutbreakAlertController::class);
+    
 
     Route::apiResource('farm-expenses', FarmExpenseController::class);
     // Farm Management
