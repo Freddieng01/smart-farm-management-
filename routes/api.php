@@ -31,6 +31,9 @@ use App\Http\Controllers\Api\ScoutingRecordController;
 use App\Http\Controllers\Api\SprayingScheduleController;
 use App\Http\Controllers\Api\OutbreakAlertController;
 use App\Http\Controllers\Api\WeatherController;
+use App\Http\Controllers\Api\HarvestScheduleController;
+use App\Http\Controllers\Api\YieldRecordController;
+use App\Http\Controllers\Api\PostHarvestHandlingController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -53,6 +56,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('scouting-records', ScoutingRecordController::class);
     Route::apiResource('spraying-schedules', SprayingScheduleController::class);
     Route::apiResource('outbreak-alerts', OutbreakAlertController::class);
+    Route::apiResource('harvest-schedules', HarvestScheduleController::class);
+    Route::apiResource('yield-records', YieldRecordController::class);
+    Route::apiResource('post-harvest-handlings', PostHarvestHandlingController::class);
 
 
     Route::apiResource('farm-expenses', FarmExpenseController::class);
