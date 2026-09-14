@@ -10,6 +10,11 @@ use App\Http\Controllers\Api\DailyTaskController;
 use App\Http\Controllers\Api\CropProductionController;
 use App\Http\Controllers\Api\FarmExpenseController;
 use App\Http\Controllers\Api\LivestockController;
+use App\Http\Controllers\Api\SupplierController;
+use App\Http\Controllers\Api\SupplierQuotationController;
+use App\Http\Controllers\Api\PurchaseOrderController;
+use App\Http\Controllers\Api\PurchaseOrderItemController;
+use App\Http\Controllers\Api\PurchasePaymentController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\MarketPriceController;
 use App\Http\Controllers\Api\SalesOrderController;
@@ -26,6 +31,12 @@ use App\Http\Controllers\Api\CropMonitoringController;
 use App\Http\Controllers\Api\WaterSourceController;
 use App\Http\Controllers\Api\IrrigationScheduleController;
 use App\Http\Controllers\Api\PumpMonitoringController;
+use App\Http\Controllers\Api\StorageFacilityController;
+use App\Http\Controllers\Api\StoredProduceController;
+use App\Http\Controllers\Api\StockMovementController;
+use App\Http\Controllers\Api\DispatchRecordController;
+use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\AlertRuleController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -47,11 +58,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('pump-monitoring', PumpMonitoringController::class);
 
     Route::apiResource('farm-expenses', FarmExpenseController::class);
+
     // Farm Management
     Route::apiResource('farms', FarmController::class);
     Route::apiResource('farms.fields', FieldController::class)->shallow();
     Route::apiResource('employees', EmployeeController::class);
     Route::apiResource('livestock', LivestockController::class);
+
+    // Supplier & Procurement
+    Route::apiResource('suppliers', SupplierController::class);
+    Route::apiResource('suppliers.quotations', SupplierQuotationController::class)->shallow();
+    Route::apiResource('purchase-orders', PurchaseOrderController::class);
+    Route::apiResource('purchase-orders.items', PurchaseOrderItemController::class)->shallow();
+    Route::apiResource('purchase-orders.payments', PurchasePaymentController::class)->shallow();
 
     // Sales & Market
     Route::apiResource('customers', CustomerController::class);
@@ -77,4 +96,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('finance/cost-per-hectare', [FinanceReportController::class, 'costPerHectare']);
     Route::get('finance/cost-per-kilogram', [FinanceReportController::class, 'costPerKilogram']);
     Route::get('finance/budget-vs-actual', [FinanceReportController::class, 'budgetVsActual']);
+
+
+        // Storage & Post-Harvest
+    Route::apiResource('storage-facilities', StorageFacilityController::class);
+    Route::apiResource('stored-produce', StoredProduceController::class);
+    Route::apiResource('stored-produce.stock-movements', StockMovementController::class)->shallow();
+    Route::apiResource('stored-produce.dispatch-records', DispatchRecordController::class)->shallow();
+       
+        
+        // Notifications & Alerts
+    Route::apiResource('notifications', NotificationController::class);
+    Route::post('notifications/{notification}/mark-as-read', [NotificationController::class, 'markAsRead']);
+    Route::apiResource('alert-rules', AlertRuleController::class);
 });
