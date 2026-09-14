@@ -28,6 +28,9 @@ use App\Http\Controllers\Api\BudgetController;
 use App\Http\Controllers\Api\CropController;
 use App\Http\Controllers\Api\PlantingController;
 use App\Http\Controllers\Api\CropMonitoringController;
+use App\Http\Controllers\Api\WaterSourceController;
+use App\Http\Controllers\Api\IrrigationScheduleController;
+use App\Http\Controllers\Api\PumpMonitoringController;
 use App\Http\Controllers\Api\StorageFacilityController;
 use App\Http\Controllers\Api\StoredProduceController;
 use App\Http\Controllers\Api\StockMovementController;
@@ -50,7 +53,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('crops', CropController::class);
     Route::apiResource('plantings', PlantingController::class);
     Route::apiResource('crop-monitoring', CropMonitoringController::class);
-
+    Route::apiResource('water-sources', WaterSourceController::class);
+    Route::apiResource('irrigation-schedules', IrrigationScheduleController::class);
+    Route::apiResource('pump-monitoring', PumpMonitoringController::class);
 
     Route::apiResource('farm-expenses', FarmExpenseController::class);
 
