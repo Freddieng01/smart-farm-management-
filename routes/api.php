@@ -25,6 +25,9 @@ use App\Http\Controllers\Api\FinanceReportController;
 use App\Http\Controllers\Api\FinancialTransactionController;
 use App\Http\Controllers\Api\ResourceController;
 use App\Http\Controllers\Api\BudgetController;
+use App\Http\Controllers\Api\CropController;
+use App\Http\Controllers\Api\PlantingController;
+use App\Http\Controllers\Api\CropMonitoringController;
 use App\Http\Controllers\Api\StorageFacilityController;
 use App\Http\Controllers\Api\StoredProduceController;
 use App\Http\Controllers\Api\StockMovementController;
@@ -44,6 +47,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('daily-tasks', DailyTaskController::class);
     Route::apiResource('crop-productions', CropProductionController::class);
+    Route::apiResource('crops', CropController::class);
+    Route::apiResource('plantings', PlantingController::class);
+    Route::apiResource('crop-monitoring', CropMonitoringController::class);
+
+
     Route::apiResource('farm-expenses', FarmExpenseController::class);
 
     // Farm Management
