@@ -32,4 +32,11 @@ class Employee extends Model
     {
         return $this->belongsTo(Farm::class);
     }
+
+    // --- Added for Resource/Finance module (additive only, nothing above changed) ---
+
+    public function financialTransactions()
+    {
+        return $this->hasMany(FinancialTransaction::class);
+    }
 }
