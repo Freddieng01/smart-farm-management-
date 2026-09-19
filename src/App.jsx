@@ -10,6 +10,7 @@ import TaskTracking from './pages/TaskTracking.jsx';
 import ProductionLogging from './pages/ProductionLogging.jsx';
 import ExpenseTracking from './pages/ExpenseTracking.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
+import LivestockManagement from './pages/LivestockManagement.jsx';
 
 function Unauthorized() {
     return (
@@ -54,7 +55,16 @@ function AppRoutes() {
                         <FarmManagement />
                     </ProtectedRoute>
                 }
-            />
+                    />
+
+            <Route
+                path="/livestock"
+                element={
+                    <ProtectedRoute>
+                        <LivestockManagement />
+                    </ProtectedRoute>
+            }
+        />
 
             <Route
                 path="/farms/:farmId/fields"
