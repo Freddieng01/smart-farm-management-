@@ -134,7 +134,7 @@ const UserManagement = () => {
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-lg w-full max-w-md p-6 shadow-xl">
                         <h2 className="text-xl font-bold mb-4">Add New User</h2>
-                        <form onSubmit={handleCreateUser} className="space-y-4">
+                        <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Full Name</label>
                                 <input 
