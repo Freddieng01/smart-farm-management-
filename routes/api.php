@@ -1,5 +1,6 @@
 <?php
 
+
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Api\DashboardController;
@@ -25,6 +26,19 @@ use App\Http\Controllers\Api\FinanceReportController;
 use App\Http\Controllers\Api\FinancialTransactionController;
 use App\Http\Controllers\Api\ResourceController;
 use App\Http\Controllers\Api\BudgetController;
+use App\Http\Controllers\Api\CropController;
+use App\Http\Controllers\Api\PlantingController;
+use App\Http\Controllers\Api\CropMonitoringController;
+use App\Http\Controllers\Api\WaterSourceController;
+use App\Http\Controllers\Api\IrrigationScheduleController;
+use App\Http\Controllers\Api\PumpMonitoringController;
+use App\Http\Controllers\Api\ScoutingRecordController;
+use App\Http\Controllers\Api\SprayingScheduleController;
+use App\Http\Controllers\Api\OutbreakAlertController;
+use App\Http\Controllers\Api\WeatherController;
+use App\Http\Controllers\Api\HarvestScheduleController;
+use App\Http\Controllers\Api\YieldRecordController;
+use App\Http\Controllers\Api\PostHarvestHandlingController;
 use App\Http\Controllers\Api\StorageFacilityController;
 use App\Http\Controllers\Api\StoredProduceController;
 use App\Http\Controllers\Api\StockMovementController;
@@ -32,7 +46,6 @@ use App\Http\Controllers\Api\DispatchRecordController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\AlertRuleController;
 use Illuminate\Support\Facades\Route;
-
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -45,6 +58,20 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('daily-tasks', DailyTaskController::class);
     Route::apiResource('crop-productions', CropProductionController::class);
+    Route::apiResource('crops', CropController::class);
+    Route::apiResource('plantings', PlantingController::class);
+    Route::apiResource('crop-monitoring', CropMonitoringController::class);
+    Route::apiResource('water-sources', WaterSourceController::class);
+    Route::apiResource('irrigation-schedules', IrrigationScheduleController::class);
+    Route::apiResource('pump-monitoring', PumpMonitoringController::class);
+    Route::apiResource('scouting-records', ScoutingRecordController::class);
+    Route::apiResource('spraying-schedules', SprayingScheduleController::class);
+    Route::apiResource('outbreak-alerts', OutbreakAlertController::class);
+    Route::apiResource('harvest-schedules', HarvestScheduleController::class);
+    Route::apiResource('yield-records', YieldRecordController::class);
+    Route::apiResource('post-harvest-handlings', PostHarvestHandlingController::class);
+
+
     Route::apiResource('farm-expenses', FarmExpenseController::class);
 
     // Farm Management
@@ -86,14 +113,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('finance/budget-vs-actual', [FinanceReportController::class, 'budgetVsActual']);
 
 
-        // Storage & Post-Harvest
+    // Weather & Environmental Monitoring
+    Route::get('weather/current', [WeatherController::class, 'current']);
+    Route::get('weather/forecast', [WeatherController::class, 'forecast']);
+    Route::get('weather/alerts', [WeatherController::class, 'alerts']);
+
+    // Storage & Post-Harvest
     Route::apiResource('storage-facilities', StorageFacilityController::class);
     Route::apiResource('stored-produce', StoredProduceController::class);
     Route::apiResource('stored-produce.stock-movements', StockMovementController::class)->shallow();
     Route::apiResource('stored-produce.dispatch-records', DispatchRecordController::class)->shallow();
-       
-        
-        // Notifications & Alerts
+
+    // Notifications & Alerts
     Route::apiResource('notifications', NotificationController::class);
     Route::post('notifications/{notification}/mark-as-read', [NotificationController::class, 'markAsRead']);
     Route::apiResource('alert-rules', AlertRuleController::class);

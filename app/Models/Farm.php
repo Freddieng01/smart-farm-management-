@@ -48,4 +48,11 @@ class Farm extends Model
     {
         return $this->hasMany(Budget::class);
     }
+
+    // --- Added for Irrigation & Water Management ---
+
+    public function waterSources()
+    {
+        return $this->hasMany(WaterSource::class);
+    }
 }
