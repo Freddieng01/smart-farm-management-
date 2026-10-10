@@ -11,6 +11,8 @@ import ProductionLogging from './pages/ProductionLogging.jsx';
 import ExpenseTracking from './pages/ExpenseTracking.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import LivestockManagement from './pages/LivestockManagement.jsx';
+import NotificationsManagement from './pages/NotificationsManagement.jsx';
+import SupplierManagement from './pages/SupplierManagement.jsx';
 
 function Unauthorized() {
     return (
@@ -63,8 +65,26 @@ function AppRoutes() {
                     <ProtectedRoute>
                         <LivestockManagement />
                     </ProtectedRoute>
-            }
-        />
+                }
+            />
+
+            <Route
+                path="/notifications"
+                element={
+                    <ProtectedRoute>
+                        <NotificationsManagement />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/suppliers"
+                element={
+                    <ProtectedRoute>
+                        <SupplierManagement />
+                    </ProtectedRoute>
+    }
+/>
 
             <Route
                 path="/farms/:farmId/fields"
