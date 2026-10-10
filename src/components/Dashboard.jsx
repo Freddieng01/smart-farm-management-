@@ -59,6 +59,7 @@ export default function Dashboard() {
     const actions = [
         { label: 'Manage Farms', path: '/farms', roles: ['Admin', 'Manager', 'Agronomist'] },
         { label: 'Livestock Management', path: '/livestock', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
+        { label: 'Notifications', path: '/notifications', roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
         { label: 'Manage Employees', path: '/employees', roles: ['Admin', 'Manager'] },
         { label: 'Task Tracking', path: '/tasks', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
         { label: 'Production Logs', path: '/production', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
