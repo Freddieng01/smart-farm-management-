@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class StoredProduce extends Model
 {
+    protected $table = 'stored_produce';
+
     protected $fillable = [
         'storage_facility_id',
         'crop_name',

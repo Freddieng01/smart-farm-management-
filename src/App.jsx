@@ -13,6 +13,7 @@ import ProtectedRoute from './components/ProtectedRoute.jsx';
 import LivestockManagement from './pages/LivestockManagement.jsx';
 import NotificationsManagement from './pages/NotificationsManagement.jsx';
 import SupplierManagement from './pages/SupplierManagement.jsx';
+import SalesManagement from './pages/SalesManagement.jsx';
 
 function Unauthorized() {
     return (
@@ -82,9 +83,18 @@ function AppRoutes() {
                 element={
                     <ProtectedRoute>
                         <SupplierManagement />
+                                </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/sales"
+                element={
+                    <ProtectedRoute>
+                        <SalesManagement />
                     </ProtectedRoute>
-    }
-/>
+                }
+            />
 
             <Route
                 path="/farms/:farmId/fields"
