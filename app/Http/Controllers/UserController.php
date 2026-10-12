@@ -29,7 +29,7 @@ class UserController extends Controller
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
-            'role' => $data['role'] ?? 'User',
+            'role' => $data['role'] ?? 'Worker',
         ]);
 
         return response()->json($user, 201);
@@ -66,6 +66,11 @@ class UserController extends Controller
     public function destroy($id): JsonResponse
     {
         $user = User::findOrFail($id);
+
+        if ($user->role === 'Admin') {
+            return response()->json(['message' => 'The System Admin cannot be deleted.'], 403);
+        }
+
         $user->delete();
         return response()->json(['message' => 'User deleted']);
     }

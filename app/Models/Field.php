@@ -69,4 +69,21 @@ class Field extends Model
     {
         return $this->hasMany(OutbreakAlert::class);
     }
+
+    // --- Added for Harvest Management ---
+
+    public function harvestSchedules(): HasMany
+    {
+        return $this->hasMany(HarvestSchedule::class);
+    }
+
+    public function yieldRecords(): HasMany
+    {
+        return $this->hasMany(YieldRecord::class);
+    }
+
+    public function postHarvestHandlings(): HasMany
+    {
+        return $this->hasMany(PostHarvestHandling::class);
+    }
 }
