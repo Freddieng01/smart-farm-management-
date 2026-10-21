@@ -62,6 +62,7 @@ export default function Dashboard() {
         { label: 'Notifications', path: '/notifications', roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
         { label: 'Suppliers & Procurement', path: '/suppliers', roles: ['Admin', 'Manager', 'Accountant'] },
         { label: 'Market & Sales', path: '/sales', roles: ['Admin', 'Manager', 'Accountant'] },
+        { label: 'Storage & Post-Harvest', path: '/storage', roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
         { label: 'Manage Employees', path: '/employees', roles: ['Admin', 'Manager'] },
         { label: 'Task Tracking', path: '/tasks', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
         { label: 'Production Logs', path: '/production', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },

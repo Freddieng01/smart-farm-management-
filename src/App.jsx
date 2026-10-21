@@ -14,6 +14,7 @@ import LivestockManagement from './pages/LivestockManagement.jsx';
 import NotificationsManagement from './pages/NotificationsManagement.jsx';
 import SupplierManagement from './pages/SupplierManagement.jsx';
 import SalesManagement from './pages/SalesManagement.jsx';
+import StorageManagement from './pages/StorageManagement.jsx';
 
 function Unauthorized() {
     return (
@@ -92,6 +93,15 @@ function AppRoutes() {
                 element={
                     <ProtectedRoute>
                         <SalesManagement />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/storage"
+                element={
+                    <ProtectedRoute>
+                        <StorageManagement />
                     </ProtectedRoute>
                 }
             />
