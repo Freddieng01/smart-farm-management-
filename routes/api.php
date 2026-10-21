@@ -4,6 +4,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\FarmController;
@@ -48,6 +49,8 @@ use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\AlertRuleController;
 use Illuminate\Support\Facades\Route;
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/forgot-password', [PasswordResetController::class, 'send']);
+Route::post('/reset-password', [PasswordResetController::class, 'reset']);
 Route::get('/invitations/{token}', [InvitationController::class, 'show']);
 Route::post('/invitations/accept', [InvitationController::class, 'accept']);
 

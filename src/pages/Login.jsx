@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { Link, useLocation } from 'react-router-dom';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -10,6 +11,7 @@ const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -39,6 +41,11 @@ const Login = () => {
                 {error && (
                     <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm">
                         {error}
+                    </div>
+                )}
+                {location.state?.message && (
+                    <div className="mb-4 rounded border border-green-400 bg-green-100 px-3 py-2 text-sm text-green-800">
+                        {location.state.message}
                     </div>
                 )}
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -88,6 +95,9 @@ const Login = () => {
                         {isLoading ? 'Signing In...' : 'Sign In'}
                     </button>
                 </form>
+                <Link className="mt-4 block text-center text-sm text-green-700 hover:underline" to="/forgot-password">
+                    Forgot your password?
+                </Link>
             </div>
         </div>
     );

@@ -15,6 +15,8 @@ import AcceptInvitation from './pages/AcceptInvitation.jsx';
 import NotificationsManagement from './pages/NotificationsManagement.jsx';
 import SupplierManagement from './pages/SupplierManagement.jsx';
 import SalesManagement from './pages/SalesManagement.jsx';
+import ForgotPassword from './pages/ForgotPassword.jsx';
+import ResetPassword from './pages/ResetPassword.jsx';
 
 function Unauthorized() {
     return (
@@ -42,6 +44,8 @@ function AppRoutes() {
                 element={!user ? <LoginPage /> : <Navigate to="/dashboard" replace />} 
             />
             <Route path="/accept-invite" element={<AcceptInvitation />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
             {/* Protected Routes */}
             <Route
