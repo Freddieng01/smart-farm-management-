@@ -126,6 +126,17 @@ For Gmail, enable two-step verification and create an app password for `MAIL_PAS
 
 `FRONTEND_URL` must be the public URL recipients can open, not `localhost` or the Vite development URL. Each invitation is valid for seven days and can be used once.
 
+### Core foundation modules
+
+The core foundation is wired through the authenticated API and React UI:
+
+- **Security and User Management**: Sanctum login, role middleware, Admin user management, and role-based invitations.
+- **Farm and Field Management**: Farm registration, map coordinates, drawn field polygons, field sizes, and farm-owner assignment.
+- **Labour and Employee Management**: User-to-farm assignments, task assignments, hourly rates, and labour cost aggregation.
+- **Farm Dashboard and Analytics**: Farm, field, acreage, active-user, expense, labour, and production summaries with map and weather views.
+
+Farm acreage is calculated from field polygons when fields are plotted. The map pin identifies the farm location only; a pin by itself has no area. Polygon areas are stored in hectares for fields and summed into farm acreage using the hectare-to-acre conversion.
+
 ---
 
 ## 6. Hand-off Notes for Team Members
