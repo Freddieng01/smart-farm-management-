@@ -53,6 +53,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+    Route::apiResource('users', UserController::class);
     Route::get('/dashboard/summary', [DashboardController::class, 'summary']);
 
     Route::apiResource('daily-tasks', DailyTaskController::class);

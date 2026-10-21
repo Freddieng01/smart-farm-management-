@@ -12,11 +12,27 @@ use Illuminate\Validation\ValidationException;
 
 class ResourceController extends Controller
 {
+    private const CATEGORIES = ['seeds', 'fertilizer', 'chemical', 'feed', 'medicine', 'packaging', 'fuel', 'tool'];
+
+    // quantity / minimum_stock are decimal(12,2): max 2 decimals, max 9,999,999,999.99
+    private const STOCK_RULES = ['numeric', 'decimal:0,2', 'min:0', 'max:9999999999.99'];
+
+    // unit_cost is decimal(10,2)
+    private const COST_RULES = ['numeric', 'decimal:0,2', 'min:0', 'max:99999999.99'];
+
+    // a stock movement must move a real amount (at least 0.01)
+    private const MOVEMENT_RULES = ['numeric', 'decimal:0,2', 'min:0.01', 'max:9999999999.99'];
+
     public function index(Request $request): JsonResponse
     {
+        $filters = $request->validate([
+            'farm_id' => ['sometimes', 'integer'],
+            'category' => ['sometimes', Rule::in(self::CATEGORIES)],
+        ]);
+
         $resources = Resource::with(['farm:id,name', 'field:id,name'])
-            ->when($request->filled('farm_id'), fn ($q) => $q->where('farm_id', $request->integer('farm_id')))
-            ->when($request->filled('category'), fn ($q) => $q->where('category', $request->string('category')))
+            ->when(isset($filters['farm_id']), fn ($q) => $q->where('farm_id', $filters['farm_id']))
+            ->when(isset($filters['category']), fn ($q) => $q->where('category', $filters['category']))
             ->latest()
             ->paginate(25);
 
@@ -29,21 +45,37 @@ class ResourceController extends Controller
             'farm_id' => ['required', 'exists:farms,id'],
             'field_id' => ['nullable', 'exists:fields,id'],
             'name' => ['required', 'string', 'max:255', Rule::unique('resources', 'name')->where('farm_id', $request->integer('farm_id'))],
-            'category' => ['required', 'string', Rule::in(['seeds', 'fertilizer', 'chemical', 'feed', 'medicine', 'packaging', 'fuel', 'tool'])],
+            'category' => ['required', 'string', Rule::in(self::CATEGORIES)],
             'unit' => ['required', 'string', 'max:20'],
-            'quantity' => ['sometimes', 'numeric', 'min:0'],
-            'minimum_stock' => ['sometimes', 'numeric', 'min:0'],
-            'unit_cost' => ['sometimes', 'numeric', 'min:0'],
+            'quantity' => ['sometimes', ...self::STOCK_RULES],
+            'minimum_stock' => ['sometimes', ...self::STOCK_RULES],
+            'unit_cost' => ['sometimes', ...self::COST_RULES],
             'expiry_date' => ['nullable', 'date'],
         ]);
 
         $this->assertFieldBelongsToFarm($validated['field_id'] ?? null, $validated['farm_id']);
 
-        $resource = Resource::create($validated);
+        // Resource + its opening-balance ledger row are saved together, so the
+        // stock balance always has a matching entry in resource_transactions.
+        $resource = DB::transaction(function () use ($validated, $request) {
+            $resource = Resource::create($validated);
+
+            if ((float) ($validated['quantity'] ?? 0) > 0) {
+                $resource->transactions()->create([
+                    'type' => 'stock_in',
+                    'quantity' => $validated['quantity'],
+                    'unit_cost' => $validated['unit_cost'] ?? 0,
+                    'reason' => 'Opening balance',
+                    'recorded_by' => $request->user()->id,
+                ]);
+            }
+
+            return $resource;
+        });
 
         return response()->json([
             'message' => 'Resource created successfully.',
-            'data' => $resource->load(['farm:id,name', 'field:id,name']),
+            'data' => $resource->fresh(['farm:id,name', 'field:id,name']),
         ], 201);
     }
 
@@ -57,27 +89,26 @@ class ResourceController extends Controller
     public function update(Request $request, Resource $resource): JsonResponse
     {
         $validated = $request->validate([
-            'farm_id' => ['sometimes', 'required', 'exists:farms,id'],
+            // A resource never moves to another farm (its history and finance links belong to one farm).
+            'farm_id' => ['prohibited'],
+            // Stock changes ONLY through stock-in / stock-out so the ledger always matches.
+            'quantity' => ['prohibited'],
             'field_id' => ['sometimes', 'nullable', 'exists:fields,id'],
             'name' => [
                 'sometimes', 'required', 'string', 'max:255',
-                Rule::unique('resources', 'name')
-                    ->where('farm_id', $request->integer('farm_id') ?: $resource->farm_id)
-                    ->ignore($resource),
+                Rule::unique('resources', 'name')->where('farm_id', $resource->farm_id)->ignore($resource),
             ],
-            'category' => ['sometimes', 'required', 'string', Rule::in(['seeds', 'fertilizer', 'chemical', 'feed', 'medicine', 'packaging', 'fuel', 'tool'])],
+            'category' => ['sometimes', 'required', 'string', Rule::in(self::CATEGORIES)],
             'unit' => ['sometimes', 'required', 'string', 'max:20'],
-            'minimum_stock' => ['sometimes', 'numeric', 'min:0'],
-            'unit_cost' => ['sometimes', 'numeric', 'min:0'],
+            'minimum_stock' => ['sometimes', ...self::STOCK_RULES],
+            'unit_cost' => ['sometimes', ...self::COST_RULES],
             'expiry_date' => ['sometimes', 'nullable', 'date'],
         ]);
 
-        $farmId = $validated['farm_id'] ?? $resource->farm_id;
-        $fieldId = array_key_exists('field_id', $validated) ? $validated['field_id'] : $resource->field_id;
-        $this->assertFieldBelongsToFarm($fieldId, $farmId);
+        if (array_key_exists('field_id', $validated)) {
+            $this->assertFieldBelongsToFarm($validated['field_id'], $resource->farm_id);
+        }
 
-        // quantity is intentionally NOT editable here - it only changes via stock-in/stock-out
-        // so the resources.quantity value always matches the resource_transactions ledger.
         $resource->update($validated);
 
         return response()->json([
@@ -88,6 +119,14 @@ class ResourceController extends Controller
 
     public function destroy(Resource $resource): JsonResponse
     {
+        // Deleting would also delete the stock history (database cascade),
+        // so a resource that has history cannot be deleted.
+        if ($resource->transactions()->exists()) {
+            return response()->json([
+                'message' => 'This resource has stock history and cannot be deleted.',
+            ], 409);
+        }
+
         $resource->delete();
 
         return response()->json([
@@ -98,16 +137,20 @@ class ResourceController extends Controller
     public function stockIn(Request $request, Resource $resource): JsonResponse
     {
         $validated = $request->validate([
-            'quantity' => ['required', 'numeric', 'min:0.01'],
-            'unit_cost' => ['nullable', 'numeric', 'min:0'],
+            'quantity' => ['required', ...self::MOVEMENT_RULES],
+            'unit_cost' => ['nullable', ...self::COST_RULES],
             'reason' => ['nullable', 'string', 'max:255'],
-            'livestock_id' => ['nullable', 'exists:livestock,id'],
+            'livestock_id' => ['nullable', 'integer', 'exists:livestock,id'],
         ]);
 
         $this->assertLivestockBelongsToFarm($validated['livestock_id'] ?? null, $resource->farm_id);
 
         $transaction = DB::transaction(function () use ($validated, $resource, $request) {
-            $txn = $resource->transactions()->create([
+            // Atomic "quantity = quantity + X" in SQL (never read-then-write in PHP).
+            $extra = isset($validated['unit_cost']) ? ['unit_cost' => $validated['unit_cost']] : [];
+            Resource::whereKey($resource->id)->increment('quantity', $validated['quantity'], $extra);
+
+            return $resource->transactions()->create([
                 'livestock_id' => $validated['livestock_id'] ?? null,
                 'type' => 'stock_in',
                 'quantity' => $validated['quantity'],
@@ -115,14 +158,6 @@ class ResourceController extends Controller
                 'reason' => $validated['reason'] ?? null,
                 'recorded_by' => $request->user()->id,
             ]);
-
-            $resource->increment('quantity', $validated['quantity']);
-
-            if (array_key_exists('unit_cost', $validated) && $validated['unit_cost'] !== null) {
-                $resource->update(['unit_cost' => $validated['unit_cost']]);
-            }
-
-            return $txn;
         });
 
         return response()->json([
@@ -137,21 +172,25 @@ class ResourceController extends Controller
     public function stockOut(Request $request, Resource $resource): JsonResponse
     {
         $validated = $request->validate([
-            'quantity' => ['required', 'numeric', 'min:0.01'],
+            'quantity' => ['required', ...self::MOVEMENT_RULES],
             'reason' => ['nullable', 'string', 'max:255'],
-            'livestock_id' => ['nullable', 'exists:livestock,id'],
+            'livestock_id' => ['nullable', 'integer', 'exists:livestock,id'],
         ]);
 
         $this->assertLivestockBelongsToFarm($validated['livestock_id'] ?? null, $resource->farm_id);
 
-        if ($validated['quantity'] > $resource->quantity) {
-            throw ValidationException::withMessages([
-                'quantity' => ["Cannot remove {$validated['quantity']} {$resource->unit} - only {$resource->quantity} {$resource->unit} in stock."],
-            ]);
-        }
-
         $transaction = DB::transaction(function () use ($validated, $resource, $request) {
-            $txn = $resource->transactions()->create([
+            // ONE atomic statement: "subtract, but only if enough stock is left".
+            // Two requests at the same moment cannot both succeed on the last units.
+            $updated = Resource::whereKey($resource->id)
+                ->where('quantity', '>=', $validated['quantity'])
+                ->decrement('quantity', $validated['quantity']);
+
+            if ($updated === 0) {
+                return null;
+            }
+
+            return $resource->transactions()->create([
                 'livestock_id' => $validated['livestock_id'] ?? null,
                 'type' => 'stock_out',
                 'quantity' => $validated['quantity'],
@@ -159,11 +198,15 @@ class ResourceController extends Controller
                 'reason' => $validated['reason'] ?? null,
                 'recorded_by' => $request->user()->id,
             ]);
-
-            $resource->decrement('quantity', $validated['quantity']);
-
-            return $txn;
         });
+
+        if ($transaction === null) {
+            $available = Resource::whereKey($resource->id)->value('quantity');
+
+            throw ValidationException::withMessages([
+                'quantity' => ["Cannot remove {$validated['quantity']} {$resource->unit} - only {$available} {$resource->unit} in stock."],
+            ]);
+        }
 
         return response()->json([
             'message' => 'Stock-out recorded successfully.',
@@ -176,9 +219,14 @@ class ResourceController extends Controller
 
     public function lowStock(Request $request): JsonResponse
     {
+        $filters = $request->validate([
+            'farm_id' => ['sometimes', 'integer', 'exists:farms,id'],
+        ]);
+
         $resources = Resource::lowStock()
             ->with(['farm:id,name', 'field:id,name'])
-            ->when($request->filled('farm_id'), fn ($q) => $q->where('farm_id', $request->integer('farm_id')))
+            ->when(isset($filters['farm_id']), fn ($q) => $q->where('farm_id', $filters['farm_id']))
+            ->orderBy('name')
             ->get();
 
         return response()->json(['data' => $resources]);
@@ -186,16 +234,21 @@ class ResourceController extends Controller
 
     public function expiring(Request $request): JsonResponse
     {
-        $days = $request->integer('days') ?: 14;
+        $filters = $request->validate([
+            'farm_id' => ['sometimes', 'integer', 'exists:farms,id'],
+            'days' => ['sometimes', 'integer', 'min:1', 'max:365'],
+        ]);
+
+        $days = $filters['days'] ?? 14;
 
         $expired = Resource::expired()
             ->with(['farm:id,name', 'field:id,name'])
-            ->when($request->filled('farm_id'), fn ($q) => $q->where('farm_id', $request->integer('farm_id')))
+            ->when(isset($filters['farm_id']), fn ($q) => $q->where('farm_id', $filters['farm_id']))
             ->get();
 
         $expiringSoon = Resource::expiringSoon($days)
             ->with(['farm:id,name', 'field:id,name'])
-            ->when($request->filled('farm_id'), fn ($q) => $q->where('farm_id', $request->integer('farm_id')))
+            ->when(isset($filters['farm_id']), fn ($q) => $q->where('farm_id', $filters['farm_id']))
             ->get();
 
         return response()->json([
@@ -209,7 +262,6 @@ class ResourceController extends Controller
 
     /**
      * A field, if supplied, must belong to the same farm as the resource.
-     * Mirrors the scoped-validation style already used in FieldController/EmployeeController.
      */
     private function assertFieldBelongsToFarm(?int $fieldId, int $farmId): void
     {
@@ -217,9 +269,7 @@ class ResourceController extends Controller
             return;
         }
 
-        $belongs = DB::table('fields')->where('id', $fieldId)->where('farm_id', $farmId)->exists();
-
-        if (! $belongs) {
+        if (! DB::table('fields')->where('id', $fieldId)->where('farm_id', $farmId)->exists()) {
             throw ValidationException::withMessages([
                 'field_id' => ['The selected field does not belong to the selected farm.'],
             ]);
@@ -227,9 +277,7 @@ class ResourceController extends Controller
     }
 
     /**
-     * A livestock reference on a stock-in/stock-out must belong to the same
-     * farm as the resource itself - prevents logging feed/medicine usage
-     * against an animal on a different farm.
+     * A livestock reference on a stock movement must belong to the same farm as the resource.
      */
     private function assertLivestockBelongsToFarm(?int $livestockId, int $farmId): void
     {
@@ -237,9 +285,7 @@ class ResourceController extends Controller
             return;
         }
 
-        $belongs = DB::table('livestock')->where('id', $livestockId)->where('farm_id', $farmId)->exists();
-
-        if (! $belongs) {
+        if (! DB::table('livestock')->where('id', $livestockId)->where('farm_id', $farmId)->exists()) {
             throw ValidationException::withMessages([
                 'livestock_id' => ['The selected livestock record does not belong to the selected farm.'],
             ]);
