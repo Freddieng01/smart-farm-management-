@@ -2,6 +2,7 @@
 
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\EmployeeController;
@@ -46,14 +47,16 @@ use App\Http\Controllers\Api\DispatchRecordController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\AlertRuleController;
 use Illuminate\Support\Facades\Route;
-Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/invitations/{token}', [InvitationController::class, 'show']);
+Route::post('/invitations/accept', [InvitationController::class, 'accept']);
 
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
-    Route::apiResource('users', UserController::class);
+    Route::apiResource('users', UserController::class)->except(['store'])->middleware('role:Admin');
+    Route::post('users/invitations', [InvitationController::class, 'store'])->middleware('role:Admin');
     Route::get('/dashboard/summary', [DashboardController::class, 'summary']);
 
     Route::apiResource('daily-tasks', DailyTaskController::class);
@@ -80,7 +83,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('farms.fields', FieldController::class)->shallow();
     Route::apiResource('employees', EmployeeController::class);
     Route::apiResource('livestock', LivestockController::class);
-    Route::apiResource('users', UserController::class);
 
     // Supplier & Procurement
     Route::apiResource('suppliers', SupplierController::class);

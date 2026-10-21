@@ -24,4 +24,8 @@ return [
             'https://api.openweathermap.org/data/2.5'
         ),
     ],
+
+    'invitation' => [
+        'frontend_url' => env('FRONTEND_URL', env('APP_URL')),
+    ],
 ];

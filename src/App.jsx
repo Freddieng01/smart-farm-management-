@@ -11,6 +11,7 @@ import ProductionLogging from './pages/ProductionLogging.jsx';
 import ExpenseTracking from './pages/ExpenseTracking.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import LivestockManagement from './pages/LivestockManagement.jsx';
+import AcceptInvitation from './pages/AcceptInvitation.jsx';
 import NotificationsManagement from './pages/NotificationsManagement.jsx';
 import SupplierManagement from './pages/SupplierManagement.jsx';
 import SalesManagement from './pages/SalesManagement.jsx';
@@ -40,6 +41,7 @@ function AppRoutes() {
                 path="/login" 
                 element={!user ? <LoginPage /> : <Navigate to="/dashboard" replace />} 
             />
+            <Route path="/accept-invite" element={<AcceptInvitation />} />
 
             {/* Protected Routes */}
             <Route
