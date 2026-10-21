@@ -57,22 +57,22 @@ export default function Dashboard() {
         { label: 'Total Farms', value: summary.infrastructure?.farms, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker', 'Farm-owner'] },
         { label: 'Total Fields', value: summary.infrastructure?.fields, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker', 'Farm-owner'] },
         { label: 'Total Acreage', value: summary.infrastructure?.total_acreage, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker', 'Farm-owner'] },
-        { label: 'Active Users', value: summary.infrastructure?.active_users, roles: ['Admin', 'Manager', 'Accountant'] },
+        { label: 'Active Users', value: summary.infrastructure?.active_users, roles: ['Admin', 'Farm-owner', 'Manager', 'Accountant'] },
         { label: 'Total Expenses', value: summary.financials?.total_expenses, roles: ['Admin', 'Accountant'] },
         { label: 'Labour Costs', value: summary.financials?.total_labor_cost, roles: ['Admin', 'Manager', 'Accountant'] },
         { label: 'Total Production', value: summary.production?.total_quantity, roles: ['Admin', 'Manager', 'Agronomist', 'Worker', 'Farm-owner'] },
     ].filter(card => card.roles.includes(user?.role));
 
     const actions = [
-        { label: 'Manage Farms', path: '/farms', roles: ['Admin', 'Manager', 'Agronomist', 'Farm-owner'] },
+        { label: 'Manage Farms', path: '/farms', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
         { label: 'Livestock Management', path: '/livestock', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
         { label: 'Notifications', path: '/notifications', roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
-        { label: 'Suppliers & Procurement', path: '/suppliers', roles: ['Admin', 'Manager', 'Accountant'] },
-        { label: 'Market & Sales', path: '/sales', roles: ['Admin', 'Manager', 'Accountant'] },
-        { label: 'Manage Employees', path: '/employees', roles: ['Admin', 'Manager'] },
-        { label: 'Task Tracking', path: '/tasks', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Production Logs', path: '/production', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Expense Tracking', path: '/expenses', roles: ['Admin', 'Accountant'] },
+        { label: 'Suppliers & Procurement', path: '/suppliers', roles: ['Admin', 'Farm-owner', 'Manager', 'Accountant'] },
+        { label: 'Market & Sales', path: '/sales', roles: ['Admin', 'Farm-owner', 'Manager', 'Accountant'] },
+        { label: 'Manage Employees', path: '/employees', roles: ['Admin', 'Farm-owner', 'Manager'] },
+        { label: 'Task Tracking', path: '/tasks', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
+        { label: 'Production Logs', path: '/production', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
+        { label: 'Expense Tracking', path: '/expenses', roles: ['Admin', 'Farm-owner', 'Manager', 'Accountant'] },
         { label: 'Manage Users', path: '/users', roles: ['Admin'] },
     ].filter(action => action.roles.includes(user?.role));
 

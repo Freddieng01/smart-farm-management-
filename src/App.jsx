@@ -56,7 +56,7 @@ function AppRoutes() {
             <Route
                 path="/farms"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Accountant', 'Worker']}>
                         <FarmManagement />
                     </ProtectedRoute>
                 }
@@ -65,7 +65,7 @@ function AppRoutes() {
             <Route
                 path="/livestock"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker']}>
                         <LivestockManagement />
                     </ProtectedRoute>
                 }
@@ -74,7 +74,7 @@ function AppRoutes() {
             <Route
                 path="/notifications"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Accountant', 'Agronomist', 'Worker']}>
                         <NotificationsManagement />
                     </ProtectedRoute>
                 }
@@ -83,7 +83,7 @@ function AppRoutes() {
             <Route
                 path="/suppliers"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Accountant']}>
                         <SupplierManagement />
                                 </ProtectedRoute>
                 }
@@ -92,7 +92,7 @@ function AppRoutes() {
             <Route
                 path="/sales"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Accountant']}>
                         <SalesManagement />
                     </ProtectedRoute>
                 }
@@ -101,7 +101,7 @@ function AppRoutes() {
             <Route
                 path="/farms/:farmId/fields"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker']}>
                         <FieldManagement />
                     </ProtectedRoute>
                 }
@@ -110,7 +110,7 @@ function AppRoutes() {
             <Route
                 path="/employees"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager']}>
                         <EmployeeManagement />
                     </ProtectedRoute>
                 }
@@ -119,7 +119,7 @@ function AppRoutes() {
             <Route
                 path="/tasks"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker']}>
                         <TaskTracking />
                     </ProtectedRoute>
                 }
@@ -128,7 +128,7 @@ function AppRoutes() {
             <Route
                 path="/production"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Agronomist']}>
                         <ProductionLogging />
                     </ProtectedRoute>
                 }
@@ -137,7 +137,7 @@ function AppRoutes() {
             <Route
                 path="/expenses"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Accountant']}>
                         <ExpenseTracking />
                     </ProtectedRoute>
                 }

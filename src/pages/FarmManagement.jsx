@@ -29,7 +29,7 @@ export default function FarmManagement() {
         try {
             const [farmResponse, ownerResponse] = await Promise.all([
                 api.get('/api/farms'),
-                api.get('/api/farm-owners'),
+                user?.role === 'Admin' ? api.get('/api/farm-owners') : Promise.resolve({ data: { data: [] } }),
             ]);
             setFarms(farmResponse.data.data);
             setOwners(ownerResponse.data.data);
@@ -69,12 +69,12 @@ export default function FarmManagement() {
         try {
             const farmData = {
                 name: form.name,
-                owner_id: form.owner_id,
                 latitude: form.latitude,
                 longitude: form.longitude,
                 ...(form.total_acreage !== '' && form.total_acreage !== null
                     ? { total_acreage: form.total_acreage }
                     : {}),
+                ...(user?.role === 'Admin' ? { owner_id: form.owner_id } : {}),
             };
 
             if (editingFarm) {
@@ -108,12 +108,14 @@ export default function FarmManagement() {
                         <h1 className="text-2xl font-semibold text-[#172316]">Farm Management</h1>
                         <p className="text-sm text-[#647260]">Register and manage your farm locations and profiles.</p>
                     </div>
-                    <button
-                        onClick={() => handleOpenModal()}
-                        className="rounded-md bg-[#315f2b] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#264b22]"
-                    >
-                        + Add New Farm
-                    </button>
+                    {['Admin', 'Farm-owner'].includes(user?.role) && (
+                        <button
+                            onClick={() => handleOpenModal()}
+                            className="rounded-md bg-[#315f2b] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#264b22]"
+                        >
+                            + Add New Farm
+                        </button>
+                    )}
                 </div>
 
                 {error && <p className="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
@@ -148,18 +150,22 @@ export default function FarmManagement() {
                                             >
                                                 Manage Fields
                                             </button>
-                                            <button
-                                                onClick={() => handleOpenModal(farm)}
-                                                className="text-blue-600 hover:underline"
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(farm.id)}
-                                                className="text-red-600 hover:underline"
-                                            >
-                                                Delete
-                                            </button>
+                                            {['Admin', 'Farm-owner', 'Manager'].includes(user?.role) && (
+                                                <button
+                                                    onClick={() => handleOpenModal(farm)}
+                                                    className="text-blue-600 hover:underline"
+                                                >
+                                                    Edit
+                                                </button>
+                                            )}
+                                            {user?.role === 'Admin' && (
+                                                <button
+                                                    onClick={() => handleDelete(farm.id)}
+                                                    className="text-red-600 hover:underline"
+                                                >
+                                                    Delete
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))
@@ -184,7 +190,7 @@ export default function FarmManagement() {
                                         required
                                     />
                                 </div>
-                                <div>
+                                {user?.role === 'Admin' && <div>
                                     <label className="block text-sm font-medium text-[#243322]">Farm Owner</label>
                                     <select
                                         className="mt-1 w-full rounded-md border border-[#cbd8ca] px-3 py-2 text-sm outline-none focus:border-[#4d7a39] focus:ring-2 focus:ring-[#4d7a39]/20"
@@ -200,7 +206,7 @@ export default function FarmManagement() {
                                     {owners.length === 0 && (
                                         <p className="mt-1 text-xs text-red-600">Invite a user with the Farm-owner role before creating a farm.</p>
                                     )}
-                                </div>
+                                </div>}
                                 <FarmLocationPicker
                                     latitude={form.latitude}
                                     longitude={form.longitude}

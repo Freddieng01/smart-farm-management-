@@ -26,7 +26,7 @@ export default function EmployeeManagement() {
         try {
             const [empRes, userRes, farmRes] = await Promise.all([
                 api.get('/api/employees'),
-                api.get('/api/users'),
+                api.get('/api/employees/assignable-users'),
                 api.get('/api/farms'),
             ]);
             setEmployees(empRes.data.data);
