@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\FinanceReportController;
 use App\Http\Controllers\Api\FinancialTransactionController;
 use App\Http\Controllers\Api\ResourceController;
+use App\Http\Controllers\Api\EquipmentController;
 use App\Http\Controllers\Api\BudgetController;
 use App\Http\Controllers\Api\CropController;
 use App\Http\Controllers\Api\PlantingController;
@@ -112,6 +113,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('finance/cost-per-kilogram', [FinanceReportController::class, 'costPerKilogram']);
     Route::get('finance/budget-vs-actual', [FinanceReportController::class, 'budgetVsActual']);
 
+
+    // Equipment & Machinery module
+    Route::get('equipment/due-service', [EquipmentController::class, 'dueForService']);
+    Route::apiResource('equipment', EquipmentController::class);
+    Route::post('equipment/{equipment}/maintenance', [EquipmentController::class, 'storeMaintenance']);
+    Route::post('equipment/{equipment}/fuel', [EquipmentController::class, 'storeFuel']);
 
     // Weather & Environmental Monitoring
     Route::get('weather/current', [WeatherController::class, 'current']);
