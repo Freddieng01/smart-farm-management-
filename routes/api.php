@@ -79,6 +79,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Farm Management
     Route::apiResource('farms', FarmController::class);
+    Route::get('farm-owners', [FarmController::class, 'owners']);
     Route::apiResource('fields', FieldController::class);
     Route::apiResource('farms.fields', FieldController::class)->shallow();
     Route::apiResource('employees', EmployeeController::class);

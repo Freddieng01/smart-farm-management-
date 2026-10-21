@@ -54,17 +54,17 @@ export default function Dashboard() {
     }, [api]);
 
     const cards = [
-        { label: 'Total Farms', value: summary.infrastructure?.farms, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
-        { label: 'Total Fields', value: summary.infrastructure?.fields, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
-        { label: 'Total Acreage', value: summary.infrastructure?.total_acreage, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
+        { label: 'Total Farms', value: summary.infrastructure?.farms, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker', 'Farm-owner'] },
+        { label: 'Total Fields', value: summary.infrastructure?.fields, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker', 'Farm-owner'] },
+        { label: 'Total Acreage', value: summary.infrastructure?.total_acreage, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker', 'Farm-owner'] },
         { label: 'Active Users', value: summary.infrastructure?.active_users, roles: ['Admin', 'Manager', 'Accountant'] },
         { label: 'Total Expenses', value: summary.financials?.total_expenses, roles: ['Admin', 'Accountant'] },
         { label: 'Labour Costs', value: summary.financials?.total_labor_cost, roles: ['Admin', 'Manager', 'Accountant'] },
-        { label: 'Total Production', value: summary.production?.total_quantity, roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
+        { label: 'Total Production', value: summary.production?.total_quantity, roles: ['Admin', 'Manager', 'Agronomist', 'Worker', 'Farm-owner'] },
     ].filter(card => card.roles.includes(user?.role));
 
     const actions = [
-        { label: 'Manage Farms', path: '/farms', roles: ['Admin', 'Manager', 'Agronomist'] },
+        { label: 'Manage Farms', path: '/farms', roles: ['Admin', 'Manager', 'Agronomist', 'Farm-owner'] },
         { label: 'Livestock Management', path: '/livestock', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
         { label: 'Notifications', path: '/notifications', roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
         { label: 'Suppliers & Procurement', path: '/suppliers', roles: ['Admin', 'Manager', 'Accountant'] },

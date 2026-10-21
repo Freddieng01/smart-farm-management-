@@ -38,6 +38,11 @@ class User extends Authenticatable
         return $this->hasOne(Employee::class);
     }
 
+    public function ownedFarms()
+    {
+        return $this->hasMany(Farm::class, 'owner_id');
+    }
+
     // --- Added for Resource/Finance module (additive only, nothing above changed) ---
 
     public function resourceTransactions()

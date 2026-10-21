@@ -99,10 +99,12 @@ The "Command Center" that aggregates data from all other modules into a single v
     - Install dependencies: `composer install`
     - Configure `.env` with database credentials.
     - Run migrations: `php artisan migrate`
-    - Start server: `php artisan serve`
+    - Start the API server: `php artisan serve --host=127.0.0.1 --port=8000`
 2.  **Frontend**:
     - Install dependencies: `npm install`
     - Start development server: `npm run dev`
+
+Run both servers during local development: Laravel on `127.0.0.1:8000` and Vite on `localhost:5173`. Vite proxies `/api/*` requests to the Laravel API.
 
 ### Email invitations
 
@@ -110,7 +112,7 @@ The default `MAIL_MAILER=log` setting writes invitation emails to Laravel's log 
 
 ```env
 MAIL_MAILER=smtp
-MAIL_SCHEME=tls
+MAIL_SCHEME=smtp
 MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
 MAIL_USERNAME=your-gmail-address@gmail.com
