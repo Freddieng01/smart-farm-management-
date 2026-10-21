@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export default function AcceptInvitation() {
+    const { logout } = useAuth();
     const [searchParams] = useSearchParams();
     const token = searchParams.get('token');
     const [invitation, setInvitation] = useState(null);
@@ -60,7 +62,13 @@ export default function AcceptInvitation() {
                     <>
                         <h1 className="mt-2 text-2xl font-semibold text-[#172316]">Account ready</h1>
                         <p className="mt-3 text-sm text-[#647260]">Your password has been set. You can now sign in.</p>
-                        <Link className="mt-6 inline-block rounded-md bg-[#315f2b] px-4 py-2 text-sm font-semibold text-white hover:bg-[#264b22]" to="/login">Go to sign in</Link>
+                        <Link
+                            className="mt-6 inline-block rounded-md bg-[#315f2b] px-4 py-2 text-sm font-semibold text-white hover:bg-[#264b22]"
+                            to="/login"
+                            onClick={logout}
+                        >
+                            Go to sign in
+                        </Link>
                     </>
                 )}
                 {status === 'ready' && invitation && (

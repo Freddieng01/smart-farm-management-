@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import BackButton from '../components/BackButton.jsx';
 
 const UserManagement = () => {
     const { api } = useAuth();
@@ -46,8 +47,10 @@ const UserManagement = () => {
         try {
             if (editingUser) {
                 await api.put(`/api/users/${editingUser.id}`, newUser);
+                alert('User updated successfully.');
             } else {
                 await api.post('/api/users/invitations', newUser);
+                alert(`Invitation sent successfully to ${newUser.email}.`);
             }
             closeModal();
             fetchUsers();
@@ -81,6 +84,7 @@ const UserManagement = () => {
 
     return (
         <div className="p-8 max-w-6xl mx-auto">
+            <BackButton />
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
                 <button
