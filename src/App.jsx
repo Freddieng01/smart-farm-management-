@@ -13,6 +13,10 @@ import ProtectedRoute from './components/ProtectedRoute.jsx';
 import LivestockManagement from './pages/LivestockManagement.jsx';
 import NotificationsManagement from './pages/NotificationsManagement.jsx';
 import SupplierManagement from './pages/SupplierManagement.jsx';
+import InventoryManagement from './pages/InventoryManagement.jsx';
+import EquipmentManagement from './pages/EquipmentManagement.jsx';
+import FinancialManagement from './pages/FinancialManagement.jsx';
+import ReportsAnalytics from './pages/ReportsAnalytics.jsx';
 
 function Unauthorized() {
     return (
@@ -140,6 +144,10 @@ function AppRoutes() {
                 }
             />
 
+            <Route path="/inventory" element={<ProtectedRoute allowedRoles={['Admin', 'Manager', 'Agronomist', 'Worker']}><InventoryManagement /></ProtectedRoute>} />
+            <Route path="/equipment" element={<ProtectedRoute allowedRoles={['Admin', 'Manager', 'Worker']}><EquipmentManagement /></ProtectedRoute>} />
+            <Route path="/finance" element={<ProtectedRoute allowedRoles={['Admin', 'Accountant']}><FinancialManagement /></ProtectedRoute>} />
+            <Route path="/reports" element={<ProtectedRoute allowedRoles={['Admin', 'Manager', 'Accountant']}><ReportsAnalytics /></ProtectedRoute>} />
             <Route path="/unauthorized" element={<Unauthorized />} />
             
             {/* Root and Fallback */}
