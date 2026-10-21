@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
+import WeatherWidget from './WeatherWidget.jsx';
+import MapWidget from './MapWidget.jsx';
 
 const initialSummary = {
     infrastructure: { farms: 0, fields: 0, active_users: 0, total_acreage: 0 },
@@ -14,6 +16,7 @@ export default function Dashboard() {
     const [summary, setSummary] = useState(initialSummary);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [farmId, setFarmId] = useState(null);
 
     useEffect(() => {
         let ignore = false;
@@ -27,6 +30,10 @@ export default function Dashboard() {
 
                 if (!ignore) {
                     setSummary(response.data.data || initialSummary);
+                    if (response.data.data?.infrastructure?.farms > 0) {
+                        const farmRes = await api.get('/api/farms');
+                        setFarmId(farmRes.data.data?.[0]?.id || null);
+                    }
                 }
             } catch {
                 if (!ignore) {
@@ -71,10 +78,9 @@ export default function Dashboard() {
             <header className="border-b border-[#dfe9de] bg-white">
                 <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
                     <div>
-                        <p className="text-sm font-semibold uppercase tracking-wide text-[#4d7a39]">FFMS Core Dashboard</p>
+                        <p className="text-sm font-semibold uppercase tracking-wide text-[#4d7a39]">AgriCore Intelligence Core Dashboard</p>
                         <h1 className="mt-1 text-xl font-semibold text-[#172316]">Farm Operations</h1>
                     </div>
-
 
                     <div className="flex items-center gap-4">
                         <div className="text-right">
@@ -106,35 +112,31 @@ export default function Dashboard() {
                     ))}
                 </div>
 
-                <div className="mt-8 grid gap-6 md:grid-cols-3">
-                    <div className="md:col-span-2 rounded-lg border border-[#dfe9de] bg-white p-6 shadow-sm">
-                        <h2 className="mb-4 text-lg font-semibold text-[#172316]">Quick Actions</h2>
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            {actions.map(action => (
-                                <button
-                                    key={action.path}
-                                    onClick={() => navigate(action.path)}
-                                    className="flex items-center justify-between rounded-md border border-[#e3ebe2] p-3 text-sm font-medium text-[#243322] transition hover:bg-[#fcfdfc] hover:border-[#4d7a39]"
-                                >
-                                    {action.label}
-                                    <span className="text-xs text-[#647260]">→</span>
-                                </button>
-                            ))}
-                        </div>
+                <div className="mt-8 grid gap-6 lg:grid-cols-3">
+                    <div className="lg:col-span-2 rounded-lg border border-[#dfe9de] bg-white p-6 shadow-sm">
+                        <h2 className="mb-4 text-lg font-semibold text-[#172316]">Farm Geographic Overview</h2>
+                        <MapWidget farmId={farmId} />
                     </div>
-                    <div className="rounded-lg border border-[#dfe9de] bg-white p-6 shadow-sm">
-                        <h2 className="mb-4 text-lg font-semibold text-[#172316]">Status</h2>
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-[#647260]">System Health</span>
-                                <span className="flex items-center gap-1.5 font-medium text-green-600">
-                                    <span className="h-2 w-2 rounded-full bg-green-600"></span>
-                                    Online
-                                </span>
-                            </div>
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-[#647260]">Role</span>
-                                <span className="font-medium text-[#172316]">{user?.role}</span>
+
+                    <div className="space-y-6">
+                        <div className="rounded-lg border border-[#dfe9de] bg-white p-6 shadow-sm">
+                            <h2 className="mb-4 text-lg font-semibold text-[#172316]">Intelligence</h2>
+                            <WeatherWidget farmId={farmId} />
+                        </div>
+
+                        <div className="rounded-lg border border-[#dfe9de] bg-white p-6 shadow-sm">
+                            <h2 className="mb-4 text-lg font-semibold text-[#172316]">Quick Actions</h2>
+                            <div className="grid grid-cols-1 gap-3">
+                                {actions.map(action => (
+                                    <button
+                                        key={action.path}
+                                        onClick={() => navigate(action.path)}
+                                        className="flex items-center justify-between rounded-md border border-[#e3ebe2] p-3 text-sm font-medium text-[#243322] transition hover:bg-[#fcfdfc] hover:border-[#4d7a39] w-full text-left"
+                                    >
+                                        {action.label}
+                                        <span className="text-xs text-[#647260]">→</span>
+                                    </button>
+                                ))}
                             </div>
                         </div>
                     </div>

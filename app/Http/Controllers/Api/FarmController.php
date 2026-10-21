@@ -22,10 +22,13 @@ class FarmController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:farms,name'],
-            'location_gps' => ['nullable', 'string', 'max:255'],
-            'total_acreage' => ['required', 'numeric', 'min:0'],
+            'name' => ['required', 'string', 'max:255', Rule::unique('farms', 'name')],
+            'latitude' => ['required', 'numeric', 'between:-90,90'],
+            'longitude' => ['required', 'numeric', 'between:-180,180'],
+            'total_acreage' => ['nullable', 'numeric', 'min:0'],
         ]);
+
+        $validated['location_gps'] = $this->locationGps($validated['latitude'], $validated['longitude']);
 
         $farm = Farm::create($validated);
 
@@ -46,9 +49,14 @@ class FarmController extends Controller
     {
         $validated = $request->validate([
             'name' => ['sometimes', 'required', 'string', 'max:255', Rule::unique('farms', 'name')->ignore($farm)],
-            'location_gps' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'latitude' => ['sometimes', 'required_with:longitude', 'numeric', 'between:-90,90'],
+            'longitude' => ['sometimes', 'required_with:latitude', 'numeric', 'between:-180,180'],
             'total_acreage' => ['sometimes', 'required', 'numeric', 'min:0'],
         ]);
+
+        if (array_key_exists('latitude', $validated) && array_key_exists('longitude', $validated)) {
+            $validated['location_gps'] = $this->locationGps($validated['latitude'], $validated['longitude']);
+        }
 
         $farm->update($validated);
 
@@ -65,5 +73,10 @@ class FarmController extends Controller
         return response()->json([
             'message' => 'Farm deleted successfully.',
         ]);
+    }
+
+    private function locationGps(float $latitude, float $longitude): string
+    {
+        return sprintf('%.8F,%.8F', $latitude, $longitude);
     }
 }

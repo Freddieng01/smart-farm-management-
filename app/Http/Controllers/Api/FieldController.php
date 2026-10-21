@@ -33,9 +33,27 @@ class FieldController extends Controller
             ],
             'soil_type' => ['nullable', 'string', 'max:255'],
             'size_hectares' => ['required', 'numeric', 'min:0'],
+            'boundary_polygon' => ['nullable', 'string'],
         ]);
 
         $field = $farm->fields()->create($validated);
+
+        // AUTOMATIC FARM LOCATION UPDATE
+        // When the first field is plotted, we set the farm's center coordinates
+        if ($validated['boundary_polygon']) {
+            $coords = json_decode($validated['boundary_polygon'], true);
+            if (is_array($coords) && count($coords) > 0) {
+                // Calculate center of the polygon for the farm's general location
+                $lat = array_sum(array_column($coords, 0)) / count($coords);
+                $lon = array_sum(array_column($coords, 1)) / count($coords);
+
+                $farm->update([
+                    'latitude' => $lat,
+                    'longitude' => $lon,
+                    'location_gps' => "{$lat},{$lon}"
+                ]);
+            }
+        }
 
         return response()->json([
             'message' => 'Field created successfully.',
@@ -57,6 +75,7 @@ class FieldController extends Controller
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'soil_type' => ['sometimes', 'nullable', 'string', 'max:255'],
             'size_hectares' => ['sometimes', 'required', 'numeric', 'min:0'],
+            'boundary_polygon' => ['nullable', 'string'],
         ]);
 
         if (array_key_exists('name', $validated) || array_key_exists('farm_id', $validated)) {

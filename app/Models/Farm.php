@@ -12,6 +12,8 @@ class Farm extends Model
     protected $fillable = [
         'name',
         'location_gps',
+        'latitude',
+        'longitude',
         'total_acreage',
     ];
 
@@ -19,6 +21,8 @@ class Farm extends Model
     {
         return [
             'total_acreage' => 'decimal:2',
+            'latitude' => 'float',
+            'longitude' => 'float',
         ];
     }
 
