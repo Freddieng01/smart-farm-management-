@@ -29,6 +29,7 @@ class DemoDataSeeder extends Seeder
             [
                 'location_gps' => '-15.4167, 28.2833',
                 'total_acreage' => 150.50,
+                'owner_id' => User::where('role', 'Farm-owner')->value('id'),
             ]
         );
 

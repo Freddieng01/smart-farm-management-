@@ -10,11 +10,12 @@ class Field extends Model
 { 
     use HasFactory; 
  
-    protected $fillable = [ 
-        'farm_id', 
-        'name', 
-        'soil_type', 
-        'size_hectares', 
+    protected $fillable = [
+        'farm_id',
+        'name',
+        'soil_type',
+        'size_hectares',
+        'boundary_polygon',
     ]; 
  
     protected function casts(): array 

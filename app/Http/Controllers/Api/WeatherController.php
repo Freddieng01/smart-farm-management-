@@ -24,9 +24,8 @@ class WeatherController extends Controller
         try {
             $farm = Farm::findOrFail($request->farm_id);
 
-            [$latitude, $longitude] = $this->getCoordinates(
-                $farm->location_gps
-            );
+            $latitude = $farm->latitude ?? $this->getCoordinates($farm->location_gps)[0];
+            $longitude = $farm->longitude ?? $this->getCoordinates($farm->location_gps)[1];
 
             $weather = $this->weatherService->getCurrentWeather(
                 $latitude,
@@ -54,9 +53,8 @@ class WeatherController extends Controller
         try {
             $farm = Farm::findOrFail($request->farm_id);
 
-            [$latitude, $longitude] = $this->getCoordinates(
-                $farm->location_gps
-            );
+            $latitude = $farm->latitude ?? $this->getCoordinates($farm->location_gps)[0];
+            $longitude = $farm->longitude ?? $this->getCoordinates($farm->location_gps)[1];
 
             $forecast = $this->weatherService->getForecast(
                 $latitude,
@@ -84,9 +82,8 @@ class WeatherController extends Controller
         try {
             $farm = Farm::findOrFail($request->farm_id);
 
-            [$latitude, $longitude] = $this->getCoordinates(
-                $farm->location_gps
-            );
+            $latitude = $farm->latitude ?? $this->getCoordinates($farm->location_gps)[0];
+            $longitude = $farm->longitude ?? $this->getCoordinates($farm->location_gps)[1];
 
             $alerts = $this->weatherService->getAlerts(
                 $latitude,
