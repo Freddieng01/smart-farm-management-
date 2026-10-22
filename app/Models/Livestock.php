@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Livestock extends Model
 {
     protected $table = 'livestock';
+
     protected $fillable = [
         'farm_id',
         'tag_number',

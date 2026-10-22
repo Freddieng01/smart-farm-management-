@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
+import FarmLocationPicker from '../components/FarmLocationPicker.jsx';
 
 export default function FarmManagement() {
     const { api, user } = useAuth();
@@ -12,7 +13,8 @@ export default function FarmManagement() {
     const [editingFarm, setEditingFarm] = useState(null);
     const [form, setForm] = useState({
         name: '',
-        location_gps: '',
+        latitude: null,
+        longitude: null,
         total_acreage: '',
     });
 
@@ -37,18 +39,26 @@ export default function FarmManagement() {
             setEditingFarm(farm);
             setForm({
                 name: farm.name,
-                location_gps: farm.location_gps || '',
+                latitude: farm.latitude ?? parseLegacyCoordinate(farm.location_gps, 0),
+                longitude: farm.longitude ?? parseLegacyCoordinate(farm.location_gps, 1),
                 total_acreage: farm.total_acreage,
             });
         } else {
             setEditingFarm(null);
-            setForm({ name: '', location_gps: '', total_acreage: '' });
+            setForm({ name: '', latitude: null, longitude: null, total_acreage: '' });
         }
         setIsModalOpen(true);
     }
 
     async function handleSubmit(e) {
         e.preventDefault();
+        if (form.latitude === null || form.latitude === undefined
+            || form.longitude === null || form.longitude === undefined
+            || !Number.isFinite(Number(form.latitude)) || !Number.isFinite(Number(form.longitude))) {
+            alert('Place your farm on the map before saving.');
+            return;
+        }
+
         try {
             if (editingFarm) {
                 await api.put(`/api/farms/${editingFarm.id}`, form);
@@ -96,7 +106,7 @@ export default function FarmManagement() {
                         <thead className="bg-[#fcfdfc] text-[#647260] uppercase">
                             <tr>
                                 <th className="px-6 py-3 font-medium">Farm Name</th>
-                                <th className="px-6 py-3 font-medium">Location (GPS)</th>
+                                <th className="px-6 py-3 font-medium">Mapped Location</th>
                                 <th className="px-6 py-3 font-medium">Acreage</th>
                                 <th className="px-6 py-3 font-medium text-right">Actions</th>
                             </tr>
@@ -110,7 +120,7 @@ export default function FarmManagement() {
                                 farms.map((farm) => (
                                     <tr key={farm.id} className="hover:bg-[#fcfdfc] transition">
                                         <td className="px-6 py-4 font-medium text-[#172316]">{farm.name}</td>
-                                        <td className="px-6 py-4 text-[#647260]">{farm.location_gps || 'Not set'}</td>
+                                        <td className="px-6 py-4 text-[#647260]">{hasFarmLocation(farm) ? 'Mapped' : 'Not mapped'}</td>
                                         <td className="px-6 py-4 text-[#647260]">{farm.total_acreage} ac</td>
                                         <td className="px-6 py-4 text-right space-x-3">
                                             <button
@@ -141,7 +151,7 @@ export default function FarmManagement() {
 
                 {isModalOpen && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-                        <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+                        <div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl">
                             <h2 className="mb-6 text-xl font-semibold text-[#172316]">
                                 {editingFarm ? 'Edit Farm' : 'Register New Farm'}
                             </h2>
@@ -155,25 +165,21 @@ export default function FarmManagement() {
                                         required
                                     />
                                 </div>
+                                <FarmLocationPicker
+                                    latitude={form.latitude}
+                                    longitude={form.longitude}
+                                    onLocationChange={([latitude, longitude]) => setForm({ ...form, latitude, longitude })}
+                                />
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Location GPS</label>
-                                    <input
-                                        className="mt-1 w-full rounded-md border border-[#cbd8ca] px-3 py-2 text-sm outline-none focus:border-[#4d7a39] focus:ring-2 focus:ring-[#4d7a39]/20"
-                                        placeholder="e.g. -15.4167, 28.2833"
-                                        value={form.location_gps}
-                                        onChange={(e) => setForm({ ...form, location_gps: e.target.value })}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Total Acreage</label>
+                                    <label className="block text-sm font-medium text-[#243322]">Total Acreage (Optional)</label>
                                     <input
                                         type="number"
                                         step="0.01"
                                         className="mt-1 w-full rounded-md border border-[#cbd8ca] px-3 py-2 text-sm outline-none focus:border-[#4d7a39] focus:ring-2 focus:ring-[#4d7a39]/20"
                                         value={form.total_acreage}
                                         onChange={(e) => setForm({ ...form, total_acreage: e.target.value })}
-                                        required
                                     />
+                                    <p className="mt-1 text-[10px] text-[#647260]">This will be auto-calculated once you plot your fields.</p>
                                 </div>
                                 <div className="mt-6 flex justify-end gap-3">
                                     <button
@@ -197,4 +203,15 @@ export default function FarmManagement() {
             </div>
         </main>
     );
+}
+
+function parseLegacyCoordinate(locationGps, index) {
+    const coordinate = Number(locationGps?.split(',')[index]);
+
+    return Number.isFinite(coordinate) ? coordinate : null;
+}
+
+function hasFarmLocation(farm) {
+    return Number.isFinite(Number(farm.latitude ?? parseLegacyCoordinate(farm.location_gps, 0)))
+        && Number.isFinite(Number(farm.longitude ?? parseLegacyCoordinate(farm.location_gps, 1)));
 }

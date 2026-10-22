@@ -36,7 +36,7 @@ export default function Login() {
         <main className="flex min-h-screen items-center justify-center bg-[#eef5ee] px-4 py-10">
             <section className="w-full max-w-md rounded-lg border border-[#d7e3d6] bg-white p-8 shadow-sm">
                 <div className="mb-8">
-                    <p className="text-sm font-semibold uppercase tracking-wide text-[#4d7a39]">FFMS</p>
+                    <p className="text-sm font-semibold uppercase tracking-wide text-[#4d7a39]">AgriCore Intelligence</p>
                     <h1 className="mt-2 text-2xl font-semibold text-[#172316]">Sign in to Farm Management</h1>
                     <p className="mt-2 text-sm text-[#647260]">Access farms, field records, labour assignments, and dashboards.</p>
                 </div>

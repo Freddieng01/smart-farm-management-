@@ -12,8 +12,8 @@ class WeatherService
 
     public function __construct()
     {
-        $this->apiKey = config('services.weather.api_key');
-        $this->baseUrl = config('services.weather.base_url');
+        $this->apiKey = config('services.weather.api_key') ?? '';
+        $this->baseUrl = config('services.weather.base_url') ?? 'https://api.openweathermap.org/data/2.5';
     }
 
     public function getCurrentWeather(float $latitude, float $longitude): array
