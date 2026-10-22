@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
 import FarmLocationPicker from '../components/FarmLocationPicker.jsx';
+import BackButton from '../components/BackButton.jsx';
 
 export default function FarmManagement() {
     const { api, user } = useAuth();
     const navigate = useNavigate();
     const [farms, setFarms] = useState([]);
+    const [owners, setOwners] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -16,6 +18,7 @@ export default function FarmManagement() {
         latitude: null,
         longitude: null,
         total_acreage: '',
+        owner_id: '',
     });
 
     useEffect(() => {
@@ -25,8 +28,12 @@ export default function FarmManagement() {
     async function fetchFarms() {
         setLoading(true);
         try {
-            const response = await api.get('/api/farms');
-            setFarms(response.data.data);
+            const [farmResponse, ownerResponse] = await Promise.all([
+                api.get('/api/farms'),
+                user?.role === 'Admin' ? api.get('/api/farm-owners') : Promise.resolve({ data: { data: [] } }),
+            ]);
+            setFarms(farmResponse.data.data);
+            setOwners(ownerResponse.data.data);
         } catch (err) {
             setError('Failed to fetch farms.');
         } finally {
@@ -42,10 +49,11 @@ export default function FarmManagement() {
                 latitude: farm.latitude ?? parseLegacyCoordinate(farm.location_gps, 0),
                 longitude: farm.longitude ?? parseLegacyCoordinate(farm.location_gps, 1),
                 total_acreage: farm.total_acreage,
+                owner_id: farm.owner_id ?? '',
             });
         } else {
             setEditingFarm(null);
-            setForm({ name: '', latitude: null, longitude: null, total_acreage: '' });
+            setForm({ name: '', latitude: null, longitude: null, total_acreage: '', owner_id: '' });
         }
         setIsModalOpen(true);
     }
@@ -60,10 +68,20 @@ export default function FarmManagement() {
         }
 
         try {
+            const farmData = {
+                name: form.name,
+                latitude: form.latitude,
+                longitude: form.longitude,
+                ...(form.total_acreage !== '' && form.total_acreage !== null
+                    ? { total_acreage: form.total_acreage }
+                    : {}),
+                ...(user?.role === 'Admin' ? { owner_id: form.owner_id } : {}),
+            };
+
             if (editingFarm) {
-                await api.put(`/api/farms/${editingFarm.id}`, form);
+                await api.put(`/api/farms/${editingFarm.id}`, farmData);
             } else {
-                await api.post('/api/farms', form);
+                await api.post('/api/farms', farmData);
             }
             setIsModalOpen(false);
             fetchFarms();
@@ -86,17 +104,20 @@ export default function FarmManagement() {
     return (
         <main className="min-h-screen bg-[#f7faf7] px-6 py-8">
             <div className="mx-auto max-w-7xl">
+                <BackButton />
                 <div className="mb-8 flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-semibold text-[#172316]">Farm Management</h1>
                         <p className="text-sm text-[#647260]">Register and manage your farm locations and profiles.</p>
                     </div>
-                    <button
-                        onClick={() => handleOpenModal()}
-                        className="rounded-md bg-[#315f2b] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#264b22]"
-                    >
-                        + Add New Farm
-                    </button>
+                    {['Admin', 'Farm-owner'].includes(user?.role) && (
+                        <button
+                            onClick={() => handleOpenModal()}
+                            className="rounded-md bg-[#315f2b] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#264b22]"
+                        >
+                            + Add New Farm
+                        </button>
+                    )}
                 </div>
 
                 {error && <p className="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
@@ -106,6 +127,7 @@ export default function FarmManagement() {
                         <thead className="bg-[#fcfdfc] text-[#647260] uppercase">
                             <tr>
                                 <th className="px-6 py-3 font-medium">Farm Name</th>
+                                <th className="px-6 py-3 font-medium">Farm Owner</th>
                                 <th className="px-6 py-3 font-medium">Mapped Location</th>
                                 <th className="px-6 py-3 font-medium">Acreage</th>
                                 <th className="px-6 py-3 font-medium text-right">Actions</th>
@@ -113,13 +135,14 @@ export default function FarmManagement() {
                         </thead>
                         <tbody className="divide-y divide-[#dfe9de]">
                             {loading ? (
-                                <tr><td colSpan="4" className="px-6 py-10 text-center text-[#647260]">Loading farms...</td></tr>
+                                <tr><td colSpan="5" className="px-6 py-10 text-center text-[#647260]">Loading farms...</td></tr>
                             ) : farms.length === 0 ? (
-                                <tr><td colSpan="4" className="px-6 py-10 text-center text-[#647260]">No farms registered yet.</td></tr>
+                                <tr><td colSpan="5" className="px-6 py-10 text-center text-[#647260]">No farms registered yet.</td></tr>
                             ) : (
                                 farms.map((farm) => (
                                     <tr key={farm.id} className="hover:bg-[#fcfdfc] transition">
                                         <td className="px-6 py-4 font-medium text-[#172316]">{farm.name}</td>
+                                        <td className="px-6 py-4 text-[#647260]">{farm.owner?.name || 'Not assigned'}</td>
                                         <td className="px-6 py-4 text-[#647260]">{hasFarmLocation(farm) ? 'Mapped' : 'Not mapped'}</td>
                                         <td className="px-6 py-4 text-[#647260]">{farm.total_acreage} ac</td>
                                         <td className="px-6 py-4 text-right space-x-3">
@@ -129,18 +152,22 @@ export default function FarmManagement() {
                                             >
                                                 Manage Fields
                                             </button>
-                                            <button
-                                                onClick={() => handleOpenModal(farm)}
-                                                className="text-blue-600 hover:underline"
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(farm.id)}
-                                                className="text-red-600 hover:underline"
-                                            >
-                                                Delete
-                                            </button>
+                                            {['Admin', 'Farm-owner', 'Manager'].includes(user?.role) && (
+                                                <button
+                                                    onClick={() => handleOpenModal(farm)}
+                                                    className="text-blue-600 hover:underline"
+                                                >
+                                                    Edit
+                                                </button>
+                                            )}
+                                            {user?.role === 'Admin' && (
+                                                <button
+                                                    onClick={() => handleDelete(farm.id)}
+                                                    className="text-red-600 hover:underline"
+                                                >
+                                                    Delete
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))
@@ -165,6 +192,23 @@ export default function FarmManagement() {
                                         required
                                     />
                                 </div>
+                                {user?.role === 'Admin' && <div>
+                                    <label className="block text-sm font-medium text-[#243322]">Farm Owner</label>
+                                    <select
+                                        className="mt-1 w-full rounded-md border border-[#cbd8ca] px-3 py-2 text-sm outline-none focus:border-[#4d7a39] focus:ring-2 focus:ring-[#4d7a39]/20"
+                                        value={form.owner_id}
+                                        onChange={(e) => setForm({ ...form, owner_id: e.target.value })}
+                                        required
+                                    >
+                                        <option value="">Choose a farm owner...</option>
+                                        {owners.map(owner => (
+                                            <option key={owner.id} value={owner.id}>{owner.name} ({owner.email})</option>
+                                        ))}
+                                    </select>
+                                    {owners.length === 0 && (
+                                        <p className="mt-1 text-xs text-red-600">Invite a user with the Farm-owner role before creating a farm.</p>
+                                    )}
+                                </div>}
                                 <FarmLocationPicker
                                     latitude={form.latitude}
                                     longitude={form.longitude}
@@ -179,7 +223,7 @@ export default function FarmManagement() {
                                         value={form.total_acreage}
                                         onChange={(e) => setForm({ ...form, total_acreage: e.target.value })}
                                     />
-                                    <p className="mt-1 text-[10px] text-[#647260]">This will be auto-calculated once you plot your fields.</p>
+                                    <p className="mt-1 text-[10px] text-[#647260]">Leave blank to calculate acreage from field polygons drawn on the map.</p>
                                 </div>
                                 <div className="mt-6 flex justify-end gap-3">
                                     <button

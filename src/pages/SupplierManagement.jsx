@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
+import BackButton from '../components/BackButton.jsx';
 
 const emptySupplier = {
     farm_id: '',
@@ -155,6 +156,7 @@ export default function SupplierManagement() {
     return (
         <main className="min-h-screen bg-[#f7faf7] px-6 py-8">
             <div className="mx-auto max-w-7xl">
+                <BackButton />
                 <div className="mb-6 flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-semibold text-[#172316]">Suppliers and procurement</h1>

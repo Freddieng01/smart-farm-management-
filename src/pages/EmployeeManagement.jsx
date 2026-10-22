@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
+import BackButton from '../components/BackButton.jsx';
 
 export default function EmployeeManagement() {
     const { api } = useAuth();
@@ -26,7 +27,7 @@ export default function EmployeeManagement() {
         try {
             const [empRes, userRes, farmRes] = await Promise.all([
                 api.get('/api/employees'),
-                api.get('/api/users'),
+                api.get('/api/employees/assignable-users'),
                 api.get('/api/farms'),
             ]);
             setEmployees(empRes.data.data);
@@ -84,6 +85,7 @@ export default function EmployeeManagement() {
     return (
         <main className="min-h-screen bg-[#f7faf7] px-6 py-8">
             <div className="mx-auto max-w-7xl">
+                <BackButton />
                 <div className="mb-8 flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-semibold text-[#172316]">Employee Management</h1>

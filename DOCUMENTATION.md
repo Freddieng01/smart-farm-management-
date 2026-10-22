@@ -43,7 +43,7 @@ This module ensures that only authorized personnel can access the system and tha
 - **RBAC (Role-Based Access Control)**: Implements a strict hierarchy:
     - **Admin**: Full system access, including user creation and deletion.
     - **Manager/Agronomist/Accountant/Worker**: Restricted access to specific modules.
-- **User Management**: A dedicated UI for administrators to create, edit, and manage user accounts.
+- **User Management**: Administrators invite users by email; invited users choose their own password through a one-time setup link.
 - **Protected Routes**: Frontend components that prevent unauthorized users from accessing sensitive pages.
 
 ### 3.2 Module 1: Farm & Field Management
@@ -79,7 +79,10 @@ The "Command Center" that aggregates data from all other modules into a single v
 | Endpoint | Method | Role | Description |
 | :--- | :---: | :---: | :--- |
 | `/api/login` | `POST` | Public | Authenticates user and returns Bearer Token. |
-| `/api/users` | `GET/POST/PUT/DEL` | Admin | Full management of system user accounts. |
+| `/api/users` | `GET/PUT/DEL` | Admin | View, edit, and delete system user accounts. |
+| `/api/users/invitations` | `POST` | Admin | Sends a seven-day, one-time account setup invitation. |
+| `/api/invitations/{token}` | `GET` | Public | Validates an invitation link. |
+| `/api/invitations/accept` | `POST` | Public | Creates the invited user's account with their chosen password. |
 | `/api/farms` | `GET/POST/PUT/DEL` | Admin/Mgr | Manage farm profiles and locations. |
 | `/api/farms/{id}/fields` | `GET/POST/PUT/DEL` | Admin/Mgr | Manage specific plots within a farm. |
 | `/api/employees` | `GET/POST/PUT/DEL` | Admin/Mgr | Assign users to farms and set pay rates. |
@@ -96,10 +99,43 @@ The "Command Center" that aggregates data from all other modules into a single v
     - Install dependencies: `composer install`
     - Configure `.env` with database credentials.
     - Run migrations: `php artisan migrate`
-    - Start server: `php artisan serve`
+    - Start the API server: `php artisan serve --host=127.0.0.1 --port=8000`
 2.  **Frontend**:
     - Install dependencies: `npm install`
     - Start development server: `npm run dev`
+
+Run both servers during local development: Laravel on `127.0.0.1:8000` and Vite on `localhost:5173`. Vite proxies `/api/*` requests to the Laravel API.
+
+### Email invitations
+
+The default `MAIL_MAILER=log` setting writes invitation emails to Laravel's log and does **not** deliver them. Configure an SMTP provider in `.env` before inviting users:
+
+```env
+MAIL_MAILER=smtp
+MAIL_SCHEME=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your-gmail-address@gmail.com
+MAIL_PASSWORD=your-16-character-gmail-app-password
+MAIL_FROM_ADDRESS=your-gmail-address@gmail.com
+MAIL_FROM_NAME="Smart Farm Management"
+FRONTEND_URL=https://your-public-app.example
+```
+
+For Gmail, enable two-step verification and create an app password for `MAIL_PASSWORD`; a regular Gmail account password will not work. The `POST /api/users/invitations` route is restricted to authenticated administrators and sends the role-specific invitation email.
+
+`FRONTEND_URL` must be the public URL recipients can open, not `localhost` or the Vite development URL. Each invitation is valid for seven days and can be used once.
+
+### Core foundation modules
+
+The core foundation is wired through the authenticated API and React UI:
+
+- **Security and User Management**: Sanctum login, role middleware, Admin user management, and role-based invitations.
+- **Farm and Field Management**: Farm registration, map coordinates, drawn field polygons, field sizes, and farm-owner assignment.
+- **Labour and Employee Management**: User-to-farm assignments, task assignments, hourly rates, and labour cost aggregation.
+- **Farm Dashboard and Analytics**: Farm, field, acreage, active-user, expense, labour, and production summaries with map and weather views.
+
+Farm acreage is calculated from field polygons when fields are plotted. The map pin identifies the farm location only; a pin by itself has no area. Polygon areas are stored in hectares for fields and summed into farm acreage using the hectare-to-acre conversion.
 
 ---
 

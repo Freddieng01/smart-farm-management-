@@ -11,10 +11,13 @@ import ProductionLogging from './pages/ProductionLogging.jsx';
 import ExpenseTracking from './pages/ExpenseTracking.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import LivestockManagement from './pages/LivestockManagement.jsx';
+import AcceptInvitation from './pages/AcceptInvitation.jsx';
 import NotificationsManagement from './pages/NotificationsManagement.jsx';
 import SupplierManagement from './pages/SupplierManagement.jsx';
 import SalesManagement from './pages/SalesManagement.jsx';
 import StorageManagement from './pages/StorageManagement.jsx';
+import ForgotPassword from './pages/ForgotPassword.jsx';
+import ResetPassword from './pages/ResetPassword.jsx';
 
 function Unauthorized() {
     return (
@@ -37,10 +40,13 @@ function AppRoutes() {
     return (
         <Routes>
             {/* Public Routes */}
-            <Route 
-                path="/login" 
-                element={!user ? <LoginPage /> : <Navigate to="/dashboard" replace />} 
+            <Route
+                path="/login"
+                element={!user ? <LoginPage /> : <Navigate to="/dashboard" replace />}
             />
+            <Route path="/accept-invite" element={<AcceptInvitation />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
             {/* Protected Routes */}
             <Route
@@ -55,16 +61,16 @@ function AppRoutes() {
             <Route
                 path="/farms"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Accountant', 'Worker']}>
                         <FarmManagement />
                     </ProtectedRoute>
                 }
-                    />
+            />
 
             <Route
                 path="/livestock"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker']}>
                         <LivestockManagement />
                     </ProtectedRoute>
                 }
@@ -73,7 +79,7 @@ function AppRoutes() {
             <Route
                 path="/notifications"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Accountant', 'Agronomist', 'Worker']}>
                         <NotificationsManagement />
                     </ProtectedRoute>
                 }
@@ -82,16 +88,16 @@ function AppRoutes() {
             <Route
                 path="/suppliers"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Accountant']}>
                         <SupplierManagement />
-                                </ProtectedRoute>
+                    </ProtectedRoute>
                 }
             />
 
             <Route
                 path="/sales"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Accountant']}>
                         <SalesManagement />
                     </ProtectedRoute>
                 }
@@ -109,7 +115,7 @@ function AppRoutes() {
             <Route
                 path="/farms/:farmId/fields"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker']}>
                         <FieldManagement />
                     </ProtectedRoute>
                 }
@@ -118,7 +124,7 @@ function AppRoutes() {
             <Route
                 path="/employees"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager']}>
                         <EmployeeManagement />
                     </ProtectedRoute>
                 }
@@ -127,7 +133,7 @@ function AppRoutes() {
             <Route
                 path="/tasks"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker']}>
                         <TaskTracking />
                     </ProtectedRoute>
                 }
@@ -136,7 +142,7 @@ function AppRoutes() {
             <Route
                 path="/production"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Agronomist']}>
                         <ProductionLogging />
                     </ProtectedRoute>
                 }
@@ -145,7 +151,7 @@ function AppRoutes() {
             <Route
                 path="/expenses"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Accountant']}>
                         <ExpenseTracking />
                     </ProtectedRoute>
                 }
@@ -161,7 +167,7 @@ function AppRoutes() {
             />
 
             <Route path="/unauthorized" element={<Unauthorized />} />
-            
+
             {/* Root and Fallback */}
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />

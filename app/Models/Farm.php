@@ -10,6 +10,7 @@ class Farm extends Model
     use HasFactory;
 
     protected $fillable = [
+        'owner_id',
         'name',
         'location_gps',
         'latitude',
@@ -29,6 +30,11 @@ class Farm extends Model
     public function fields()
     {
         return $this->hasMany(Field::class);
+    }
+
+    public function owner()
+    {
+        return $this->belongsTo(User::class, 'owner_id');
     }
 
     public function employees()

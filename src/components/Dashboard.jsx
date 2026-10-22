@@ -54,26 +54,26 @@ export default function Dashboard() {
     }, [api]);
 
     const cards = [
-        { label: 'Total Farms', value: summary.infrastructure?.farms, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
-        { label: 'Total Fields', value: summary.infrastructure?.fields, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
-        { label: 'Total Acreage', value: summary.infrastructure?.total_acreage, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
-        { label: 'Active Users', value: summary.infrastructure?.active_users, roles: ['Admin', 'Manager', 'Accountant'] },
+        { label: 'Total Farms', value: summary.infrastructure?.farms, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker', 'Farm-owner'] },
+        { label: 'Total Fields', value: summary.infrastructure?.fields, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker', 'Farm-owner'] },
+        { label: 'Total Acreage', value: summary.infrastructure?.total_acreage, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker', 'Farm-owner'] },
+        { label: 'Active Users', value: summary.infrastructure?.active_users, roles: ['Admin', 'Farm-owner', 'Manager', 'Accountant'] },
         { label: 'Total Expenses', value: summary.financials?.total_expenses, roles: ['Admin', 'Accountant'] },
         { label: 'Labour Costs', value: summary.financials?.total_labor_cost, roles: ['Admin', 'Manager', 'Accountant'] },
-        { label: 'Total Production', value: summary.production?.total_quantity, roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
+        { label: 'Total Production', value: summary.production?.total_quantity, roles: ['Admin', 'Manager', 'Agronomist', 'Worker', 'Farm-owner'] },
     ].filter(card => card.roles.includes(user?.role));
 
     const actions = [
-        { label: 'Manage Farms', path: '/farms', roles: ['Admin', 'Manager', 'Agronomist'] },
-        { label: 'Livestock Management', path: '/livestock', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Notifications', path: '/notifications', roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
-        { label: 'Suppliers & Procurement', path: '/suppliers', roles: ['Admin', 'Manager', 'Accountant'] },
-        { label: 'Market & Sales', path: '/sales', roles: ['Admin', 'Manager', 'Accountant'] },
-        { label: 'Storage & Post-Harvest', path: '/storage', roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
-        { label: 'Manage Employees', path: '/employees', roles: ['Admin', 'Manager'] },
-        { label: 'Task Tracking', path: '/tasks', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Production Logs', path: '/production', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Expense Tracking', path: '/expenses', roles: ['Admin', 'Accountant'] },
+        { label: 'Manage Farms', path: '/farms', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
+        { label: 'Livestock Management', path: '/livestock', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
+        { label: 'Notifications', path: '/notifications', roles: ['Admin', 'Farm-owner', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
+        { label: 'Suppliers & Procurement', path: '/suppliers', roles: ['Admin', 'Farm-owner', 'Manager', 'Accountant'] },
+        { label: 'Market & Sales', path: '/sales', roles: ['Admin', 'Farm-owner', 'Manager', 'Accountant'] },
+        { label: 'Storage & Post-Harvest', path: '/storage', roles: ['Admin', 'Farm-owner', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
+        { label: 'Manage Employees', path: '/employees', roles: ['Admin', 'Farm-owner', 'Manager'] },
+        { label: 'Task Tracking', path: '/tasks', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
+        { label: 'Production Logs', path: '/production', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
+        { label: 'Expense Tracking', path: '/expenses', roles: ['Admin', 'Farm-owner', 'Manager', 'Accountant'] },
         { label: 'Manage Users', path: '/users', roles: ['Admin'] },
     ].filter(action => action.roles.includes(user?.role));
 
@@ -138,7 +138,7 @@ export default function Dashboard() {
                                         className="flex items-center justify-between rounded-md border border-[#e3ebe2] p-3 text-sm font-medium text-[#243322] transition hover:bg-[#fcfdfc] hover:border-[#4d7a39] w-full text-left"
                                     >
                                         {action.label}
-                                        <span className="text-xs text-[#647260]">→</span>
+                                        <span className="text-xs text-[#647260]">&rarr;</span>
                                     </button>
                                 ))}
                             </div>
