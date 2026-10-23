@@ -73,6 +73,10 @@ export default function Dashboard() {
         { label: 'Task Tracking', path: '/tasks', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
         { label: 'Production Logs', path: '/production', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
         { label: 'Expense Tracking', path: '/expenses', roles: ['Admin', 'Farm-owner', 'Manager', 'Accountant'] },
+        { label: 'Inventory & Inputs', path: '/inventory', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
+        { label: 'Equipment & Machinery', path: '/equipment', roles: ['Admin', 'Farm-owner', 'Manager', 'Worker'] },
+        { label: 'Financial Management', path: '/finance', roles: ['Admin', 'Farm-owner', 'Accountant'] },
+        { label: 'Reports & Analytics', path: '/reports', roles: ['Admin', 'Farm-owner', 'Manager', 'Accountant'] },
         { label: 'Manage Users', path: '/users', roles: ['Admin'] },
     ].filter(action => action.roles.includes(user?.role));
 

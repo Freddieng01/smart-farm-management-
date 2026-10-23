@@ -17,6 +17,10 @@ import SupplierManagement from './pages/SupplierManagement.jsx';
 import SalesManagement from './pages/SalesManagement.jsx';
 import ForgotPassword from './pages/ForgotPassword.jsx';
 import ResetPassword from './pages/ResetPassword.jsx';
+import InventoryManagement from './pages/InventoryManagement.jsx';
+import EquipmentManagement from './pages/EquipmentManagement.jsx';
+import FinancialManagement from './pages/FinancialManagement.jsx';
+import ReportsAnalytics from './pages/ReportsAnalytics.jsx';
 
 function Unauthorized() {
     return (
@@ -156,6 +160,10 @@ function AppRoutes() {
                 }
             />
 
+            <Route path="/inventory" element={<ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker']}><InventoryManagement /></ProtectedRoute>} />
+            <Route path="/equipment" element={<ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Worker']}><EquipmentManagement /></ProtectedRoute>} />
+            <Route path="/finance" element={<ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Accountant']}><FinancialManagement /></ProtectedRoute>} />
+            <Route path="/reports" element={<ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Accountant']}><ReportsAnalytics /></ProtectedRoute>} />
             <Route path="/unauthorized" element={<Unauthorized />} />
             
             {/* Root and Fallback */}
