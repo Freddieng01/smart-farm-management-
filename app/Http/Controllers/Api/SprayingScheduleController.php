@@ -25,15 +25,15 @@ class SprayingScheduleController extends Controller
             'treatment' => 'required|string|max:255',
             'spraying_date' => 'required|date',
             'start_time' => 'nullable|date_format:H:i',
-            'duration_minutes' => 'nullable|numeric|min:0',
-            'status' => 'nullable|string|max:50',
+            'duration_minutes' => 'nullable|integer|min:0',
+            'status' => 'nullable|in:Scheduled,Completed,Cancelled',
             'notes' => 'nullable|string',
         ]);
 
         $schedule = SprayingSchedule::create($validated);
 
         return response()->json([
-            'message' => 'Spraying schedule created successfully',
+            'message' => 'Spraying schedule created successfully.',
             'data' => $schedule->load('field'),
         ], 201);
     }
@@ -55,15 +55,15 @@ class SprayingScheduleController extends Controller
             'treatment' => 'sometimes|required|string|max:255',
             'spraying_date' => 'sometimes|required|date',
             'start_time' => 'nullable|date_format:H:i',
-            'duration_minutes' => 'nullable|numeric|min:0',
-            'status' => 'nullable|string|max:50',
+            'duration_minutes' => 'nullable|integer|min:0',
+            'status' => 'sometimes|nullable|in:Scheduled,Completed,Cancelled',
             'notes' => 'nullable|string',
         ]);
 
         $sprayingSchedule->update($validated);
 
         return response()->json([
-            'message' => 'Spraying schedule updated successfully',
+            'message' => 'Spraying schedule updated successfully.',
             'data' => $sprayingSchedule->load('field'),
         ]);
     }
@@ -73,7 +73,7 @@ class SprayingScheduleController extends Controller
         $sprayingSchedule->delete();
 
         return response()->json([
-            'message' => 'Spraying schedule deleted successfully',
+            'message' => 'Spraying schedule deleted successfully.',
         ]);
     }
 }
