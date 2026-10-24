@@ -3,12 +3,91 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
 import WeatherWidget from './WeatherWidget.jsx';
 import MapWidget from './MapWidget.jsx';
+import FarmScene from './FarmScene.jsx';
 
 const initialSummary = {
     infrastructure: { farms: 0, fields: 0, active_users: 0, total_acreage: 0 },
     financials: { total_expenses: 0, total_labor_cost: 0, total_outflow: 0 },
     production: { total_quantity: 0 },
 };
+
+const actionIcons = {
+    '/farms': '🚜',
+    '/livestock': '🐄',
+    '/notifications': '🔔',
+    '/suppliers': '📦',
+    '/sales': '🛒',
+    '/storage': '🏭',
+    '/employees': '🧑‍🌾',
+    '/tasks': '✅',
+    '/production': '🌽',
+    '/expenses': '🧾',
+    '/users': '🔐',
+};
+
+// The hero sky changes with the time of day.
+function getSky(hour) {
+    if (hour < 5) {
+        return { greeting: 'Burning the midnight oil', gradient: 'from-slate-900 via-slate-800 to-farm-900', body: 'moon', night: true };
+    }
+    if (hour < 8) {
+        return { greeting: 'Good morning', gradient: 'from-indigo-900 via-orange-400 to-amber-200', body: 'sun', night: false };
+    }
+    if (hour < 12) {
+        return { greeting: 'Good morning', gradient: 'from-sky-600 via-sky-400 to-sky-200', body: 'sun', night: false };
+    }
+    if (hour < 17) {
+        return { greeting: 'Good afternoon', gradient: 'from-sky-600 via-sky-400 to-sky-200', body: 'sun', night: false };
+    }
+    if (hour < 20) {
+        return { greeting: 'Good evening', gradient: 'from-indigo-900 via-rose-500 to-amber-300', body: 'sun', night: false };
+    }
+    return { greeting: 'Good evening', gradient: 'from-slate-900 via-slate-800 to-farm-900', body: 'moon', night: true };
+}
+
+function AnimatedNumber({ value, loading }) {
+    const target = Number(value ?? 0);
+    const [display, setDisplay] = useState(0);
+
+    useEffect(() => {
+        if (loading || !Number.isFinite(target)) return undefined;
+
+        let frame;
+        const start = performance.now();
+        const duration = 900;
+
+        const tick = (now) => {
+            const t = Math.min((now - start) / duration, 1);
+            const eased = 1 - Math.pow(1 - t, 3);
+            setDisplay(target * eased);
+            if (t < 1) frame = requestAnimationFrame(tick);
+        };
+
+        frame = requestAnimationFrame(tick);
+        return () => cancelAnimationFrame(frame);
+    }, [target, loading]);
+
+    if (loading) return <span className="animate-pulse text-farm-300">···</span>;
+    if (!Number.isFinite(target)) return <span>{String(value)}</span>;
+
+    const shown = Number.isInteger(target) ? Math.round(display) : display;
+    return <span>{shown.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>;
+}
+
+function Panel({ title, className = '', children }) {
+    return (
+        <div className={`overflow-hidden rounded-2xl border border-farm-100 bg-white shadow-card ${className}`}>
+            <div className="h-1 bg-gradient-to-r from-farm-500 via-harvest-400 to-farm-300" />
+            <div className="p-6">
+                <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-farm-900">
+                    <span className="h-2 w-2 rounded-full bg-harvest-500" />
+                    {title}
+                </h2>
+                {children}
+            </div>
+        </div>
+    );
+}
 
 export default function Dashboard() {
     const { api, user, logout } = useAuth();
@@ -17,6 +96,11 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [farmId, setFarmId] = useState(null);
+
+    const now = new Date();
+    const sky = getSky(now.getHours());
+    const today = now.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
+    const firstName = (user?.name || 'there').split(' ')[0];
 
     useEffect(() => {
         let ignore = false;
@@ -53,14 +137,25 @@ export default function Dashboard() {
         };
     }, [api]);
 
+    const farmCount = summary.infrastructure?.farms ?? 0;
+    const fieldCount = summary.infrastructure?.fields ?? 0;
+
+    let subtitle = 'Checking on the farm…';
+    if (!loading) {
+        subtitle =
+            farmCount > 0
+                ? `Keeping an eye on ${farmCount} farm${farmCount === 1 ? '' : 's'} and ${fieldCount} field${fieldCount === 1 ? '' : 's'}.`
+                : 'Let’s get your first farm set up.';
+    }
+
     const cards = [
-        { label: 'Total Farms', value: summary.infrastructure?.farms, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker', 'Farm-owner'] },
-        { label: 'Total Fields', value: summary.infrastructure?.fields, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker', 'Farm-owner'] },
-        { label: 'Total Acreage', value: summary.infrastructure?.total_acreage, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker', 'Farm-owner'] },
-        { label: 'Active Users', value: summary.infrastructure?.active_users, roles: ['Admin', 'Farm-owner', 'Manager', 'Accountant'] },
-        { label: 'Total Expenses', value: summary.financials?.total_expenses, roles: ['Admin', 'Accountant'] },
-        { label: 'Labour Costs', value: summary.financials?.total_labor_cost, roles: ['Admin', 'Manager', 'Accountant'] },
-        { label: 'Total Production', value: summary.production?.total_quantity, roles: ['Admin', 'Manager', 'Agronomist', 'Worker', 'Farm-owner'] },
+        { label: 'Total Farms', icon: '🏡', tint: 'bg-farm-100', bar: 'bg-farm-500', value: summary.infrastructure?.farms, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker', 'Farm-owner'] },
+        { label: 'Total Fields', icon: '🌱', tint: 'bg-farm-100', bar: 'bg-farm-400', value: summary.infrastructure?.fields, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker', 'Farm-owner'] },
+        { label: 'Total Acreage', icon: '📐', tint: 'bg-farm-100', bar: 'bg-farm-600', value: summary.infrastructure?.total_acreage, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker', 'Farm-owner'] },
+        { label: 'Active Users', icon: '👥', tint: 'bg-farm-100', bar: 'bg-farm-300', value: summary.infrastructure?.active_users, roles: ['Admin', 'Farm-owner', 'Manager', 'Accountant'] },
+        { label: 'Total Expenses', icon: '💸', tint: 'bg-harvest-100', bar: 'bg-harvest-500', value: summary.financials?.total_expenses, roles: ['Admin', 'Accountant'] },
+        { label: 'Labour Costs', icon: '👷', tint: 'bg-harvest-100', bar: 'bg-harvest-400', value: summary.financials?.total_labor_cost, roles: ['Admin', 'Manager', 'Accountant'] },
+        { label: 'Total Production', icon: '🌾', tint: 'bg-harvest-100', bar: 'bg-harvest-600', value: summary.production?.total_quantity, roles: ['Admin', 'Manager', 'Agronomist', 'Worker', 'Farm-owner'] },
     ].filter(card => card.roles.includes(user?.role));
 
     const actions = [
@@ -78,73 +173,94 @@ export default function Dashboard() {
     ].filter(action => action.roles.includes(user?.role));
 
     return (
-        <main className="min-h-screen bg-[#f7faf7]">
-            <header className="border-b border-[#dfe9de] bg-white">
-                <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-                    <div>
-                        <p className="text-sm font-semibold uppercase tracking-wide text-[#4d7a39]">AgriCore Intelligence Core Dashboard</p>
-                        <h1 className="mt-1 text-xl font-semibold text-[#172316]">Farm Operations</h1>
+        <main className="min-h-screen bg-farm-50">
+            <header className={`relative overflow-hidden bg-gradient-to-b ${sky.gradient} text-white`}>
+                <FarmScene sky={sky} />
+
+                <div className="relative mx-auto max-w-7xl px-6 pb-28 pt-6">
+                    <div className="flex items-start justify-between gap-4">
+                        <p className="text-sm font-medium tracking-wide text-white/80">
+                            AgriCore Intelligence Core Dashboard
+                        </p>
+
+                        <div className="flex items-center gap-3">
+                            <div className="text-right">
+                                <p className="text-sm font-medium">{user?.name}</p>
+                                <span className="inline-block rounded-full bg-white/20 px-2 py-0.5 text-xs font-medium backdrop-blur">
+                                    {user?.role}
+                                </span>
+                            </div>
+                            <button
+                                className="rounded-md border border-white/40 px-3 py-2 text-sm font-medium text-white transition hover:bg-white/15"
+                                type="button"
+                                onClick={logout}
+                            >
+                                Logout
+                            </button>
+                        </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
-                        <div className="text-right">
-                            <p className="text-sm font-medium text-[#172316]">{user?.name}</p>
-                            <p className="text-xs text-[#647260]">{user?.role}</p>
-                        </div>
-                        <button
-                            className="rounded-md border border-[#cbd8ca] px-3 py-2 text-sm font-medium text-[#243322] transition hover:bg-[#eef5ee]"
-                            type="button"
-                            onClick={logout}
-                        >
-                            Logout
-                        </button>
+                    <div className="mt-8">
+                        <p className="text-sm text-white/80">{today}</p>
+                        <h1 className="mt-1 text-3xl font-bold sm:text-4xl">
+                            {sky.greeting}, {firstName} 👋
+                        </h1>
+                        <p className="mt-2 max-w-xl text-white/90">{subtitle}</p>
                     </div>
                 </div>
             </header>
 
-            <section className="mx-auto max-w-7xl px-6 py-8">
+            <section className="relative z-10 mx-auto -mt-14 max-w-7xl px-6 pb-12">
                 {error && <p className="mb-6 rounded-md bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
 
-                <div className="grid gap-4 sm:grid-cols-3">
-                    {cards.map((card) => (
-                        <article className="rounded-lg border border-[#dfe9de] bg-white p-5 shadow-sm" key={card.label}>
-                            <p className="text-sm font-medium text-[#647260]">{card.label}</p>
-                            <p className="mt-3 text-3xl font-semibold text-[#172316]">
-                                {loading ? '...' : card.value.toLocaleString()}
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    {cards.map((card, i) => (
+                        <article
+                            key={card.label}
+                            className="relative animate-rise overflow-hidden rounded-2xl border border-farm-100 bg-white p-5 shadow-card transition duration-200 hover:-translate-y-1 motion-reduce:animate-none"
+                            style={{ animationDelay: `${i * 70}ms` }}
+                        >
+                            <div className="flex items-center justify-between">
+                                <p className="text-sm font-medium text-farm-600">{card.label}</p>
+                                <span className={`grid h-11 w-11 place-items-center rounded-xl text-xl ${card.tint}`} aria-hidden="true">
+                                    {card.icon}
+                                </span>
+                            </div>
+                            <p className="mt-3 text-3xl font-bold text-farm-900">
+                                <AnimatedNumber value={card.value} loading={loading} />
                             </p>
+                            <span className={`absolute inset-x-0 bottom-0 h-1 ${card.bar}`} />
                         </article>
                     ))}
                 </div>
 
                 <div className="mt-8 grid gap-6 lg:grid-cols-3">
-                    <div className="lg:col-span-2 rounded-lg border border-[#dfe9de] bg-white p-6 shadow-sm">
-                        <h2 className="mb-4 text-lg font-semibold text-[#172316]">Farm Geographic Overview</h2>
+                    <Panel title="Farm Geographic Overview" className="lg:col-span-2">
                         <MapWidget farmId={farmId} />
-                    </div>
+                    </Panel>
 
-                    <div className="space-y-6">
-                        <div className="rounded-lg border border-[#dfe9de] bg-white p-6 shadow-sm">
-                            <h2 className="mb-4 text-lg font-semibold text-[#172316]">Intelligence</h2>
-                            <WeatherWidget farmId={farmId} />
-                        </div>
-
-                        <div className="rounded-lg border border-[#dfe9de] bg-white p-6 shadow-sm">
-                            <h2 className="mb-4 text-lg font-semibold text-[#172316]">Quick Actions</h2>
-                            <div className="grid grid-cols-1 gap-3">
-                                {actions.map(action => (
-                                    <button
-                                        key={action.path}
-                                        onClick={() => navigate(action.path)}
-                                        className="flex items-center justify-between rounded-md border border-[#e3ebe2] p-3 text-sm font-medium text-[#243322] transition hover:bg-[#fcfdfc] hover:border-[#4d7a39] w-full text-left"
-                                    >
-                                        {action.label}
-                                        <span className="text-xs text-[#647260]">&rarr;</span>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
+                    <Panel title="Intelligence">
+                        <WeatherWidget farmId={farmId} />
+                    </Panel>
                 </div>
+
+                <Panel title="Quick Actions" className="mt-8">
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+                        {actions.map(action => (
+                            <button
+                                key={action.path}
+                                type="button"
+                                onClick={() => navigate(action.path)}
+                                className="group flex flex-col items-start gap-3 rounded-xl border border-farm-100 bg-farm-50/60 p-4 text-left transition hover:-translate-y-0.5 hover:border-harvest-400 hover:bg-white hover:shadow-card"
+                            >
+                                <span className="grid h-10 w-10 place-items-center rounded-lg bg-white text-xl shadow-sm transition group-hover:bg-harvest-100">
+                                    {actionIcons[action.path] || '📋'}
+                                </span>
+                                <span className="text-sm font-semibold text-farm-800">{action.label}</span>
+                            </button>
+                        ))}
+                    </div>
+                </Panel>
             </section>
         </main>
     );
