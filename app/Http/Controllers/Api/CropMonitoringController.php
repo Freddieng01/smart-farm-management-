@@ -9,11 +9,14 @@ use Illuminate\Http\Request;
 
 class CropMonitoringController extends Controller
 {
+    /**
+     * Display all crop monitoring records.
+     */
     public function index(): JsonResponse
     {
         $monitoring = CropMonitoring::with([
             'planting.crop',
-            'planting.field'
+            'planting.field',
         ])
             ->latest('monitoring_date')
             ->paginate(25);
@@ -21,6 +24,9 @@ class CropMonitoringController extends Controller
         return response()->json($monitoring);
     }
 
+    /**
+     * Create a new crop monitoring record.
+     */
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -37,20 +43,29 @@ class CropMonitoringController extends Controller
 
         return response()->json([
             'message' => 'Crop monitoring record created successfully.',
-            'data' => $monitoring->load('planting.crop'),
+            'data' => $monitoring->load([
+                'planting.crop',
+                'planting.field',
+            ]),
         ], 201);
     }
 
+    /**
+     * Display a specific crop monitoring record.
+     */
     public function show(CropMonitoring $cropMonitoring): JsonResponse
     {
         return response()->json([
             'data' => $cropMonitoring->load([
                 'planting.crop',
-                'planting.field'
+                'planting.field',
             ]),
         ]);
     }
 
+    /**
+     * Update an existing crop monitoring record.
+     */
     public function update(
         Request $request,
         CropMonitoring $cropMonitoring
@@ -69,10 +84,16 @@ class CropMonitoringController extends Controller
 
         return response()->json([
             'message' => 'Crop monitoring record updated successfully.',
-            'data' => $cropMonitoring->fresh(),
+            'data' => $cropMonitoring->fresh()->load([
+                'planting.crop',
+                'planting.field',
+            ]),
         ]);
     }
 
+    /**
+     * Delete a crop monitoring record.
+     */
     public function destroy(CropMonitoring $cropMonitoring): JsonResponse
     {
         $cropMonitoring->delete();

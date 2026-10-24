@@ -23,16 +23,16 @@ class OutbreakAlertController extends Controller
             'field_id' => 'required|exists:fields,id',
             'pest_disease_name' => 'required|string|max:255',
             'alert_date' => 'required|date',
-            'severity' => 'nullable|string|max:50',
+            'severity' => 'nullable|in:Low,Medium,High,Critical',
             'description' => 'required|string',
-            'status' => 'nullable|string|max:50',
+            'status' => 'nullable|in:Open,Investigating,Resolved',
             'notes' => 'nullable|string',
         ]);
 
         $alert = OutbreakAlert::create($validated);
 
         return response()->json([
-            'message' => 'Outbreak alert created successfully',
+            'message' => 'Outbreak alert created successfully.',
             'data' => $alert->load('field'),
         ], 201);
     }
@@ -52,16 +52,16 @@ class OutbreakAlertController extends Controller
             'field_id' => 'sometimes|required|exists:fields,id',
             'pest_disease_name' => 'sometimes|required|string|max:255',
             'alert_date' => 'sometimes|required|date',
-            'severity' => 'nullable|string|max:50',
+            'severity' => 'sometimes|nullable|in:Low,Medium,High,Critical',
             'description' => 'sometimes|required|string',
-            'status' => 'nullable|string|max:50',
+            'status' => 'sometimes|nullable|in:Open,Investigating,Resolved',
             'notes' => 'nullable|string',
         ]);
 
         $outbreakAlert->update($validated);
 
         return response()->json([
-            'message' => 'Outbreak alert updated successfully',
+            'message' => 'Outbreak alert updated successfully.',
             'data' => $outbreakAlert->load('field'),
         ]);
     }
@@ -71,7 +71,7 @@ class OutbreakAlertController extends Controller
         $outbreakAlert->delete();
 
         return response()->json([
-            'message' => 'Outbreak alert deleted successfully',
+            'message' => 'Outbreak alert deleted successfully.',
         ]);
     }
 }

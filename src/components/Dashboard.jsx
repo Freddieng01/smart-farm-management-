@@ -8,7 +8,7 @@ import FarmScene from './FarmScene.jsx';
 const initialSummary = {
     infrastructure: { farms: 0, fields: 0, active_users: 0, total_acreage: 0 },
     financials: { total_expenses: 0, total_labor_cost: 0, total_outflow: 0 },
-    production: { total_quantity: 0 },
+    production: { total_quantity: 0, yield_records: 0 },
 };
 
 const actionIcons = {
@@ -23,6 +23,19 @@ const actionIcons = {
     '/production': '🌽',
     '/expenses': '🧾',
     '/users': '🔐',
+    '/crops': '🌿',
+    '/plantings': '🌱',
+    '/crop-monitoring': '🔍',
+    '/irrigation-schedules': '💧',
+    '/pest-disease': '🐛',
+    '/weather': '⛅',
+    '/harvest': '🧺',
+    '/yield-records': '📈',
+    '/post-harvest-handling': '🍎',
+    '/inventory': '🗃️',
+    '/equipment': '🔧',
+    '/finance': '💰',
+    '/reports': '📊',
 };
 
 // The hero sky changes with the time of day.
@@ -113,8 +126,17 @@ export default function Dashboard() {
                 const response = await api.get('/api/dashboard/summary');
 
                 if (!ignore) {
-                    setSummary(response.data.data || initialSummary);
-                    if (response.data.data?.infrastructure?.farms > 0) {
+                    const data = response.data.data || {};
+
+                    setSummary({
+                        ...initialSummary,
+                        ...data,
+                        infrastructure: { ...initialSummary.infrastructure, ...(data.infrastructure || {}) },
+                        financials: { ...initialSummary.financials, ...(data.financials || {}) },
+                        production: { ...initialSummary.production, ...(data.production || {}) },
+                    });
+
+                    if (data.infrastructure?.farms > 0) {
                         const farmRes = await api.get('/api/farms');
                         setFarmId(farmRes.data.data?.[0]?.id || null);
                     }
@@ -156,6 +178,7 @@ export default function Dashboard() {
         { label: 'Total Expenses', icon: '💸', tint: 'bg-harvest-100', bar: 'bg-harvest-500', value: summary.financials?.total_expenses, roles: ['Admin', 'Accountant'] },
         { label: 'Labour Costs', icon: '👷', tint: 'bg-harvest-100', bar: 'bg-harvest-400', value: summary.financials?.total_labor_cost, roles: ['Admin', 'Manager', 'Accountant'] },
         { label: 'Total Production', icon: '🌾', tint: 'bg-harvest-100', bar: 'bg-harvest-600', value: summary.production?.total_quantity, roles: ['Admin', 'Manager', 'Agronomist', 'Worker', 'Farm-owner'] },
+        { label: 'Yield Records', icon: '📈', tint: 'bg-harvest-100', bar: 'bg-harvest-500', value: summary.production?.yield_records, roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
     ].filter(card => card.roles.includes(user?.role));
 
     const actions = [
@@ -168,7 +191,20 @@ export default function Dashboard() {
         { label: 'Manage Employees', path: '/employees', roles: ['Admin', 'Farm-owner', 'Manager'] },
         { label: 'Task Tracking', path: '/tasks', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
         { label: 'Production Logs', path: '/production', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
+        { label: 'Crop Management', path: '/crops', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
+        { label: 'Planting Management', path: '/plantings', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
+        { label: 'Crop Monitoring', path: '/crop-monitoring', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
+        { label: 'Irrigation Schedules', path: '/irrigation-schedules', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
+        { label: 'Pest & Disease', path: '/pest-disease', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
+        { label: 'Weather', path: '/weather', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
+        { label: 'Harvest Management', path: '/harvest', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
+        { label: 'Yield Records', path: '/yield-records', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
+        { label: 'Post-Harvest Handling', path: '/post-harvest-handling', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
         { label: 'Expense Tracking', path: '/expenses', roles: ['Admin', 'Farm-owner', 'Manager', 'Accountant'] },
+        { label: 'Inventory & Inputs', path: '/inventory', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
+        { label: 'Equipment & Machinery', path: '/equipment', roles: ['Admin', 'Farm-owner', 'Manager', 'Worker'] },
+        { label: 'Financial Management', path: '/finance', roles: ['Admin', 'Farm-owner', 'Accountant'] },
+        { label: 'Reports & Analytics', path: '/reports', roles: ['Admin', 'Farm-owner', 'Manager', 'Accountant'] },
         { label: 'Manage Users', path: '/users', roles: ['Admin'] },
     ].filter(action => action.roles.includes(user?.role));
 
@@ -239,9 +275,31 @@ export default function Dashboard() {
                         <MapWidget farmId={farmId} />
                     </Panel>
 
-                    <Panel title="Intelligence">
-                        <WeatherWidget farmId={farmId} />
-                    </Panel>
+                    <div className="space-y-6">
+                        <Panel title="Intelligence">
+                            <WeatherWidget farmId={farmId} />
+                        </Panel>
+
+                        <Panel title="System Status">
+                            <div className="space-y-3 text-sm">
+                                <div className="flex items-center justify-between gap-3">
+                                    <span className="text-farm-600">System Health</span>
+                                    <span className="flex items-center gap-2 font-medium text-farm-500">
+                                        <span className="h-2 w-2 rounded-full bg-farm-500" />
+                                        Online
+                                    </span>
+                                </div>
+                                <div className="flex items-center justify-between gap-3">
+                                    <span className="text-farm-600">Logged-in Role</span>
+                                    <span className="font-medium text-farm-900">{user?.role || 'Unknown'}</span>
+                                </div>
+                                <div className="flex items-center justify-between gap-3">
+                                    <span className="text-farm-600">Farm Selected</span>
+                                    <span className="font-medium text-farm-900">{farmId ? `Farm #${farmId}` : 'None'}</span>
+                                </div>
+                            </div>
+                        </Panel>
+                    </div>
                 </div>
 
                 <Panel title="Quick Actions" className="mt-8">
