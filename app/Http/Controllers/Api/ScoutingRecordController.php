@@ -23,8 +23,8 @@ class ScoutingRecordController extends Controller
             'field_id' => 'required|exists:fields,id',
             'scouting_date' => 'required|date',
             'pest_disease_name' => 'required|string|max:255',
-            'type' => 'required|string|max:50',
-            'severity' => 'nullable|string|max:50',
+            'type' => 'required|in:Pest,Disease',
+            'severity' => 'nullable|in:Low,Medium,High,Critical',
             'affected_area' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string',
         ]);
@@ -32,7 +32,7 @@ class ScoutingRecordController extends Controller
         $record = ScoutingRecord::create($validated);
 
         return response()->json([
-            'message' => 'Scouting record created successfully',
+            'message' => 'Scouting record created successfully.',
             'data' => $record->load('field'),
         ], 201);
     }
@@ -44,14 +44,16 @@ class ScoutingRecordController extends Controller
         );
     }
 
-    public function update(Request $request, ScoutingRecord $scoutingRecord)
-    {
+    public function update(
+        Request $request,
+        ScoutingRecord $scoutingRecord
+    ) {
         $validated = $request->validate([
             'field_id' => 'sometimes|required|exists:fields,id',
             'scouting_date' => 'sometimes|required|date',
             'pest_disease_name' => 'sometimes|required|string|max:255',
-            'type' => 'sometimes|required|string|max:50',
-            'severity' => 'nullable|string|max:50',
+            'type' => 'sometimes|required|in:Pest,Disease',
+            'severity' => 'nullable|in:Low,Medium,High,Critical',
             'affected_area' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string',
         ]);
@@ -59,7 +61,7 @@ class ScoutingRecordController extends Controller
         $scoutingRecord->update($validated);
 
         return response()->json([
-            'message' => 'Scouting record updated successfully',
+            'message' => 'Scouting record updated successfully.',
             'data' => $scoutingRecord->load('field'),
         ]);
     }
@@ -69,7 +71,7 @@ class ScoutingRecordController extends Controller
         $scoutingRecord->delete();
 
         return response()->json([
-            'message' => 'Scouting record deleted successfully',
+            'message' => 'Scouting record deleted successfully.',
         ]);
     }
 }

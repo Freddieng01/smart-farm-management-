@@ -15,14 +15,14 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8',
-            'role' => 'nullable|string',
+            'role' => 'nullable|in:Admin,Manager,Agronomist,Worker',
         ]);
 
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => $data['password'],
-            'role' => $data['role'] ?? 'User',
+            'role' => $data['role'] ?? 'Worker',
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
