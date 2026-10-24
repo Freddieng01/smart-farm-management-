@@ -18,5 +18,10 @@ return [
             'driver' => 'monolog',
             'handler' => Monolog\Handler\NullHandler::class,
         ],
+        'audit' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/audit.log'),
+            'level' => 'info',
+        ],
     ],
 ];

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import BackButton from '../components/BackButton.jsx';
 
 const UserManagement = () => {
     const { api } = useAuth();
@@ -12,10 +12,8 @@ const UserManagement = () => {
     const [newUser, setNewUser] = useState({
         name: '',
         email: '',
-        password: '',
         role: 'Worker'
     });
-
 
     useEffect(() => {
         fetchUsers();
@@ -32,17 +30,29 @@ const UserManagement = () => {
         }
     };
 
+    const closeModal = () => {
+        setShowModal(false);
+        setEditingUser(null);
+        setNewUser({ name: '', email: '', role: 'Worker' });
+    };
+
+    const openInvitationModal = () => {
+        setEditingUser(null);
+        setNewUser({ name: '', email: '', role: 'Worker' });
+        setShowModal(true);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             if (editingUser) {
                 await api.put(`/api/users/${editingUser.id}`, newUser);
+                alert('User updated successfully.');
             } else {
-                await api.post('/api/users', newUser);
+                await api.post('/api/users/invitations', newUser);
+                alert(`Invitation sent successfully to ${newUser.email}.`);
             }
-            setNewUser({ name: '', email: '', password: '', role: 'Worker' });
-            setShowModal(false);
-            setEditingUser(null);
+            closeModal();
             fetchUsers();
         } catch (err) {
             alert(err.response?.data?.message || 'Error saving user');
@@ -65,7 +75,6 @@ const UserManagement = () => {
         setNewUser({
             name: user.name,
             email: user.email,
-            password: '', // Leave password empty for editing unless they want to change it
             role: user.role
         });
         setShowModal(true);
@@ -75,13 +84,14 @@ const UserManagement = () => {
 
     return (
         <div className="p-8 max-w-6xl mx-auto">
+            <BackButton />
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
-                <button 
-                    onClick={() => setShowModal(true)}
+                <button
+                    onClick={openInvitationModal}
                     className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
                 >
-                    + Add User
+                    + Invite User
                 </button>
             </div>
 
@@ -103,9 +113,9 @@ const UserManagement = () => {
                                 <td className="px-6 py-4 text-sm text-gray-800">{user.name}</td>
                                 <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
                                 <td className="px-6 py-4 text-sm">
-                                    <span className={`px-2 py-1 rounded-full text-xs font-medium 
-                                        ${user.role === 'Admin' ? 'bg-purple-100 text-purple-700' : 
-                                          user.role === 'Manager' ? 'bg-blue-100 text-blue-700' : 
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium
+                                        ${user.role === 'Admin' ? 'bg-purple-100 text-purple-700' :
+                                          user.role === 'Manager' ? 'bg-blue-100 text-blue-700' :
                                           'bg-gray-100 text-gray-700'}`}>
                                         {user.role}
                                     </span>
@@ -133,42 +143,35 @@ const UserManagement = () => {
             {showModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-lg w-full max-w-md p-6 shadow-xl">
-                        <h2 className="text-xl font-bold mb-4">Add New User</h2>
-                        <form onSubmit={handleCreateUser} className="space-y-4">
+                        <h2 className="text-xl font-bold mb-4">
+                            {editingUser ? 'Edit User' : 'Invite New User'}
+                        </h2>
+                        <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Full Name</label>
-                                <input 
-                                    className="w-full border rounded-lg p-2 mt-1" 
-                                    value={newUser.name} 
-                                    onChange={e => setNewUser({...newUser, name: e.target.value})} 
-                                    required 
+                                <input
+                                    className="w-full border rounded-lg p-2 mt-1"
+                                    value={newUser.name}
+                                    onChange={e => setNewUser({...newUser, name: e.target.value})}
+                                    required
                                 />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Email</label>
-                                <input 
-                                    type="email" 
-                                    className="w-full border rounded-lg p-2 mt-1" 
-                                    value={newUser.email} 
-                                    onChange={e => setNewUser({...newUser, email: e.target.value})} 
-                                    required 
+                                <input
+                                    type="email"
+                                    className="w-full border rounded-lg p-2 mt-1"
+                                    value={newUser.email}
+                                    onChange={e => setNewUser({...newUser, email: e.target.value})}
+                                    required
                                 />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Password</label>
-                                <input 
-                                    type="password" 
-                                    className="w-full border rounded-lg p-2 mt-1" 
-                                    value={newUser.password} 
-                                    onChange={e => setNewUser({...newUser, password: e.target.value})} 
-                                    required 
-                                />
-                            </div>
+                            {!editingUser && <p className="rounded-md bg-green-50 p-3 text-sm text-green-800">The new user will receive an email invitation and choose their own password.</p>}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Role</label>
-                                <select 
-                                    className="w-full border rounded-lg p-2 mt-1" 
-                                    value={newUser.role} 
+                                <select
+                                    className="w-full border rounded-lg p-2 mt-1"
+                                    value={newUser.role}
                                     onChange={e => setNewUser({...newUser, role: e.target.value})}
                                 >
                                     <option value="Admin">Admin</option>
@@ -180,18 +183,18 @@ const UserManagement = () => {
                                 </select>
                             </div>
                             <div className="flex justify-end space-x-3 mt-6">
-                                <button 
-                                    type="button" 
-                                    onClick={() => setShowModal(false)} 
+                                <button
+                                    type="button"
+                                    onClick={closeModal}
                                     className="px-4 py-2 text-gray-600 hover:text-gray-800"
                                 >
                                     Cancel
                                 </button>
-                                <button 
-                                    type="submit" 
+                                <button
+                                    type="submit"
                                     className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
                                 >
-                                    Create User
+                                    {editingUser ? 'Update User' : 'Send Invitation'}
                                 </button>
                             </div>
                         </form>

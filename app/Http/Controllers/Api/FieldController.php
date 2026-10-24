@@ -33,9 +33,29 @@ class FieldController extends Controller
             ],
             'soil_type' => ['nullable', 'string', 'max:255'],
             'size_hectares' => ['required', 'numeric', 'min:0'],
+            'boundary_polygon' => ['nullable', 'string'],
         ]);
 
         $field = $farm->fields()->create($validated);
+
+        // AUTOMATIC FARM LOCATION UPDATE
+        // When the first field is plotted, we set the farm's center coordinates
+        if (! empty($validated['boundary_polygon'])) {
+            $coords = json_decode($validated['boundary_polygon'], true);
+            if (is_array($coords) && count($coords) > 0) {
+                // Calculate center of the polygon for the farm's general location
+                $lat = array_sum(array_column($coords, 0)) / count($coords);
+                $lon = array_sum(array_column($coords, 1)) / count($coords);
+
+                $farm->update([
+                    'latitude' => $lat,
+                    'longitude' => $lon,
+                    'location_gps' => "{$lat},{$lon}"
+                ]);
+            }
+        }
+
+        $this->syncFarmAcreage($farm);
 
         return response()->json([
             'message' => 'Field created successfully.',
@@ -52,11 +72,14 @@ class FieldController extends Controller
 
     public function update(Request $request, Field $field): JsonResponse
     {
+        $oldFarm = $field->farm;
+
         $validated = $request->validate([
             'farm_id' => ['sometimes', 'required', 'exists:farms,id'],
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'soil_type' => ['sometimes', 'nullable', 'string', 'max:255'],
             'size_hectares' => ['sometimes', 'required', 'numeric', 'min:0'],
+            'boundary_polygon' => ['nullable', 'string'],
         ]);
 
         if (array_key_exists('name', $validated) || array_key_exists('farm_id', $validated)) {
@@ -78,6 +101,10 @@ class FieldController extends Controller
         }
 
         $field->update($validated);
+        if ($oldFarm->id !== $field->farm_id) {
+            $this->syncFarmAcreage($oldFarm);
+        }
+        $this->syncFarmAcreage(Farm::findOrFail($field->farm_id));
 
         return response()->json([
             'message' => 'Field updated successfully.',
@@ -87,10 +114,18 @@ class FieldController extends Controller
 
     public function destroy(Field $field): JsonResponse
     {
+        $farm = $field->farm;
         $field->delete();
+        $this->syncFarmAcreage($farm);
 
         return response()->json([
             'message' => 'Field deleted successfully.',
         ]);
+    }
+
+    private function syncFarmAcreage(Farm $farm): void
+    {
+        $hectares = (float) $farm->fields()->sum('size_hectares');
+        $farm->update(['total_acreage' => round($hectares * 2.47105, 2)]);
     }
 }

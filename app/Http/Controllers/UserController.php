@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\JsonResponse;
 
@@ -14,25 +13,6 @@ class UserController extends Controller
     {
         $users = User::query()->paginate(15);
         return response()->json($users);
-    }
-
-    public function store(Request $request): JsonResponse
-    {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
-            'role' => 'nullable|string',
-        ]);
-
-        $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-            'role' => $data['role'] ?? 'User',
-        ]);
-
-        return response()->json($user, 201);
     }
 
     public function show($id): JsonResponse
@@ -48,15 +28,8 @@ class UserController extends Controller
         $data = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'email' => ['sometimes','required','email', Rule::unique('users','email')->ignore($user->id)],
-            'password' => 'sometimes|nullable|string|min:6',
-            'role' => 'sometimes|nullable|string',
+            'role' => ['sometimes', 'required', Rule::in(['Admin', 'Manager', 'Agronomist', 'Worker', 'Accountant', 'Farm-owner'])],
         ]);
-
-        if (isset($data['password']) && $data['password']) {
-            $data['password'] = Hash::make($data['password']);
-        } else {
-            unset($data['password']);
-        }
 
         $user->update($data);
 
@@ -66,6 +39,11 @@ class UserController extends Controller
     public function destroy($id): JsonResponse
     {
         $user = User::findOrFail($id);
+
+        if ($user->role === 'Admin') {
+            return response()->json(['message' => 'The System Admin cannot be deleted.'], 403);
+        }
+
         $user->delete();
         return response()->json(['message' => 'User deleted']);
     }

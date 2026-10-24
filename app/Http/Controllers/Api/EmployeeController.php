@@ -8,9 +8,20 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use App\Support\Authorization\FarmAccess;
 
 class EmployeeController extends Controller
 {
+    public function assignableUsers(): JsonResponse
+    {
+        return response()->json([
+            'data' => \App\Models\User::query()
+                ->whereIn('role', ['Manager', 'Agronomist', 'Accountant', 'Worker'])
+                ->orderBy('name')
+                ->get(['id', 'name', 'email', 'role']),
+        ]);
+    }
+
     public function index(): JsonResponse
     {
         $employees = Employee::with(['user:id,name,email,role', 'farm:id,name'])
@@ -22,6 +33,8 @@ class EmployeeController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        $this->authorizeAssignment($request);
+
         $validated = $request->validate([
             'user_id' => [
                 'required',
@@ -50,6 +63,9 @@ class EmployeeController extends Controller
 
     public function update(Request $request, Employee $employee): JsonResponse
     {
+        FarmAccess::authorizeModel($employee);
+        $this->authorizeAssignment($request, $employee);
+
         $validated = $request->validate([
             'user_id' => ['sometimes', 'required', 'exists:users,id'],
             'farm_id' => ['sometimes', 'required', 'exists:farms,id'],
@@ -85,10 +101,26 @@ class EmployeeController extends Controller
 
     public function destroy(Employee $employee): JsonResponse
     {
+        FarmAccess::authorizeModel($employee);
+
         $employee->delete();
 
         return response()->json([
             'message' => 'Employee deleted successfully.',
         ]);
+    }
+
+    private function authorizeAssignment(Request $request, ?Employee $employee = null): void
+    {
+        $user = $request->user();
+        abort_unless(in_array($user?->role, ['Admin', 'Manager', 'Farm-owner'], true), 403, 'You may not assign employees.');
+
+        $farmId = (int) ($request->input('farm_id') ?: $employee?->farm_id);
+        FarmAccess::authorizeFarm($farmId);
+
+        if ($request->filled('user_id')) {
+            $target = \App\Models\User::findOrFail($request->input('user_id'));
+            abort_if(in_array($target->role, ['Admin', 'Farm-owner'], true), 422, 'Only operational users may be assigned as employees.');
+        }
     }
 }

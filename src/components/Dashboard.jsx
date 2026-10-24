@@ -1,7 +1,8 @@
-
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
+import WeatherWidget from './WeatherWidget.jsx';
+import MapWidget from './MapWidget.jsx';
 
 const initialSummary = {
     infrastructure: {
@@ -28,6 +29,7 @@ export default function Dashboard() {
     const [summary, setSummary] = useState(initialSummary);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [farmId, setFarmId] = useState(null);
 
     useEffect(() => {
         let ignore = false;
@@ -58,10 +60,19 @@ export default function Dashboard() {
                             ...(data.production || {}),
                         },
                     });
+
+                    if (data.infrastructure?.farms > 0) {
+                        const farmRes = await api.get('/api/farms');
+                        setFarmId(
+                            farmRes.data.data?.[0]?.id || null
+                        );
+                    }
                 }
             } catch {
                 if (!ignore) {
-                    setError('Dashboard summary could not be loaded.');
+                    setError(
+                        'Dashboard summary could not be loaded.'
+                    );
                 }
             } finally {
                 if (!ignore) {
@@ -81,22 +92,48 @@ export default function Dashboard() {
         {
             label: 'Total Farms',
             value: summary.infrastructure.farms,
-            roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker'],
+            roles: [
+                'Admin',
+                'Farm-owner',
+                'Manager',
+                'Accountant',
+                'Agronomist',
+                'Worker',
+            ],
         },
         {
             label: 'Total Fields',
             value: summary.infrastructure.fields,
-            roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker'],
+            roles: [
+                'Admin',
+                'Farm-owner',
+                'Manager',
+                'Accountant',
+                'Agronomist',
+                'Worker',
+            ],
         },
         {
             label: 'Total Acreage',
             value: summary.infrastructure.total_acreage,
-            roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker'],
+            roles: [
+                'Admin',
+                'Farm-owner',
+                'Manager',
+                'Accountant',
+                'Agronomist',
+                'Worker',
+            ],
         },
         {
             label: 'Active Users',
             value: summary.infrastructure.active_users,
-            roles: ['Admin', 'Manager', 'Accountant'],
+            roles: [
+                'Admin',
+                'Farm-owner',
+                'Manager',
+                'Accountant',
+            ],
         },
         {
             label: 'Total Expenses',
@@ -111,12 +148,24 @@ export default function Dashboard() {
         {
             label: 'Total Production',
             value: summary.production.total_quantity,
-            roles: ['Admin', 'Manager', 'Agronomist', 'Worker'],
+            roles: [
+                'Admin',
+                'Farm-owner',
+                'Manager',
+                'Agronomist',
+                'Worker',
+            ],
         },
         {
             label: 'Yield Records',
             value: summary.production.yield_records,
-            roles: ['Admin', 'Manager', 'Agronomist', 'Worker'],
+            roles: [
+                'Admin',
+                'Farm-owner',
+                'Manager',
+                'Agronomist',
+                'Worker',
+            ],
         },
     ].filter((card) => card.roles.includes(user?.role));
 
@@ -124,47 +173,223 @@ export default function Dashboard() {
         {
             label: 'Manage Farms',
             path: '/farms',
-            roles: ['Admin', 'Manager', 'Agronomist'],
+            roles: [
+                'Admin',
+                'Farm-owner',
+                'Manager',
+                'Agronomist',
+            ],
+        },
+        {
+            label: 'Livestock Management',
+            path: '/livestock',
+            roles: [
+                'Admin',
+                'Manager',
+                'Agronomist',
+                'Worker',
+            ],
+        },
+        {
+            label: 'Notifications',
+            path: '/notifications',
+            roles: [
+                'Admin',
+                'Manager',
+                'Accountant',
+                'Agronomist',
+                'Worker',
+            ],
+        },
+        {
+            label: 'Suppliers & Procurement',
+            path: '/suppliers',
+            roles: [
+                'Admin',
+                'Farm-owner',
+                'Manager',
+                'Accountant',
+            ],
+        },
+        {
+            label: 'Market & Sales',
+            path: '/sales',
+            roles: [
+                'Admin',
+                'Farm-owner',
+                'Manager',
+                'Accountant',
+            ],
         },
         {
             label: 'Manage Employees',
             path: '/employees',
-            roles: ['Admin', 'Manager'],
+            roles: [
+                'Admin',
+                'Farm-owner',
+                'Manager',
+            ],
         },
         {
             label: 'Task Tracking',
             path: '/tasks',
-            roles: ['Admin', 'Manager', 'Agronomist', 'Worker'],
+            roles: [
+                'Admin',
+                'Farm-owner',
+                'Manager',
+                'Agronomist',
+                'Worker',
+            ],
         },
         {
             label: 'Production Logs',
             path: '/production',
-            roles: ['Admin', 'Manager', 'Agronomist', 'Worker'],
+            roles: [
+                'Admin',
+                'Farm-owner',
+                'Manager',
+                'Agronomist',
+            ],
         },
         {
             label: 'Crop Management',
             path: '/crops',
-            roles: ['Admin', 'Manager', 'Agronomist', 'Worker'],
+            roles: [
+                'Admin',
+                'Manager',
+                'Agronomist',
+                'Worker',
+            ],
+        },
+        {
+            label: 'Planting Management',
+            path: '/plantings',
+            roles: [
+                'Admin',
+                'Manager',
+                'Agronomist',
+                'Worker',
+            ],
+        },
+        {
+            label: 'Crop Monitoring',
+            path: '/crop-monitoring',
+            roles: [
+                'Admin',
+                'Manager',
+                'Agronomist',
+                'Worker',
+            ],
+        },
+        {
+            label: 'Irrigation Schedules',
+            path: '/irrigation-schedules',
+            roles: [
+                'Admin',
+                'Manager',
+                'Agronomist',
+                'Worker',
+            ],
+        },
+        {
+            label: 'Pest & Disease',
+            path: '/pest-disease',
+            roles: [
+                'Admin',
+                'Manager',
+                'Agronomist',
+                'Worker',
+            ],
+        },
+        {
+            label: 'Weather',
+            path: '/weather',
+            roles: [
+                'Admin',
+                'Manager',
+                'Agronomist',
+                'Worker',
+            ],
         },
         {
             label: 'Harvest Management',
             path: '/harvest',
-            roles: ['Admin', 'Manager', 'Agronomist', 'Worker'],
-        },
-        {
-            label: 'Post-Harvest Handling',
-            path: '/post-harvest-handling',
-            roles: ['Admin', 'Manager', 'Agronomist', 'Worker'],
+            roles: [
+                'Admin',
+                'Manager',
+                'Agronomist',
+                'Worker',
+            ],
         },
         {
             label: 'Yield Records',
             path: '/yield-records',
-            roles: ['Admin', 'Manager', 'Agronomist', 'Worker'],
+            roles: [
+                'Admin',
+                'Manager',
+                'Agronomist',
+                'Worker',
+            ],
+        },
+        {
+            label: 'Post-Harvest Handling',
+            path: '/post-harvest-handling',
+            roles: [
+                'Admin',
+                'Manager',
+                'Agronomist',
+                'Worker',
+            ],
         },
         {
             label: 'Expense Tracking',
             path: '/expenses',
-            roles: ['Admin', 'Accountant'],
+            roles: [
+                'Admin',
+                'Farm-owner',
+                'Manager',
+                'Accountant',
+            ],
+        },
+        {
+            label: 'Inventory & Inputs',
+            path: '/inventory',
+            roles: [
+                'Admin',
+                'Farm-owner',
+                'Manager',
+                'Agronomist',
+                'Worker',
+            ],
+        },
+        {
+            label: 'Equipment & Machinery',
+            path: '/equipment',
+            roles: [
+                'Admin',
+                'Farm-owner',
+                'Manager',
+                'Worker',
+            ],
+        },
+        {
+            label: 'Financial Management',
+            path: '/finance',
+            roles: [
+                'Admin',
+                'Farm-owner',
+                'Accountant',
+            ],
+        },
+        {
+            label: 'Reports & Analytics',
+            path: '/reports',
+            roles: [
+                'Admin',
+                'Farm-owner',
+                'Manager',
+                'Accountant',
+            ],
         },
         {
             label: 'Manage Users',
@@ -180,7 +405,7 @@ export default function Dashboard() {
                 <div className="flex flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6">
                     <div>
                         <p className="text-sm font-semibold uppercase tracking-wide text-[#4d7a39]">
-                            FFMS Core Dashboard
+                            AgriCore Intelligence Core Dashboard
                         </p>
 
                         <h1 className="mt-1 text-xl font-semibold text-[#172316]">
@@ -235,14 +460,18 @@ export default function Dashboard() {
                             <p className="mt-3 text-3xl font-semibold text-[#172316]">
                                 {loading
                                     ? '...'
-                                    : Number(card.value ?? 0).toLocaleString()}
+                                    : Number(
+                                          card.value ?? 0
+                                      ).toLocaleString()}
                             </p>
                         </article>
                     ))}
                 </div>
 
-                {/* Quick actions and system status */}
+                {/* Dashboard tools */}
                 <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-3">
+
+                    {/* Quick Actions */}
                     <section className="rounded-lg border border-[#dfe9de] bg-white p-5 shadow-sm sm:p-6 xl:col-span-2">
                         <h2 className="mb-4 text-lg font-semibold text-[#172316]">
                             Quick Actions
@@ -253,7 +482,9 @@ export default function Dashboard() {
                                 <button
                                     key={action.path}
                                     type="button"
-                                    onClick={() => navigate(action.path)}
+                                    onClick={() =>
+                                        navigate(action.path)
+                                    }
                                     className="flex items-center justify-between rounded-md border border-[#e3ebe2] p-3 text-left text-sm font-medium text-[#243322] transition hover:border-[#4d7a39] hover:bg-[#fcfdfc]"
                                 >
                                     <span>{action.label}</span>
@@ -269,6 +500,7 @@ export default function Dashboard() {
                         </div>
                     </section>
 
+                    {/* System Status */}
                     <section className="rounded-lg border border-[#dfe9de] bg-white p-5 shadow-sm sm:p-6">
                         <h2 className="mb-4 text-lg font-semibold text-[#172316]">
                             System Status
@@ -295,7 +527,37 @@ export default function Dashboard() {
                                     {user?.role || 'Unknown'}
                                 </span>
                             </div>
+
+                            <div className="flex items-center justify-between gap-3 text-sm">
+                                <span className="text-[#647260]">
+                                    Farm Selected
+                                </span>
+
+                                <span className="font-medium text-[#172316]">
+                                    {farmId
+                                        ? `Farm #${farmId}`
+                                        : 'None'}
+                                </span>
+                            </div>
                         </div>
+                    </section>
+
+                    {/* Geographic Overview */}
+                    <section className="rounded-lg border border-[#dfe9de] bg-white p-5 shadow-sm sm:p-6 xl:col-span-2">
+                        <h2 className="mb-4 text-lg font-semibold text-[#172316]">
+                            Farm Geographic Overview
+                        </h2>
+
+                        <MapWidget farmId={farmId} />
+                    </section>
+
+                    {/* Weather Intelligence */}
+                    <section className="rounded-lg border border-[#dfe9de] bg-white p-5 shadow-sm sm:p-6">
+                        <h2 className="mb-4 text-lg font-semibold text-[#172316]">
+                            Intelligence
+                        </h2>
+
+                        <WeatherWidget farmId={farmId} />
                     </section>
                 </div>
             </section>

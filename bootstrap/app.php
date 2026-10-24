@@ -15,6 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(\App\Http\Middleware\LogSecurityEvent::class);
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
+            'farm.access' => \App\Http\Middleware\EnsureFarmAccess::class,
+            'module' => \App\Http\Middleware\RoleAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

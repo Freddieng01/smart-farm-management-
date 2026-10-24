@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 
@@ -12,6 +11,7 @@ import TaskTracking from './pages/TaskTracking.jsx';
 import ProductionLogging from './pages/ProductionLogging.jsx';
 import ExpenseTracking from './pages/ExpenseTracking.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
+
 import HarvestManagement from './pages/HarvestManagement.jsx';
 import YieldRecords from './pages/YieldRecords.jsx';
 import PostHarvestHandling from './pages/PostHarvestHandling.jsx';
@@ -24,6 +24,18 @@ import PumpMonitoring from './pages/PumpMonitoring.jsx';
 import PestDiseaseManagement from './pages/PestDiseaseManagement.jsx';
 import WeatherManagement from './pages/WeatherManagement.jsx';
 
+import LivestockManagement from './pages/LivestockManagement.jsx';
+import AcceptInvitation from './pages/AcceptInvitation.jsx';
+import NotificationsManagement from './pages/NotificationsManagement.jsx';
+import SupplierManagement from './pages/SupplierManagement.jsx';
+import SalesManagement from './pages/SalesManagement.jsx';
+import ForgotPassword from './pages/ForgotPassword.jsx';
+import ResetPassword from './pages/ResetPassword.jsx';
+import InventoryManagement from './pages/InventoryManagement.jsx';
+import EquipmentManagement from './pages/EquipmentManagement.jsx';
+import FinancialManagement from './pages/FinancialManagement.jsx';
+import ReportsAnalytics from './pages/ReportsAnalytics.jsx';
+
 function Unauthorized() {
     return (
         <main className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -31,12 +43,15 @@ function Unauthorized() {
                 <h1 className="text-4xl font-bold text-gray-900 mb-2">
                     403
                 </h1>
+
                 <h2 className="text-2xl font-semibold text-gray-800 mb-4">
                     Access Denied
                 </h2>
+
                 <p className="text-gray-600 mb-8">
                     You do not have permission to access this page.
                 </p>
+
                 <a
                     href="/dashboard"
                     className="inline-block bg-[#315f2b] text-white px-6 py-2 rounded-md font-medium hover:bg-[#264b22] transition"
@@ -63,6 +78,21 @@ function AppRoutes() {
             />
 
             <Route
+                path="/accept-invite"
+                element={<AcceptInvitation />}
+            />
+
+            <Route
+                path="/forgot-password"
+                element={<ForgotPassword />}
+            />
+
+            <Route
+                path="/reset-password"
+                element={<ResetPassword />}
+            />
+
+            <Route
                 path="/dashboard"
                 element={
                     <ProtectedRoute>
@@ -74,8 +104,84 @@ function AppRoutes() {
             <Route
                 path="/farms"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute
+                        allowedRoles={[
+                            'Admin',
+                            'Farm-owner',
+                            'Manager',
+                            'Agronomist',
+                            'Accountant',
+                            'Worker',
+                        ]}
+                    >
                         <FarmManagement />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/livestock"
+                element={
+                    <ProtectedRoute
+                        allowedRoles={[
+                            'Admin',
+                            'Farm-owner',
+                            'Manager',
+                            'Agronomist',
+                            'Worker',
+                        ]}
+                    >
+                        <LivestockManagement />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/notifications"
+                element={
+                    <ProtectedRoute
+                        allowedRoles={[
+                            'Admin',
+                            'Farm-owner',
+                            'Manager',
+                            'Accountant',
+                            'Agronomist',
+                            'Worker',
+                        ]}
+                    >
+                        <NotificationsManagement />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/suppliers"
+                element={
+                    <ProtectedRoute
+                        allowedRoles={[
+                            'Admin',
+                            'Farm-owner',
+                            'Manager',
+                            'Accountant',
+                        ]}
+                    >
+                        <SupplierManagement />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/sales"
+                element={
+                    <ProtectedRoute
+                        allowedRoles={[
+                            'Admin',
+                            'Farm-owner',
+                            'Manager',
+                            'Accountant',
+                        ]}
+                    >
+                        <SalesManagement />
                     </ProtectedRoute>
                 }
             />
@@ -83,7 +189,15 @@ function AppRoutes() {
             <Route
                 path="/farms/:farmId/fields"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute
+                        allowedRoles={[
+                            'Admin',
+                            'Farm-owner',
+                            'Manager',
+                            'Agronomist',
+                            'Worker',
+                        ]}
+                    >
                         <FieldManagement />
                     </ProtectedRoute>
                 }
@@ -92,7 +206,13 @@ function AppRoutes() {
             <Route
                 path="/employees"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute
+                        allowedRoles={[
+                            'Admin',
+                            'Farm-owner',
+                            'Manager',
+                        ]}
+                    >
                         <EmployeeManagement />
                     </ProtectedRoute>
                 }
@@ -101,7 +221,15 @@ function AppRoutes() {
             <Route
                 path="/tasks"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute
+                        allowedRoles={[
+                            'Admin',
+                            'Farm-owner',
+                            'Manager',
+                            'Agronomist',
+                            'Worker',
+                        ]}
+                    >
                         <TaskTracking />
                     </ProtectedRoute>
                 }
@@ -110,12 +238,20 @@ function AppRoutes() {
             <Route
                 path="/production"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute
+                        allowedRoles={[
+                            'Admin',
+                            'Farm-owner',
+                            'Manager',
+                            'Agronomist',
+                        ]}
+                    >
                         <ProductionLogging />
                     </ProtectedRoute>
                 }
             />
 
+            {/* Crop Management */}
             <Route
                 path="/crops"
                 element={
@@ -143,6 +279,7 @@ function AppRoutes() {
                 }
             />
 
+            {/* Irrigation and Water Management */}
             <Route
                 path="/water-sources"
                 element={
@@ -170,21 +307,22 @@ function AppRoutes() {
                 }
             />
 
-            <Route
-                path="/weather"
-                element={
-                    <ProtectedRoute>
-                        <WeatherManagement />
-                    </ProtectedRoute>
-                }
-            />
-
-            {/* Pest & Disease Management */}
+            {/* Pest and Disease Management */}
             <Route
                 path="/pest-disease"
                 element={
                     <ProtectedRoute>
                         <PestDiseaseManagement />
+                    </ProtectedRoute>
+                }
+            />
+
+            {/* Weather Management */}
+            <Route
+                path="/weather"
+                element={
+                    <ProtectedRoute>
+                        <WeatherManagement />
                     </ProtectedRoute>
                 }
             />
@@ -218,20 +356,97 @@ function AppRoutes() {
                 }
             />
 
+            {/* Expenses */}
             <Route
                 path="/expenses"
                 element={
-                    <ProtectedRoute>
+                    <ProtectedRoute
+                        allowedRoles={[
+                            'Admin',
+                            'Farm-owner',
+                            'Manager',
+                            'Accountant',
+                        ]}
+                    >
                         <ExpenseTracking />
                     </ProtectedRoute>
                 }
             />
 
+            {/* User Management */}
             <Route
                 path="/users"
                 element={
                     <ProtectedRoute allowedRoles={['Admin']}>
                         <UserManagement />
+                    </ProtectedRoute>
+                }
+            />
+
+            {/* Inventory */}
+            <Route
+                path="/inventory"
+                element={
+                    <ProtectedRoute
+                        allowedRoles={[
+                            'Admin',
+                            'Farm-owner',
+                            'Manager',
+                            'Agronomist',
+                            'Worker',
+                        ]}
+                    >
+                        <InventoryManagement />
+                    </ProtectedRoute>
+                }
+            />
+
+            {/* Equipment */}
+            <Route
+                path="/equipment"
+                element={
+                    <ProtectedRoute
+                        allowedRoles={[
+                            'Admin',
+                            'Farm-owner',
+                            'Manager',
+                            'Worker',
+                        ]}
+                    >
+                        <EquipmentManagement />
+                    </ProtectedRoute>
+                }
+            />
+
+            {/* Financial Management */}
+            <Route
+                path="/finance"
+                element={
+                    <ProtectedRoute
+                        allowedRoles={[
+                            'Admin',
+                            'Farm-owner',
+                            'Accountant',
+                        ]}
+                    >
+                        <FinancialManagement />
+                    </ProtectedRoute>
+                }
+            />
+
+            {/* Reports and Analytics */}
+            <Route
+                path="/reports"
+                element={
+                    <ProtectedRoute
+                        allowedRoles={[
+                            'Admin',
+                            'Farm-owner',
+                            'Manager',
+                            'Accountant',
+                        ]}
+                    >
+                        <ReportsAnalytics />
                     </ProtectedRoute>
                 }
             />

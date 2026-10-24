@@ -12,14 +12,25 @@ use Illuminate\Validation\ValidationException;
 
 class FinancialTransactionController extends Controller
 {
+    // amount is decimal(12,2): at least 0.01, max 2 decimals, max 9,999,999,999.99
+    private const AMOUNT_RULES = ['numeric', 'decimal:0,2', 'min:0.01', 'max:9999999999.99'];
+
     public function index(Request $request): JsonResponse
     {
+        $filters = $request->validate([
+            'farm_id' => ['sometimes', 'integer'],
+            'type' => ['sometimes', Rule::in(['income', 'expense'])],
+            'category' => ['sometimes', 'string', 'max:50'],
+            'from' => ['sometimes', 'date'],
+            'to' => ['sometimes', 'date'],
+        ]);
+
         $transactions = FinancialTransaction::with(['farm:id,name', 'field:id,name', 'employee:id,user_id', 'recordedBy:id,name'])
-            ->when($request->filled('farm_id'), fn ($q) => $q->where('farm_id', $request->integer('farm_id')))
-            ->when($request->filled('type'), fn ($q) => $q->where('type', $request->string('type')))
-            ->when($request->filled('category'), fn ($q) => $q->where('category', $request->string('category')))
-            ->when($request->filled('from'), fn ($q) => $q->whereDate('transaction_date', '>=', $request->date('from')))
-            ->when($request->filled('to'), fn ($q) => $q->whereDate('transaction_date', '<=', $request->date('to')))
+            ->when(isset($filters['farm_id']), fn ($q) => $q->where('farm_id', $filters['farm_id']))
+            ->when(isset($filters['type']), fn ($q) => $q->where('type', $filters['type']))
+            ->when(isset($filters['category']), fn ($q) => $q->where('category', $filters['category']))
+            ->when(isset($filters['from']), fn ($q) => $q->where('transaction_date', '>=', $filters['from']))
+            ->when(isset($filters['to']), fn ($q) => $q->where('transaction_date', '<=', $filters['to']))
             ->latest('transaction_date')
             ->paginate(25);
 
@@ -32,6 +43,7 @@ class FinancialTransactionController extends Controller
 
         $transaction = FinancialTransaction::create([
             ...$validated,
+            // always the logged-in user - never taken from the request body
             'recorded_by' => $request->user()->id,
         ]);
 
@@ -74,19 +86,25 @@ class FinancialTransactionController extends Controller
         $req = $sometimes ? 'sometimes' : 'required';
 
         $rules = [
-            'farm_id' => [$req, 'exists:farms,id'],
-            'field_id' => ['nullable', 'exists:fields,id'],
-            'employee_id' => ['nullable', 'exists:employees,id'],
-            'livestock_id' => ['nullable', 'exists:livestock,id'],
-            'resource_transaction_id' => ['nullable', 'exists:resource_transactions,id'],
+            'farm_id' => [$req, 'integer', 'exists:farms,id'],
+            'field_id' => ['nullable', 'integer', 'exists:fields,id'],
+            'employee_id' => ['nullable', 'integer', 'exists:employees,id'],
+            'livestock_id' => ['nullable', 'integer', 'exists:livestock,id'],
+            // One stock purchase can back only ONE financial transaction (prevents double counting).
+            'resource_transaction_id' => [
+                'nullable', 'integer', 'exists:resource_transactions,id',
+                Rule::unique('financial_transactions', 'resource_transaction_id')->ignore($existing?->id),
+            ],
             'type' => [$req, Rule::in(['income', 'expense'])],
-            'category' => [$req, 'string'],
+            'category' => [$req, 'string', 'max:50'],
             'description' => ['nullable', 'string', 'max:255'],
-            'amount' => [$req, 'numeric', 'min:0.01'],
+            'amount' => [$req, ...self::AMOUNT_RULES],
             'transaction_date' => [$req, 'date', 'before_or_equal:today'],
         ];
 
-        $validated = $request->validate($rules);
+        $validated = $request->validate($rules, [
+            'resource_transaction_id.unique' => 'This stock purchase is already linked to another financial transaction.',
+        ]);
 
         $type = $validated['type'] ?? $existing?->type;
         $category = $validated['category'] ?? $existing?->category;
@@ -101,10 +119,9 @@ class FinancialTransactionController extends Controller
             ]);
         }
 
-        // Cross-farm ownership checks: every optional reference on this
-        // transaction must belong to the SAME farm as the transaction itself,
-        // not just exist somewhere in the database. On update, any reference
-        // not present in this request falls back to what's already stored.
+        // Cross-farm ownership checks: every optional reference must belong to the
+        // SAME farm as the transaction. On update, anything not sent falls back to
+        // what is already stored.
         $farmId = $validated['farm_id'] ?? $existing?->farm_id;
 
         $fieldId = array_key_exists('field_id', $validated) ? $validated['field_id'] : $existing?->field_id;
@@ -152,8 +169,6 @@ class FinancialTransactionController extends Controller
             return;
         }
 
-        // Assumes the livestock table has a farm_id column, per the confirmed
-        // "Livestock belongs to Farm through farm_id" relationship.
         if (! DB::table('livestock')->where('id', $livestockId)->where('farm_id', $farmId)->exists()) {
             throw ValidationException::withMessages([
                 'livestock_id' => ['The selected livestock record does not belong to the selected farm.'],
@@ -167,17 +182,25 @@ class FinancialTransactionController extends Controller
             return;
         }
 
-        // A resource_transaction has no farm_id of its own - it belongs to a
-        // resource, which belongs to a farm. Join through resources to check.
-        $belongs = DB::table('resource_transactions')
+        // A resource_transaction has no farm_id of its own: it belongs to a resource,
+        // which belongs to a farm. Join through resources to check.
+        $row = DB::table('resource_transactions')
             ->join('resources', 'resources.id', '=', 'resource_transactions.resource_id')
             ->where('resource_transactions.id', $resourceTransactionId)
             ->where('resources.farm_id', $farmId)
-            ->exists();
+            ->select('resource_transactions.type')
+            ->first();
 
-        if (! $belongs) {
+        if ($row === null) {
             throw ValidationException::withMessages([
                 'resource_transaction_id' => ['The selected resource transaction does not belong to the selected farm.'],
+            ]);
+        }
+
+        // Only a purchase (stock-in) can be a cost; a stock-out is just stock being used.
+        if ($row->type !== 'stock_in') {
+            throw ValidationException::withMessages([
+                'resource_transaction_id' => ['Only a stock-in (purchase) can be linked to a financial transaction.'],
             ]);
         }
     }
