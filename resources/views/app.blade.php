@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>FFMS</title>
         @viteReactRefresh
-        @vite(['resources/js/app.jsx'])
+        @vite(['src/main.jsx'])
     </head>
     <body>
         <div id="root"></div>

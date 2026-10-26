@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import ModuleLayout from '../components/ModuleLayout.jsx';
 
 const emptyForm = {
   field_id: '',
@@ -15,7 +16,7 @@ const emptyForm = {
 const statusStyles = {
   scheduled: 'bg-blue-100 text-blue-700',
   'in progress': 'bg-yellow-100 text-yellow-700',
-  completed: 'bg-green-100 text-green-700',
+  completed: 'bg-farm-100 text-farm-700',
   cancelled: 'bg-red-100 text-red-700',
 };
 
@@ -262,32 +263,18 @@ export default function HarvestManagement() {
   ).length;
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 md:p-8">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">
-              Harvest Management
-            </h1>
-            <p className="mt-1 text-gray-600">
-              Schedule, monitor, and manage farm harvests.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => navigate('/dashboard')}
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50"
-            >
-              Dashboard
-            </button>
+    <ModuleLayout
+      title="Harvest Management"
+      subtitle="Schedule, monitor, and manage farm harvests."
+      actions={<>
+<div className="flex flex-wrap gap-2">
+            
 
             <button
               type="button"
               onClick={loadData}
               disabled={loading}
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              className="rounded-full bg-white/15 px-5 py-2 text-sm font-medium text-white ring-1 ring-white/30 transition hover:bg-white/25 disabled:opacity-60"
             >
               {loading ? 'Refreshing...' : 'Refresh Data'}
             </button>
@@ -295,21 +282,23 @@ export default function HarvestManagement() {
             <button
               type="button"
               onClick={openCreateForm}
-              className="rounded-lg bg-green-700 px-4 py-2 font-medium text-white hover:bg-green-800"
+              className="rounded-full bg-harvest-400 px-5 py-2 text-sm font-medium text-farm-900 transition hover:bg-harvest-500 disabled:opacity-60"
             >
               + New Harvest
             </button>
           </div>
-        </div>
+      </>}
+    >
+      <div className="mx-auto max-w-7xl">
 
         {error && (
-          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-red-700">
+          <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 p-3 text-red-700">
             {error}
           </div>
         )}
 
         {success && (
-          <div className="mb-4 rounded-lg border border-green-200 bg-green-50 p-3 text-green-700">
+          <div className="mb-4 rounded-2xl border border-farm-200 bg-farm-50 p-3 text-farm-700">
             {success}
           </div>
         )}
@@ -323,10 +312,10 @@ export default function HarvestManagement() {
           ].map((card) => (
             <div
               key={card.label}
-              className="rounded-xl bg-white p-5 shadow-sm"
+              className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]"
             >
-              <p className="text-sm text-gray-500">{card.label}</p>
-              <p className="mt-2 text-3xl font-bold text-gray-800">
+              <p className="text-sm text-slate-500">{card.label}</p>
+              <p className="mt-2 text-3xl font-bold text-farm-900">
                 {card.value}
               </p>
             </div>
@@ -336,15 +325,15 @@ export default function HarvestManagement() {
         {showForm && (
           <form
             onSubmit={handleSubmit}
-            className="mb-6 rounded-xl bg-white p-5 shadow-sm"
+            className="mb-6 rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]"
           >
-            <h2 className="mb-4 text-xl font-semibold text-gray-800">
+            <h2 className="mb-4 text-xl font-semibold text-farm-900">
               {editingId ? 'Edit Harvest Schedule' : 'Create Harvest Schedule'}
             </h2>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-1 block text-sm font-medium text-slate-700">
                   Farm
                 </label>
                 <select
@@ -353,7 +342,7 @@ export default function HarvestManagement() {
                     setSelectedFarm(event.target.value);
                     setForm((current) => ({ ...current, field_id: '' }));
                   }}
-                  className="w-full rounded-lg border border-gray-300 p-2"
+                  className="w-full rounded-xl border border-farm-200 p-2"
                   required
                 >
                   <option value="">Select a farm</option>
@@ -366,14 +355,14 @@ export default function HarvestManagement() {
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-1 block text-sm font-medium text-slate-700">
                   Field
                 </label>
                 <select
                   name="field_id"
                   value={form.field_id}
                   onChange={handleChange}
-                  className="w-full rounded-lg border border-gray-300 p-2"
+                  className="w-full rounded-xl border border-farm-200 p-2"
                   required
                 >
                   <option value="">Select a field</option>
@@ -386,7 +375,7 @@ export default function HarvestManagement() {
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-1 block text-sm font-medium text-slate-700">
                   Harvest Date
                 </label>
                 <input
@@ -394,13 +383,13 @@ export default function HarvestManagement() {
                   name="harvest_date"
                   value={form.harvest_date}
                   onChange={handleChange}
-                  className="w-full rounded-lg border border-gray-300 p-2"
+                  className="w-full rounded-xl border border-farm-200 p-2"
                   required
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-1 block text-sm font-medium text-slate-700">
                   Estimated Quantity
                 </label>
                 <input
@@ -411,19 +400,19 @@ export default function HarvestManagement() {
                   min="0"
                   step="any"
                   placeholder="Enter expected quantity"
-                  className="w-full rounded-lg border border-gray-300 p-2"
+                  className="w-full rounded-xl border border-farm-200 p-2"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-1 block text-sm font-medium text-slate-700">
                   Unit
                 </label>
                 <select
                   name="unit"
                   value={form.unit}
                   onChange={handleChange}
-                  className="w-full rounded-lg border border-gray-300 p-2"
+                  className="w-full rounded-xl border border-farm-200 p-2"
                 >
                   <option value="kg">Kilograms (kg)</option>
                   <option value="tonnes">Tonnes</option>
@@ -434,14 +423,14 @@ export default function HarvestManagement() {
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-1 block text-sm font-medium text-slate-700">
                   Status
                 </label>
                 <select
                   name="status"
                   value={form.status}
                   onChange={handleChange}
-                  className="w-full rounded-lg border border-gray-300 p-2"
+                  className="w-full rounded-xl border border-farm-200 p-2"
                 >
                   <option value="scheduled">Scheduled</option>
                   <option value="in progress">In Progress</option>
@@ -451,7 +440,7 @@ export default function HarvestManagement() {
               </div>
 
               <div className="md:col-span-2">
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-1 block text-sm font-medium text-slate-700">
                   Notes
                 </label>
                 <textarea
@@ -460,7 +449,7 @@ export default function HarvestManagement() {
                   onChange={handleChange}
                   rows="3"
                   placeholder="Optional harvest notes"
-                  className="w-full rounded-lg border border-gray-300 p-2"
+                  className="w-full rounded-xl border border-farm-200 p-2"
                 />
               </div>
             </div>
@@ -469,7 +458,7 @@ export default function HarvestManagement() {
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-lg bg-green-700 px-5 py-2 font-medium text-white hover:bg-green-800 disabled:opacity-50"
+                className="rounded-full bg-farm-700 px-5 py-2 font-medium text-white hover:bg-farm-800 disabled:opacity-50"
               >
                 {saving
                   ? 'Saving...'
@@ -486,7 +475,7 @@ export default function HarvestManagement() {
                   setForm(emptyForm);
                   setError('');
                 }}
-                className="rounded-lg border border-gray-300 px-5 py-2 text-gray-700 hover:bg-gray-50"
+                className="rounded-full border border-farm-200 px-5 py-2 text-slate-700 hover:bg-farm-50"
               >
                 Cancel
               </button>
@@ -494,9 +483,9 @@ export default function HarvestManagement() {
           </form>
         )}
 
-        <div className="rounded-xl bg-white p-5 shadow-sm">
+        <div className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
           <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-            <h2 className="text-xl font-semibold text-gray-800">
+            <h2 className="text-xl font-semibold text-farm-900">
               Harvest Schedules
             </h2>
 
@@ -505,23 +494,23 @@ export default function HarvestManagement() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search field, status, date, or notes..."
-              className="w-full rounded-lg border border-gray-300 p-2 sm:max-w-sm"
+              className="w-full rounded-xl border border-farm-200 p-2 sm:max-w-sm"
             />
           </div>
 
           {loading ? (
-            <p className="py-8 text-center text-gray-500">
+            <p className="py-8 text-center text-slate-500">
               Loading harvest schedules...
             </p>
           ) : filteredHarvests.length === 0 ? (
-            <p className="py-8 text-center text-gray-500">
+            <p className="py-8 text-center text-slate-500">
               No harvest schedules found.
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[850px] text-left">
                 <thead>
-                  <tr className="border-b bg-gray-50 text-sm text-gray-600">
+                  <tr className="border-b bg-farm-50 text-sm text-slate-600">
                     <th className="p-3">Field</th>
                     <th className="p-3">Harvest Date</th>
                     <th className="p-3">Estimated Quantity</th>
@@ -535,19 +524,19 @@ export default function HarvestManagement() {
                   {filteredHarvests.map((harvest) => (
                     <tr
                       key={harvest.id}
-                      className="border-b last:border-0 hover:bg-gray-50"
+                      className="border-b last:border-0 hover:bg-farm-50"
                     >
-                      <td className="p-3 font-medium text-gray-800">
+                      <td className="p-3 font-medium text-farm-900">
                         {harvest.field?.name || 'Unknown field'}
                       </td>
 
-                      <td className="p-3 text-gray-600">
+                      <td className="p-3 text-slate-600">
                         {harvest.harvest_date
                           ? harvest.harvest_date.slice(0, 10)
                           : '—'}
                       </td>
 
-                      <td className="p-3 text-gray-600">
+                      <td className="p-3 text-slate-600">
                         {harvest.estimated_quantity ?? '—'}{' '}
                         {harvest.unit || ''}
                       </td>
@@ -556,14 +545,14 @@ export default function HarvestManagement() {
                         <span
                           className={`rounded-full px-3 py-1 text-xs font-medium ${
                             statusStyles[harvest.status] ||
-                            'bg-gray-100 text-gray-700'
+                            'bg-slate-100 text-slate-700'
                           }`}
                         >
                           {harvest.status || 'Unknown'}
                         </span>
                       </td>
 
-                      <td className="max-w-xs truncate p-3 text-gray-600">
+                      <td className="max-w-xs truncate p-3 text-slate-600">
                         {harvest.notes || '—'}
                       </td>
 
@@ -572,7 +561,7 @@ export default function HarvestManagement() {
                           <button
                             type="button"
                             onClick={() => openEditForm(harvest)}
-                            className="rounded-md bg-blue-100 px-3 py-1 text-sm text-blue-700 hover:bg-blue-200"
+                            className="rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700 hover:bg-blue-200"
                           >
                             Edit
                           </button>
@@ -580,7 +569,7 @@ export default function HarvestManagement() {
                           <button
                             type="button"
                             onClick={() => handleDelete(harvest)}
-                            className="rounded-md bg-red-100 px-3 py-1 text-sm text-red-700 hover:bg-red-200"
+                            className="rounded-full bg-red-100 px-3 py-1 text-sm text-red-700 hover:bg-red-200"
                           >
                             Delete
                           </button>
@@ -594,6 +583,6 @@ export default function HarvestManagement() {
           )}
         </div>
       </div>
-    </div>
+    </ModuleLayout>
   );
 }

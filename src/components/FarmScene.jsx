@@ -1,178 +1,129 @@
-// Dashboard hero scene: sky objects (sun/moon, stars, clouds) plus a flat
-// farm landscape (hills, barn, silos, cows). Drawn as SVG so it stays crisp
-// at any screen size. Colours switch to a night palette after dark.
+// Dashboard hero scene. The sky follows the clock: the sun travels across the
+// sky during the day (and rises/sets behind the ridge), the moon and stars
+// come out at night. The land is drawn as layered ridgelines above a field
+// of crop rows. Everything is SVG, so it stays crisp on any screen.
 
-const bodyStyles = {
-    sun: 'bg-harvest-400 shadow-[0_0_60px_20px_rgba(245,185,50,0.5)]',
-    moon: 'bg-slate-100 shadow-[0_0_50px_12px_rgba(226,232,240,0.35)]',
+const palettes = {
+    day: { far: '#4fb582', mid: '#2a8a5a', near: '#14532d', rows: '#86d9a3' },
+    dawn: { far: '#7fae85', mid: '#2f7a55', near: '#14532d', rows: '#e8b987' },
+    dusk: { far: '#93927f', mid: '#3d6e55', near: '#14472b', rows: '#e6a76f' },
+    night: { far: '#12382a', mid: '#0e3022', near: '#0a2418', rows: '#2a6a4a' },
 };
 
-const stars = [[8, 18], [18, 42], [27, 12], [36, 30], [48, 15], [58, 38], [67, 10], [76, 28], [86, 16], [93, 40]];
+const stars = [[8, 14], [16, 38], [24, 10], [33, 26], [44, 12], [55, 34], [63, 9], [71, 24], [82, 13], [91, 33], [96, 18], [38, 42]];
 
-const clouds = [
-    { top: '18%', width: 'w-28', duration: '70s', delay: '-10s' },
-    { top: '38%', width: 'w-20', duration: '95s', delay: '-45s' },
-    { top: '10%', width: 'w-24', duration: '120s', delay: '-80s' },
-];
+// x positions where the crop rows meet the bottom edge of the picture
+const rowEnds = Array.from({ length: 33 }, (_, i) => -1200 + i * 120);
 
-const day = {
-    farHill: '#8cc287',
-    hillA: '#4f9a4f',
-    crest: '#c9e8a6',
-    hillB: '#6aae66',
-    hillC: '#5aa257',
-    meadow: '#78bf6d',
-    patch: '#b4de8e',
-    wall: '#f3efe4',
-    roofBarn: '#8c7b5a',
-    roofHouse: '#6b5a42',
-    door: '#c9cfc2',
-    silo: '#dde3d6',
-    dome: '#c4cbbd',
-    cow: '#1f4422',
-    window: '#cfd6c8',
-    foreground: '#f1f8f1',
-};
+function celestial(sky) {
+    if (sky.night) {
+        return { left: '80%', top: '24%', kind: 'moon' };
+    }
 
-const night = {
-    farHill: '#24473f',
-    hillA: '#1c3d33',
-    crest: '#3d6b58',
-    hillB: '#22483a',
-    hillC: '#1f4235',
-    meadow: '#1d4a35',
-    patch: '#2f6b4d',
-    wall: '#8b94a3',
-    roofBarn: '#4a4338',
-    roofHouse: '#3b342b',
-    door: '#6c7482',
-    silo: '#8b94a3',
-    dome: '#6c7482',
-    cow: '#0b1a10',
-    window: '#fddf8a',
-    foreground: '#f1f8f1',
-};
+    // Sun travels from about 05:30 to 19:30 along a gentle arc, on the right
+    // half of the sky so it never sits behind the greeting text.
+    const t = Math.min(Math.max((sky.hour - 5.5) / 14, 0), 1);
+    const left = 52 + t * 38;
+    const top = 72 - Math.sin(Math.PI * t) * 34;
 
-// A cow drawn from simple shapes. (x, y) is where its feet touch the ground.
-function Cow({ x, y, scale = 1, grazing = false, flip = false, color }) {
-    const sx = flip ? -scale : scale;
-
-    return (
-        <g transform={`translate(${x} ${y}) scale(${sx} ${scale})`} fill={color}>
-            <rect x="0" y="-22" width="34" height="14" rx="6" />
-            <rect x="4" y="-10" width="3" height="10" rx="1" />
-            <rect x="10" y="-10" width="3" height="10" rx="1" />
-            <rect x="24" y="-10" width="3" height="10" rx="1" />
-            <rect x="30" y="-10" width="3" height="10" rx="1" />
-            <g transform={grazing ? 'rotate(55 32 -18)' : undefined}>
-                <rect x="30" y="-28" width="13" height="10" rx="4" />
-                <rect x="31" y="-31" width="3" height="4" rx="1" />
-            </g>
-            <path d="M1,-19 Q-6,-16 -4,-6" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" />
-        </g>
-    );
+    return { left: `${left}%`, top: `${top}%`, kind: 'sun' };
 }
 
+const bodyStyle = {
+    sun: {
+        dawn: 'bg-orange-200 shadow-[0_0_70px_24px_rgba(253,186,116,0.55)]',
+        day: 'bg-amber-100 shadow-[0_0_80px_28px_rgba(254,243,199,0.55)]',
+        dusk: 'bg-orange-200 shadow-[0_0_70px_24px_rgba(253,164,175,0.5)]',
+    },
+    moon: 'bg-slate-100 shadow-[0_0_40px_10px_rgba(226,232,240,0.22),inset_-9px_-3px_0_0_rgba(15,23,42,0.28)]',
+};
+
 export default function FarmScene({ sky }) {
-    const c = sky.night ? night : day;
+    const c = palettes[sky.phase] || palettes.day;
+    const body = celestial(sky);
+    const bodyClass = body.kind === 'moon' ? bodyStyle.moon : bodyStyle.sun[sky.phase] || bodyStyle.sun.day;
 
     return (
         <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
             {sky.night && (
                 <svg className="absolute inset-0 h-full w-full">
                     {stars.map(([x, y]) => (
-                        <circle key={`${x}-${y}`} cx={`${x}%`} cy={`${y}%`} r="1.5" fill="#ffffff" opacity="0.8" />
+                        <circle key={`${x}-${y}`} cx={`${x}%`} cy={`${y}%`} r="1.3" fill="#ffffff" opacity="0.7" />
                     ))}
                 </svg>
             )}
 
             <div
-                className={`absolute right-[12%] top-8 h-16 w-16 animate-float rounded-full motion-reduce:animate-none ${bodyStyles[sky.body]}`}
+                className={`absolute h-14 w-14 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-60 sm:opacity-100 ${bodyClass}`}
+                style={{ left: body.left, top: body.top }}
             />
 
-            {!sky.night &&
-                clouds.map((cloud) => (
+            {!sky.night && (
+                <>
                     <div
-                        key={cloud.top}
-                        className={`absolute left-0 h-6 ${cloud.width} animate-drift rounded-full bg-white/40 blur-[1px] motion-reduce:animate-none`}
-                        style={{ top: cloud.top, animationDuration: cloud.duration, animationDelay: cloud.delay }}
+                        className="absolute left-0 top-[22%] h-8 w-72 animate-drift rounded-full bg-white/15 blur-xl motion-reduce:animate-none"
+                        style={{ animationDuration: '140s', animationDelay: '-30s' }}
                     />
-                ))}
+                    <div
+                        className="absolute left-0 top-[40%] h-6 w-52 animate-drift rounded-full bg-white/10 blur-xl motion-reduce:animate-none"
+                        style={{ animationDuration: '190s', animationDelay: '-110s' }}
+                    />
+                </>
+            )}
 
             <svg
-                viewBox="0 0 1440 220"
+                viewBox="0 0 1440 240"
                 preserveAspectRatio="xMidYMax slice"
-                className="absolute inset-x-0 bottom-0 h-44 w-full sm:h-56"
+                className="absolute inset-x-0 bottom-0 h-32 w-full sm:h-44"
             >
-                {/* distant hills */}
+                <defs>
+                    <linearGradient id="ffms-far" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stopColor={c.far} />
+                        <stop offset="1" stopColor={c.mid} />
+                    </linearGradient>
+                    <linearGradient id="ffms-mid" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stopColor={c.mid} />
+                        <stop offset="1" stopColor={c.near} />
+                    </linearGradient>
+                    <clipPath id="ffms-field">
+                        <path d="M0,204 C220,184 480,196 720,186 C980,176 1220,196 1440,184 L1440,240 L0,240 Z" />
+                    </clipPath>
+                </defs>
+
+                {/* distant ridge */}
                 <path
-                    d="M0,132 C200,112 380,122 560,128 C760,134 900,98 1100,92 C1260,88 1360,104 1440,98 L1440,220 L0,220 Z"
-                    fill={c.farHill}
+                    d="M0,150 C120,128 240,122 380,138 C520,154 600,120 760,112 C920,104 1040,134 1200,126 C1300,121 1380,128 1440,136 L1440,240 L0,240 Z"
+                    fill="url(#ffms-far)"
                 />
 
-                {/* big hill behind the barn, with a sunlit crest */}
+                {/* middle ridge */}
                 <path
-                    d="M560,160 C700,100 880,84 1020,104 C1120,118 1180,140 1230,160 L1230,220 L560,220 Z"
-                    fill={c.hillA}
+                    d="M0,176 C160,150 300,150 460,166 C620,182 760,146 940,142 C1100,138 1250,164 1440,152 L1440,240 L0,240 Z"
+                    fill="url(#ffms-mid)"
                 />
+
+                {/* field with crop rows running to the horizon */}
                 <path
-                    d="M600,140 C720,100 880,92 1000,108"
+                    d="M0,204 C220,184 480,196 720,186 C980,176 1220,196 1440,184 L1440,240 L0,240 Z"
+                    fill={c.near}
+                />
+                <g clipPath="url(#ffms-field)" stroke={c.rows} strokeWidth="1.4" opacity="0.4">
+                    {rowEnds.map((x) => (
+                        <line key={x} x1="720" y1="176" x2={x} y2="240" />
+                    ))}
+                </g>
+                <path
+                    d="M0,204 C220,184 480,196 720,186 C980,176 1220,196 1440,184"
                     fill="none"
-                    stroke={c.crest}
-                    strokeWidth="6"
-                    strokeLinecap="round"
-                    opacity="0.5"
+                    stroke={c.rows}
+                    strokeWidth="1.5"
+                    opacity="0.35"
                 />
-
-                {/* right hill and low left hill */}
-                <path d="M1100,160 C1200,112 1320,96 1440,104 L1440,220 L1100,220 Z" fill={c.hillC} />
-                <path
-                    d="M0,160 C120,136 280,128 420,146 C480,154 520,160 560,164 L560,220 L0,220 Z"
-                    fill={c.hillB}
-                />
-
-                {/* meadow */}
-                <path
-                    d="M0,160 C240,152 480,168 720,158 C960,148 1200,166 1440,154 L1440,220 L0,220 Z"
-                    fill={c.meadow}
-                />
-                <ellipse cx="620" cy="182" rx="150" ry="5" fill={c.patch} opacity="0.5" />
-                <ellipse cx="240" cy="190" rx="110" ry="4" fill={c.patch} opacity="0.45" />
-                <ellipse cx="1000" cy="188" rx="170" ry="5" fill={c.patch} opacity="0.4" />
-
-                {/* small house */}
-                <rect x="868" y="140" width="46" height="18" fill={c.wall} />
-                <polygon points="864,140 891,128 918,140" fill={c.roofHouse} />
-                <rect x="878" y="148" width="7" height="10" fill={c.roofBarn} />
-                <rect x="895" y="145" width="9" height="7" fill={c.window} />
-
-                {/* barn */}
-                <rect x="1010" y="112" width="120" height="46" fill={c.wall} />
-                <polygon points="1002,114 1018,98 1122,98 1138,114" fill={c.roofBarn} />
-                <rect x="1024" y="126" width="32" height="32" fill={c.door} />
-                <line x1="1040" y1="126" x2="1040" y2="158" stroke={c.roofBarn} strokeWidth="1.5" opacity="0.5" />
-                <rect x="1088" y="124" width="14" height="10" fill={c.window} />
-
-                {/* silos */}
-                <rect x="1150" y="122" width="16" height="36" fill={c.silo} />
-                <ellipse cx="1158" cy="122" rx="8" ry="5" fill={c.dome} />
-                <rect x="1170" y="122" width="16" height="36" fill={c.silo} />
-                <ellipse cx="1178" cy="122" rx="8" ry="5" fill={c.dome} />
-
-                {/* outbuilding */}
-                <rect x="1196" y="140" width="58" height="18" fill={c.wall} />
-                <polygon points="1192,140 1200,130 1250,130 1258,140" fill={c.roofHouse} />
-
-                {/* the herd */}
-                <Cow x={300} y={172} scale={1} color={c.cow} />
-                <Cow x={420} y={176} scale={1.2} grazing color={c.cow} />
-                <Cow x={560} y={170} scale={0.85} flip color={c.cow} />
-                <Cow x={690} y={166} scale={0.7} grazing color={c.cow} />
 
                 {/* soft edge into the page background */}
                 <path
-                    d="M0,206 C300,190 620,214 900,200 C1140,188 1300,210 1440,198 L1440,220 L0,220 Z"
-                    fill={c.foreground}
+                    d="M0,222 C300,210 620,230 900,220 C1140,211 1300,228 1440,218 L1440,240 L0,240 Z"
+                    fill="#f1f8f1"
                 />
             </svg>
         </div>

@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
+import ModuleLayout from '../components/ModuleLayout.jsx';
 
 const emptyForm = {
   field_id: '',
@@ -264,24 +265,16 @@ export default function PostHarvestHandling() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 md:p-8">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">
-              Post-Harvest Handling
-            </h1>
-            <p className="mt-1 text-gray-600">
-              Record produce handling, storage conditions, and losses after harvest.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
+    <ModuleLayout
+      title="Post-Harvest Handling"
+      subtitle="Record produce handling, storage conditions, and losses after harvest."
+      actions={<>
+<div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={loadData}
               disabled={loading}
-              className="rounded-lg border bg-white px-4 py-2 hover:bg-gray-50 disabled:opacity-50"
+              className="rounded-full bg-white/15 px-5 py-2 text-sm font-medium text-white ring-1 ring-white/30 transition hover:bg-white/25 disabled:opacity-60"
             >
               Refresh
             </button>
@@ -289,53 +282,55 @@ export default function PostHarvestHandling() {
             <button
               type="button"
               onClick={createRecord}
-              className="rounded-lg bg-green-700 px-4 py-2 text-white hover:bg-green-800"
+              className="rounded-full bg-harvest-400 px-5 py-2 text-sm font-medium text-farm-900 transition hover:bg-harvest-500 disabled:opacity-60"
             >
               + Add Handling Record
             </button>
           </div>
-        </div>
+      </>}
+    >
+      <div className="mx-auto max-w-7xl">
 
         {error && (
-          <div role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-red-700">
+          <div role="alert" className="mb-4 rounded-2xl bg-red-50 p-3 text-red-700">
             {error}
           </div>
         )}
 
         {success && (
-          <div role="status" className="mb-4 rounded-lg bg-green-50 p-3 text-green-700">
+          <div role="status" className="mb-4 rounded-2xl bg-farm-50 p-3 text-farm-700">
             {success}
           </div>
         )}
 
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="rounded-xl bg-white p-5 shadow-sm">
-            <p className="text-sm text-gray-500">Handling Records</p>
-            <p className="mt-2 text-3xl font-bold text-gray-800">
+          <div className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+            <p className="text-sm text-slate-500">Handling Records</p>
+            <p className="mt-2 text-3xl font-bold text-farm-900">
               {records.length}
             </p>
           </div>
 
-          <div className="rounded-xl bg-white p-5 shadow-sm">
-            <p className="text-sm text-gray-500">Total Quantity Handled</p>
-            <p className="mt-2 text-3xl font-bold text-gray-800">
+          <div className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+            <p className="text-sm text-slate-500">Total Quantity Handled</p>
+            <p className="mt-2 text-3xl font-bold text-farm-900">
               {totalHandled.toLocaleString(undefined, {
                 maximumFractionDigits: 2,
               })}
             </p>
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-slate-500">
               Combined quantity; units may differ.
             </p>
           </div>
 
-          <div className="rounded-xl bg-white p-5 shadow-sm">
-            <p className="text-sm text-gray-500">Recorded Post-Harvest Loss</p>
+          <div className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+            <p className="text-sm text-slate-500">Recorded Post-Harvest Loss</p>
             <p className="mt-2 text-3xl font-bold text-red-600">
               {totalLoss.toLocaleString(undefined, {
                 maximumFractionDigits: 2,
               })}
             </p>
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-slate-500">
               Combined quantity; units may differ.
             </p>
           </div>
@@ -344,9 +339,9 @@ export default function PostHarvestHandling() {
         {showForm && (
           <form
             onSubmit={submitForm}
-            className="mb-6 rounded-xl bg-white p-5 shadow-sm"
+            className="mb-6 rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]"
           >
-            <h2 className="mb-4 text-xl font-semibold text-gray-800">
+            <h2 className="mb-4 text-xl font-semibold text-farm-900">
               {editingId
                 ? 'Edit Handling Record'
                 : 'New Handling Record'}
@@ -366,7 +361,7 @@ export default function PostHarvestHandling() {
                       field_id: '',
                     }));
                   }}
-                  className="w-full rounded-lg border p-2"
+                  className="w-full rounded-xl border p-2"
                   required
                 >
                   <option value="">Select farm</option>
@@ -386,7 +381,7 @@ export default function PostHarvestHandling() {
                   name="field_id"
                   value={form.field_id}
                   onChange={changeForm}
-                  className="w-full rounded-lg border p-2"
+                  className="w-full rounded-xl border p-2"
                   required
                 >
                   <option value="">Select field</option>
@@ -407,7 +402,7 @@ export default function PostHarvestHandling() {
                   name="handling_date"
                   value={form.handling_date}
                   onChange={changeForm}
-                  className="w-full rounded-lg border p-2"
+                  className="w-full rounded-xl border p-2"
                   required
                 />
               </div>
@@ -420,7 +415,7 @@ export default function PostHarvestHandling() {
                   name="storage_method"
                   value={form.storage_method}
                   onChange={changeForm}
-                  className="w-full rounded-lg border p-2"
+                  className="w-full rounded-xl border p-2"
                   required
                 >
                   <option value="">Select storage method</option>
@@ -444,7 +439,7 @@ export default function PostHarvestHandling() {
                   value={form.storage_location}
                   onChange={changeForm}
                   maxLength="255"
-                  className="w-full rounded-lg border p-2"
+                  className="w-full rounded-xl border p-2"
                   placeholder="e.g. Main warehouse"
                 />
               </div>
@@ -460,7 +455,7 @@ export default function PostHarvestHandling() {
                   onChange={changeForm}
                   min="0"
                   step="0.01"
-                  className="w-full rounded-lg border p-2"
+                  className="w-full rounded-xl border p-2"
                   required
                 />
               </div>
@@ -473,7 +468,7 @@ export default function PostHarvestHandling() {
                   name="unit"
                   value={form.unit}
                   onChange={changeForm}
-                  className="w-full rounded-lg border p-2"
+                  className="w-full rounded-xl border p-2"
                   required
                 >
                   <option value="kg">Kilograms (kg)</option>
@@ -492,7 +487,7 @@ export default function PostHarvestHandling() {
                   name="condition"
                   value={form.condition}
                   onChange={changeForm}
-                  className="w-full rounded-lg border p-2"
+                  className="w-full rounded-xl border p-2"
                 >
                   <option value="">Not recorded</option>
                   <option value="Excellent">Excellent</option>
@@ -515,10 +510,10 @@ export default function PostHarvestHandling() {
                   min="0"
                   max={form.quantity === '' ? undefined : form.quantity}
                   step="0.01"
-                  className="w-full rounded-lg border p-2"
+                  className="w-full rounded-xl border p-2"
                   placeholder="Optional"
                 />
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-1 text-xs text-slate-500">
                   Cannot exceed the quantity handled.
                 </p>
               </div>
@@ -532,7 +527,7 @@ export default function PostHarvestHandling() {
                   value={form.notes}
                   onChange={changeForm}
                   rows="3"
-                  className="w-full rounded-lg border p-2"
+                  className="w-full rounded-xl border p-2"
                   placeholder="Optional handling observations..."
                 />
               </div>
@@ -542,7 +537,7 @@ export default function PostHarvestHandling() {
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-lg bg-green-700 px-5 py-2 text-white hover:bg-green-800 disabled:opacity-50"
+                className="rounded-full bg-farm-700 px-5 py-2 text-white hover:bg-farm-800 disabled:opacity-50"
               >
                 {saving
                   ? 'Saving...'
@@ -558,7 +553,7 @@ export default function PostHarvestHandling() {
                   setEditingId(null);
                   setError('');
                 }}
-                className="rounded-lg border px-5 py-2 hover:bg-gray-50"
+                className="rounded-full border px-5 py-2 hover:bg-farm-50"
               >
                 Cancel
               </button>
@@ -566,9 +561,9 @@ export default function PostHarvestHandling() {
           </form>
         )}
 
-        <div className="rounded-xl bg-white p-5 shadow-sm">
+        <div className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
           <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row">
-            <h2 className="text-xl font-semibold text-gray-800">
+            <h2 className="text-xl font-semibold text-farm-900">
               Handling Records
             </h2>
 
@@ -577,23 +572,23 @@ export default function PostHarvestHandling() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search field, storage, condition..."
-              className="w-full rounded-lg border p-2 sm:max-w-sm"
+              className="w-full rounded-xl border p-2 sm:max-w-sm"
             />
           </div>
 
           {loading ? (
-            <p className="py-8 text-center text-gray-500">
+            <p className="py-8 text-center text-slate-500">
               Loading post-harvest records...
             </p>
           ) : filteredRecords.length === 0 ? (
-            <p className="py-8 text-center text-gray-500">
+            <p className="py-8 text-center text-slate-500">
               No post-harvest records found.
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[1050px] text-left">
                 <thead>
-                  <tr className="border-b bg-gray-50 text-sm text-gray-600">
+                  <tr className="border-b bg-farm-50 text-sm text-slate-600">
                     <th className="p-3">Field</th>
                     <th className="p-3">Date</th>
                     <th className="p-3">Storage Method</th>
@@ -660,6 +655,6 @@ export default function PostHarvestHandling() {
           )}
         </div>
       </div>
-    </div>
+    </ModuleLayout>
   );
 }

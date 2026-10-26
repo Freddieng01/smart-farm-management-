@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
-import BackButton from '../components/BackButton.jsx';
+import ModuleLayout from '../components/ModuleLayout.jsx';
 
 const emptyNotification = { farm_id: '', type: '', title: '', message: '', priority: 'Normal' };
 const emptyRule = { farm_id: '', type: '', trigger_condition: '', is_active: true };
 
 const inputClass =
-    'mt-1 w-full rounded-md border border-[#cbd8ca] px-3 py-2 text-sm outline-none focus:border-[#4d7a39] focus:ring-2 focus:ring-[#4d7a39]/20';
+    'mt-1 w-full rounded-xl border border-farm-200 px-3 py-2 text-sm outline-none focus:border-farm-500 focus:ring-2 focus:ring-farm-500/20';
 
 const priorityStyles = {
     Urgent: 'bg-red-100 text-red-800',
     High: 'bg-amber-100 text-amber-800',
-    Normal: 'bg-green-100 text-green-800',
-    Low: 'bg-gray-100 text-gray-700',
+    Normal: 'bg-farm-100 text-farm-800',
+    Low: 'bg-slate-100 text-slate-700',
 };
 
 export default function NotificationsManagement() {
@@ -119,31 +119,27 @@ export default function NotificationsManagement() {
     const unreadCount = notifications.filter((n) => !n.read_at).length;
 
     return (
-        <main className="min-h-screen bg-[#f7faf7] px-6 py-8">
-            <div className="mx-auto max-w-7xl">
-                <BackButton />
-                <div className="mb-6 flex items-center justify-between">
-                    <div>
-                        <h1 className="text-2xl font-semibold text-[#172316]">Notifications and alerts</h1>
-                        <p className="text-sm text-[#647260]">
-                            See what needs attention, and set the rules that trigger alerts for each farm.
-                        </p>
-                    </div>
-                    <button
+        <ModuleLayout
+          title="Notifications and alerts"
+          subtitle="See what needs attention, and set the rules that trigger alerts for each farm."
+          actions={<>
+<button
                         onClick={() => (tab === 'notifications' ? setNotificationModal(true) : setRuleModal(true))}
-                        className="rounded-md bg-[#315f2b] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#264b22]"
+                        className="rounded-full bg-harvest-400 px-5 py-2 text-sm font-medium text-farm-900 transition hover:bg-harvest-500 disabled:opacity-60"
                     >
                         {tab === 'notifications' ? '+ Add notification' : '+ Add alert rule'}
                     </button>
-                </div>
+          </>}
+        >
+            <div className="mx-auto max-w-7xl">
 
-                <div className="mb-4 flex gap-2 border-b border-[#dfe9de]">
+                <div className="mb-4 flex gap-2 border-b border-farm-100">
                     <button
                         onClick={() => setTab('notifications')}
                         className={`px-4 py-2 text-sm font-medium transition ${
                             tab === 'notifications'
-                                ? 'border-b-2 border-[#315f2b] text-[#172316]'
-                                : 'text-[#647260] hover:text-[#172316]'
+                                ? 'border-b-2 border-farm-700 text-farm-900'
+                                : 'text-slate-500 hover:text-farm-900'
                         }`}
                     >
                         My notifications{unreadCount > 0 ? ` (${unreadCount} unread)` : ''}
@@ -152,19 +148,19 @@ export default function NotificationsManagement() {
                         onClick={() => setTab('rules')}
                         className={`px-4 py-2 text-sm font-medium transition ${
                             tab === 'rules'
-                                ? 'border-b-2 border-[#315f2b] text-[#172316]'
-                                : 'text-[#647260] hover:text-[#172316]'
+                                ? 'border-b-2 border-farm-700 text-farm-900'
+                                : 'text-slate-500 hover:text-farm-900'
                         }`}
                     >
                         Alert rules
                     </button>
                 </div>
 
-                {error && <p className="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
+                {error && <p className="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
 
                 {tab === 'notifications' && (
                     <>
-                        <label className="mb-3 flex items-center gap-2 text-sm text-[#647260]">
+                        <label className="mb-3 flex items-center gap-2 text-sm text-slate-500">
                             <input
                                 type="checkbox"
                                 checked={unreadOnly}
@@ -172,27 +168,27 @@ export default function NotificationsManagement() {
                             />
                             Show unread only
                         </label>
-                        <div className="overflow-hidden rounded-lg border border-[#dfe9de] bg-white shadow-sm">
+                        <div className="overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
                             <table className="w-full text-left text-sm">
-                                <thead className="bg-[#fcfdfc] text-[#647260]">
+                                <thead className="bg-farm-50 text-slate-500">
                                     <tr>
-                                        <th className="px-6 py-3 font-medium">Title</th>
-                                        <th className="px-6 py-3 font-medium">Type</th>
-                                        <th className="px-6 py-3 font-medium">Priority</th>
-                                        <th className="px-6 py-3 font-medium">Received</th>
-                                        <th className="px-6 py-3 text-right font-medium">Actions</th>
+                                        <th className="px-6 py-3 font-semibold">Title</th>
+                                        <th className="px-6 py-3 font-semibold">Type</th>
+                                        <th className="px-6 py-3 font-semibold">Priority</th>
+                                        <th className="px-6 py-3 font-semibold">Received</th>
+                                        <th className="px-6 py-3 text-right font-semibold">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-[#dfe9de]">
+                                <tbody className="divide-y divide-farm-100">
                                     {loading ? (
                                         <tr>
-                                            <td colSpan="5" className="px-6 py-10 text-center text-[#647260]">
+                                            <td colSpan="5" className="px-6 py-10 text-center text-slate-500">
                                                 Loading notifications...
                                             </td>
                                         </tr>
                                     ) : visibleNotifications.length === 0 ? (
                                         <tr>
-                                            <td colSpan="5" className="px-6 py-10 text-center text-[#647260]">
+                                            <td colSpan="5" className="px-6 py-10 text-center text-slate-500">
                                                 {unreadOnly
                                                     ? 'No unread notifications.'
                                                     : 'Nothing here yet. Add a notification to see how alerts will look.'}
@@ -200,14 +196,14 @@ export default function NotificationsManagement() {
                                         </tr>
                                     ) : (
                                         visibleNotifications.map((n) => (
-                                            <tr key={n.id} className={n.read_at ? '' : 'bg-[#f3f9f1]'}>
+                                            <tr key={n.id} className={n.read_at ? '' : 'bg-farm-50'}>
                                                 <td className="px-6 py-4">
-                                                    <p className={`text-[#172316] ${n.read_at ? '' : 'font-semibold'}`}>
+                                                    <p className={`text-farm-900 ${n.read_at ? '' : 'font-semibold'}`}>
                                                         {n.title}
                                                     </p>
-                                                    <p className="mt-0.5 text-xs text-[#647260]">{n.message}</p>
+                                                    <p className="mt-0.5 text-xs text-slate-500">{n.message}</p>
                                                 </td>
-                                                <td className="px-6 py-4 text-[#647260]">{n.type}</td>
+                                                <td className="px-6 py-4 text-slate-500">{n.type}</td>
                                                 <td className="px-6 py-4">
                                                     <span
                                                         className={`rounded-full px-2 py-1 text-xs font-medium ${
@@ -217,14 +213,14 @@ export default function NotificationsManagement() {
                                                         {n.priority}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-4 text-[#647260]">
+                                                <td className="px-6 py-4 text-slate-500">
                                                     {n.created_at ? new Date(n.created_at).toLocaleString() : '-'}
                                                 </td>
                                                 <td className="space-x-3 px-6 py-4 text-right">
                                                     {!n.read_at && (
                                                         <button
                                                             onClick={() => handleMarkAsRead(n.id)}
-                                                            className="text-blue-600 hover:underline"
+                                                            className="text-farm-700 hover:underline"
                                                         >
                                                             Mark as read
                                                         </button>
@@ -246,42 +242,42 @@ export default function NotificationsManagement() {
                 )}
 
                 {tab === 'rules' && (
-                    <div className="overflow-hidden rounded-lg border border-[#dfe9de] bg-white shadow-sm">
+                    <div className="overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
                         <table className="w-full text-left text-sm">
-                            <thead className="bg-[#fcfdfc] text-[#647260]">
+                            <thead className="bg-farm-50 text-slate-500">
                                 <tr>
-                                    <th className="px-6 py-3 font-medium">Alert type</th>
-                                    <th className="px-6 py-3 font-medium">Triggers when</th>
-                                    <th className="px-6 py-3 font-medium">Farm ID</th>
-                                    <th className="px-6 py-3 font-medium">Status</th>
-                                    <th className="px-6 py-3 text-right font-medium">Actions</th>
+                                    <th className="px-6 py-3 font-semibold">Alert type</th>
+                                    <th className="px-6 py-3 font-semibold">Triggers when</th>
+                                    <th className="px-6 py-3 font-semibold">Farm ID</th>
+                                    <th className="px-6 py-3 font-semibold">Status</th>
+                                    <th className="px-6 py-3 text-right font-semibold">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-[#dfe9de]">
+                            <tbody className="divide-y divide-farm-100">
                                 {loading ? (
                                     <tr>
-                                        <td colSpan="5" className="px-6 py-10 text-center text-[#647260]">
+                                        <td colSpan="5" className="px-6 py-10 text-center text-slate-500">
                                             Loading alert rules...
                                         </td>
                                     </tr>
                                 ) : rules.length === 0 ? (
                                     <tr>
-                                        <td colSpan="5" className="px-6 py-10 text-center text-[#647260]">
+                                        <td colSpan="5" className="px-6 py-10 text-center text-slate-500">
                                             No alert rules yet. Add one to decide what should raise an alert.
                                         </td>
                                     </tr>
                                 ) : (
                                     rules.map((rule) => (
                                         <tr key={rule.id}>
-                                            <td className="px-6 py-4 font-medium text-[#172316]">{rule.type}</td>
-                                            <td className="px-6 py-4 text-[#647260]">{rule.trigger_condition}</td>
-                                            <td className="px-6 py-4 text-[#647260]">{rule.farm_id}</td>
+                                            <td className="px-6 py-4 font-medium text-farm-900">{rule.type}</td>
+                                            <td className="px-6 py-4 text-slate-500">{rule.trigger_condition}</td>
+                                            <td className="px-6 py-4 text-slate-500">{rule.farm_id}</td>
                                             <td className="px-6 py-4">
                                                 <span
                                                     className={`rounded-full px-2 py-1 text-xs font-medium ${
                                                         rule.is_active
-                                                            ? 'bg-green-100 text-green-800'
-                                                            : 'bg-gray-100 text-gray-700'
+                                                            ? 'bg-farm-100 text-farm-800'
+                                                            : 'bg-slate-100 text-slate-700'
                                                     }`}
                                                 >
                                                     {rule.is_active ? 'Active' : 'Paused'}
@@ -290,7 +286,7 @@ export default function NotificationsManagement() {
                                             <td className="space-x-3 px-6 py-4 text-right">
                                                 <button
                                                     onClick={() => handleToggleRule(rule)}
-                                                    className="text-blue-600 hover:underline"
+                                                    className="text-farm-700 hover:underline"
                                                 >
                                                     {rule.is_active ? 'Pause' : 'Resume'}
                                                 </button>
@@ -311,11 +307,11 @@ export default function NotificationsManagement() {
 
                 {notificationModal && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-                        <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
-                            <h2 className="mb-6 text-xl font-semibold text-[#172316]">Add notification</h2>
+                        <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-6 shadow-xl">
+                            <h2 className="mb-6 text-xl font-semibold text-farm-900">Add notification</h2>
                             <form onSubmit={handleCreateNotification} className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Farm ID (optional)</label>
+                                    <label className="block text-sm font-medium text-farm-900">Farm ID (optional)</label>
                                     <input
                                         type="number"
                                         className={inputClass}
@@ -324,7 +320,7 @@ export default function NotificationsManagement() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Type</label>
+                                    <label className="block text-sm font-medium text-farm-900">Type</label>
                                     <input
                                         className={inputClass}
                                         placeholder="e.g. vaccination, low_stock, harvest"
@@ -334,7 +330,7 @@ export default function NotificationsManagement() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Title</label>
+                                    <label className="block text-sm font-medium text-farm-900">Title</label>
                                     <input
                                         className={inputClass}
                                         value={notificationForm.title}
@@ -343,7 +339,7 @@ export default function NotificationsManagement() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Message</label>
+                                    <label className="block text-sm font-medium text-farm-900">Message</label>
                                     <textarea
                                         rows="3"
                                         className={inputClass}
@@ -353,7 +349,7 @@ export default function NotificationsManagement() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Priority</label>
+                                    <label className="block text-sm font-medium text-farm-900">Priority</label>
                                     <select
                                         className={inputClass}
                                         value={notificationForm.priority}
@@ -369,13 +365,13 @@ export default function NotificationsManagement() {
                                     <button
                                         type="button"
                                         onClick={() => setNotificationModal(false)}
-                                        className="rounded-md border border-[#cbd8ca] px-4 py-2 text-sm font-medium text-[#647260] transition hover:bg-[#fcfdfc]"
+                                        className="rounded-full border border-farm-200 px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-farm-50"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className="rounded-md bg-[#315f2b] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#264b22]"
+                                        className="rounded-full bg-farm-700 px-5 py-2 text-sm font-medium text-white transition hover:bg-farm-800"
                                     >
                                         Add notification
                                     </button>
@@ -387,11 +383,11 @@ export default function NotificationsManagement() {
 
                 {ruleModal && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-                        <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
-                            <h2 className="mb-6 text-xl font-semibold text-[#172316]">Add alert rule</h2>
+                        <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-6 shadow-xl">
+                            <h2 className="mb-6 text-xl font-semibold text-farm-900">Add alert rule</h2>
                             <form onSubmit={handleCreateRule} className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Farm ID</label>
+                                    <label className="block text-sm font-medium text-farm-900">Farm ID</label>
                                     <input
                                         type="number"
                                         className={inputClass}
@@ -401,7 +397,7 @@ export default function NotificationsManagement() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Alert type</label>
+                                    <label className="block text-sm font-medium text-farm-900">Alert type</label>
                                     <input
                                         className={inputClass}
                                         placeholder="e.g. low_stock, vaccination_due"
@@ -411,7 +407,7 @@ export default function NotificationsManagement() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Triggers when</label>
+                                    <label className="block text-sm font-medium text-farm-900">Triggers when</label>
                                     <input
                                         className={inputClass}
                                         placeholder="e.g. stock falls below minimum"
@@ -420,7 +416,7 @@ export default function NotificationsManagement() {
                                         required
                                     />
                                 </div>
-                                <label className="flex items-center gap-2 text-sm text-[#243322]">
+                                <label className="flex items-center gap-2 text-sm text-farm-900">
                                     <input
                                         type="checkbox"
                                         checked={ruleForm.is_active}
@@ -432,13 +428,13 @@ export default function NotificationsManagement() {
                                     <button
                                         type="button"
                                         onClick={() => setRuleModal(false)}
-                                        className="rounded-md border border-[#cbd8ca] px-4 py-2 text-sm font-medium text-[#647260] transition hover:bg-[#fcfdfc]"
+                                        className="rounded-full border border-farm-200 px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-farm-50"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className="rounded-md bg-[#315f2b] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#264b22]"
+                                        className="rounded-full bg-farm-700 px-5 py-2 text-sm font-medium text-white transition hover:bg-farm-800"
                                     >
                                         Add alert rule
                                     </button>
@@ -448,6 +444,6 @@ export default function NotificationsManagement() {
                     </div>
                 )}
             </div>
-        </main>
+        </ModuleLayout>
     );
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
-import BackButton from '../components/BackButton.jsx';
+import ModuleLayout from '../components/ModuleLayout.jsx';
 
 export default function TaskTracking() {
     const { api } = useAuth();
@@ -130,54 +130,52 @@ export default function TaskTracking() {
     }
 
     return (
-        <main className="min-h-screen bg-[#f7faf7] px-6 py-8">
-            <div className="mx-auto max-w-7xl">
-                <BackButton />
-                <div className="mb-8 flex items-center justify-between">
-                    <div>
-                        <h1 className="text-2xl font-semibold text-[#172316]">Daily Task Tracking</h1>
-                        <p className="text-sm text-[#647260]">Log work hours, track progress, and monitor field activities.</p>
-                    </div>
-                    <button
+        <ModuleLayout
+          title="Daily Task Tracking"
+          subtitle="Log work hours, track progress, and monitor field activities."
+          actions={<>
+<button
                         onClick={() => handleOpenModal()}
-                        className="rounded-md bg-[#315f2b] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#264b22]"
+                        className="rounded-full bg-harvest-400 px-5 py-2 text-sm font-medium text-farm-900 transition hover:bg-harvest-500 disabled:opacity-60"
                     >
                         + Log Daily Task
                     </button>
-                </div>
+          </>}
+        >
+            <div className="mx-auto max-w-7xl">
 
-                {error && <p className="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
+                {error && <p className="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
 
-                <div className="overflow-hidden rounded-lg border border-[#dfe9de] bg-white shadow-sm">
+                <div className="overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
                     <table className="w-full text-left text-sm">
-                        <thead className="bg-[#fcfdfc] text-[#647260] uppercase">
+                        <thead className="bg-farm-50 text-farm-700 text-xs">
                             <tr>
-                                <th className="px-6 py-3 font-medium">Date</th>
-                                <th className="px-6 py-3 font-medium">Employee</th>
-                                <th className="px-6 py-3 font-medium">Field</th>
-                                <th className="px-6 py-3 font-medium">Description</th>
-                                <th className="px-6 py-3 font-medium">Hours</th>
-                                <th className="px-6 py-3 font-medium">Status</th>
-                                <th className="px-6 py-3 font-medium text-right">Actions</th>
+                                <th className="px-6 py-3 font-semibold">Date</th>
+                                <th className="px-6 py-3 font-semibold">Employee</th>
+                                <th className="px-6 py-3 font-semibold">Field</th>
+                                <th className="px-6 py-3 font-semibold">Description</th>
+                                <th className="px-6 py-3 font-semibold">Hours</th>
+                                <th className="px-6 py-3 font-semibold">Status</th>
+                                <th className="px-6 py-3 font-semibold text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-[#dfe9de]">
+                        <tbody className="divide-y divide-farm-100">
                             {loading ? (
-                                <tr><td colSpan="7" className="px-6 py-10 text-center text-[#647260]">Loading tasks...</td></tr>
+                                <tr><td colSpan="7" className="px-6 py-10 text-center text-slate-500">Loading tasks...</td></tr>
                             ) : tasks.length === 0 ? (
-                                <tr><td colSpan="7" className="px-6 py-10 text-center text-[#647260]">No tasks logged yet.</td></tr>
+                                <tr><td colSpan="7" className="px-6 py-10 text-center text-slate-500">No tasks logged yet.</td></tr>
                             ) : (
                                 tasks.map((task) => (
-                                    <tr key={task.id} className="hover:bg-[#fcfdfc] transition">
-                                        <td className="px-6 py-4 text-[#647260]">{task.date}</td>
-                                        <td className="px-6 py-4 font-medium text-[#172316]">{task.employee?.user?.name}</td>
-                                        <td className="px-6 py-4 text-[#647260]">{task.field?.name || 'General'}</td>
-                                        <td className="px-6 py-4 text-[#647260]">{task.task_description}</td>
-                                        <td className="px-6 py-4 text-[#647260]">{task.hours_worked}h</td>
+                                    <tr key={task.id} className="hover:bg-farm-50 transition">
+                                        <td className="px-6 py-4 text-slate-500">{task.date}</td>
+                                        <td className="px-6 py-4 font-medium text-farm-900">{task.employee?.user?.name}</td>
+                                        <td className="px-6 py-4 text-slate-500">{task.field?.name || 'General'}</td>
+                                        <td className="px-6 py-4 text-slate-500">{task.task_description}</td>
+                                        <td className="px-6 py-4 text-slate-500">{task.hours_worked}h</td>
                                         <td className="px-6 py-4">
                                             <span className={`rounded-full px-2 py-1 text-xs font-medium ${
-                                                task.status === 'completed' ? 'bg-green-100 text-green-700' :
-                                                task.status === 'in_progress' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
+                                                task.status === 'completed' ? 'bg-farm-100 text-farm-700' :
+                                                task.status === 'in_progress' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'
                                             }`}>
                                                 {task.status}
                                             </span>
@@ -185,7 +183,7 @@ export default function TaskTracking() {
                                         <td className="px-6 py-4 text-right space-x-3">
                                             <button
                                                 onClick={() => handleOpenModal(task)}
-                                                className="text-blue-600 hover:underline"
+                                                className="text-farm-700 hover:underline"
                                             >
                                                 Edit
                                             </button>
@@ -205,16 +203,16 @@ export default function TaskTracking() {
 
                 {isModalOpen && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-                        <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-                            <h2 className="mb-6 text-xl font-semibold text-[#172316]">
+                        <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-xl">
+                            <h2 className="mb-6 text-xl font-semibold text-farm-900">
                                 {editingTask ? 'Edit Task' : 'Log Daily Task'}
                             </h2>
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-[#243322]">Employee</label>
+                                        <label className="block text-sm font-medium text-farm-900">Employee</label>
                                         <select
-                                            className="mt-1 w-full rounded-md border border-[#cbd8ca] px-3 py-2 text-sm outline-none focus:border-[#4d7a39] focus:ring-2 focus:ring-[#4d7a39]/20"
+                                            className="mt-1 w-full rounded-xl border border-farm-200 px-3 py-2 text-sm outline-none focus:border-farm-500 focus:ring-2 focus:ring-farm-500/20"
                                             value={form.employee_id}
                                             onChange={(e) => setForm({ ...form, employee_id: e.target.value })}
                                             required
@@ -226,10 +224,10 @@ export default function TaskTracking() {
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-[#243322]">Date</label>
+                                        <label className="block text-sm font-medium text-farm-900">Date</label>
                                         <input
                                             type="date"
-                                            className="mt-1 w-full rounded-md border border-[#cbd8ca] px-3 py-2 text-sm outline-none focus:border-[#4d7a39] focus:ring-2 focus:ring-[#4d7a39]/20"
+                                            className="mt-1 w-full rounded-xl border border-farm-200 px-3 py-2 text-sm outline-none focus:border-farm-500 focus:ring-2 focus:ring-farm-500/20"
                                             value={form.date}
                                             onChange={(e) => setForm({ ...form, date: e.target.value })}
                                             required
@@ -237,9 +235,9 @@ export default function TaskTracking() {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Field (Optional)</label>
+                                    <label className="block text-sm font-medium text-farm-900">Field (Optional)</label>
                                     <select
-                                        className="mt-1 w-full rounded-md border border-[#cbd8ca] px-3 py-2 text-sm outline-none focus:border-[#4d7a39] focus:ring-2 focus:ring-[#4d7a39]/20"
+                                        className="mt-1 w-full rounded-xl border border-farm-200 px-3 py-2 text-sm outline-none focus:border-farm-500 focus:ring-2 focus:ring-farm-500/20"
                                         value={form.field_id}
                                         onChange={(e) => setForm({ ...form, field_id: e.target.value })}
                                     >
@@ -250,9 +248,9 @@ export default function TaskTracking() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Description</label>
+                                    <label className="block text-sm font-medium text-farm-900">Description</label>
                                     <input
-                                        className="mt-1 w-full rounded-md border border-[#cbd8ca] px-3 py-2 text-sm outline-none focus:border-[#4d7a39] focus:ring-2 focus:ring-[#4d7a39]/20"
+                                        className="mt-1 w-full rounded-xl border border-farm-200 px-3 py-2 text-sm outline-none focus:border-farm-500 focus:ring-2 focus:ring-farm-500/20"
                                         placeholder="e.g. Planting maize in North Field"
                                         value={form.task_description}
                                         onChange={(e) => setForm({ ...form, task_description: e.target.value })}
@@ -261,20 +259,20 @@ export default function TaskTracking() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-[#243322]">Hours Worked</label>
+                                        <label className="block text-sm font-medium text-farm-900">Hours Worked</label>
                                         <input
                                             type="number"
                                             step="0.1"
-                                            className="mt-1 w-full rounded-md border border-[#cbd8ca] px-3 py-2 text-sm outline-none focus:border-[#4d7a39] focus:ring-2 focus:ring-[#4d7a39]/20"
+                                            className="mt-1 w-full rounded-xl border border-farm-200 px-3 py-2 text-sm outline-none focus:border-farm-500 focus:ring-2 focus:ring-farm-500/20"
                                             value={form.hours_worked}
                                             onChange={(e) => setForm({ ...form, hours_worked: e.target.value })}
                                             required
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-[#243322]">Status</label>
+                                        <label className="block text-sm font-medium text-farm-900">Status</label>
                                         <select
-                                            className="mt-1 w-full rounded-md border border-[#cbd8ca] px-3 py-2 text-sm outline-none focus:border-[#4d7a39] focus:ring-2 focus:ring-[#4d7a39]/20"
+                                            className="mt-1 w-full rounded-xl border border-farm-200 px-3 py-2 text-sm outline-none focus:border-farm-500 focus:ring-2 focus:ring-farm-500/20"
                                             value={form.status}
                                             onChange={(e) => setForm({ ...form, status: e.target.value })}
                                             required
@@ -289,13 +287,13 @@ export default function TaskTracking() {
                                     <button
                                         type="button"
                                         onClick={() => setIsModalOpen(false)}
-                                        className="rounded-md border border-[#cbd8ca] px-4 py-2 text-sm font-medium text-[#647260] transition hover:bg-[#fcfdfc]"
+                                        className="rounded-full border border-farm-200 px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-farm-50"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className="rounded-md bg-[#315f2b] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#264b22]"
+                                        className="rounded-full bg-farm-700 px-5 py-2 text-sm font-medium text-white transition hover:bg-farm-800"
                                     >
                                         {editingTask ? 'Update Task' : 'Log Task'}
                                     </button>
@@ -305,6 +303,6 @@ export default function TaskTracking() {
                     </div>
                 )}
             </div>
-        </main>
+        </ModuleLayout>
     );
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
-import BackButton from '../components/BackButton.jsx';
+import ModuleLayout from '../components/ModuleLayout.jsx';
 
 export default function ProductionLogging() {
     const { api } = useAuth();
@@ -102,53 +102,51 @@ export default function ProductionLogging() {
     }
 
     return (
-        <main className="min-h-screen bg-[#f7faf7] px-6 py-8">
-            <div className="mx-auto max-w-7xl">
-                <BackButton />
-                <div className="mb-8 flex items-center justify-between">
-                    <div>
-                        <h1 className="text-2xl font-semibold text-[#172316]">Crop Production Logging</h1>
-                        <p className="text-sm text-[#647260]">Record actual harvests and production quantities by field.</p>
-                    </div>
-                    <button
+        <ModuleLayout
+          title="Crop Production Logging"
+          subtitle="Record actual harvests and production quantities by field."
+          actions={<>
+<button
                         onClick={() => handleOpenModal()}
-                        className="rounded-md bg-[#315f2b] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#264b22]"
+                        className="rounded-full bg-harvest-400 px-5 py-2 text-sm font-medium text-farm-900 transition hover:bg-harvest-500 disabled:opacity-60"
                     >
                         + Log Production
                     </button>
-                </div>
+          </>}
+        >
+            <div className="mx-auto max-w-7xl">
 
-                {error && <p className="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
+                {error && <p className="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
 
-                <div className="overflow-hidden rounded-lg border border-[#dfe9de] bg-white shadow-sm">
+                <div className="overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
                     <table className="w-full text-left text-sm">
-                        <thead className="bg-[#fcfdfc] text-[#647260] uppercase">
+                        <thead className="bg-farm-50 text-farm-700 text-xs">
                             <tr>
-                                <th className="px-6 py-3 font-medium">Date</th>
-                                <th className="px-6 py-3 font-medium">Field</th>
-                                <th className="px-6 py-3 font-medium">Crop</th>
-                                <th className="px-6 py-3 font-medium">Quantity</th>
-                                <th className="px-6 py-3 font-medium">Grade</th>
-                                <th className="px-6 py-3 font-medium text-right">Actions</th>
+                                <th className="px-6 py-3 font-semibold">Date</th>
+                                <th className="px-6 py-3 font-semibold">Field</th>
+                                <th className="px-6 py-3 font-semibold">Crop</th>
+                                <th className="px-6 py-3 font-semibold">Quantity</th>
+                                <th className="px-6 py-3 font-semibold">Grade</th>
+                                <th className="px-6 py-3 font-semibold text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-[#dfe9de]">
+                        <tbody className="divide-y divide-farm-100">
                             {loading ? (
-                                <tr><td colSpan="6" className="px-6 py-10 text-center text-[#647260]">Loading production...</td></tr>
+                                <tr><td colSpan="6" className="px-6 py-10 text-center text-slate-500">Loading production...</td></tr>
                             ) : productions.length === 0 ? (
-                                <tr><td colSpan="6" className="px-6 py-10 text-center text-[#647260]">No production records yet.</td></tr>
+                                <tr><td colSpan="6" className="px-6 py-10 text-center text-slate-500">No production records yet.</td></tr>
                             ) : (
                                 productions.map((prod) => (
-                                    <tr key={prod.id} className="hover:bg-[#fcfdfc] transition">
-                                        <td className="px-6 py-4 text-[#647260]">{prod.harvest_date}</td>
-                                        <td className="px-6 py-4 font-medium text-[#172316]">{prod.field?.name}</td>
-                                        <td className="px-6 py-4 text-[#647260]">{prod.crop_type}</td>
-                                        <td className="px-6 py-4 text-[#647260]">{prod.quantity} {prod.unit}</td>
-                                        <td className="px-6 py-4 text-[#647260]">{prod.quality_grade || 'N/A'}</td>
+                                    <tr key={prod.id} className="hover:bg-farm-50 transition">
+                                        <td className="px-6 py-4 text-slate-500">{prod.harvest_date}</td>
+                                        <td className="px-6 py-4 font-medium text-farm-900">{prod.field?.name}</td>
+                                        <td className="px-6 py-4 text-slate-500">{prod.crop_type}</td>
+                                        <td className="px-6 py-4 text-slate-500">{prod.quantity} {prod.unit}</td>
+                                        <td className="px-6 py-4 text-slate-500">{prod.quality_grade || 'N/A'}</td>
                                         <td className="px-6 py-4 text-right space-x-3">
                                             <button
                                                 onClick={() => handleOpenModal(prod)}
-                                                className="text-blue-600 hover:underline"
+                                                className="text-farm-700 hover:underline"
                                             >
                                                 Edit
                                             </button>
@@ -168,15 +166,15 @@ export default function ProductionLogging() {
 
                 {isModalOpen && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-                        <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-                            <h2 className="mb-6 text-xl font-semibold text-[#172316]">
+                        <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-xl">
+                            <h2 className="mb-6 text-xl font-semibold text-farm-900">
                                 {editingProduction ? 'Edit Production' : 'Log Production'}
                             </h2>
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Field</label>
+                                    <label className="block text-sm font-medium text-farm-900">Field</label>
                                     <select
-                                        className="mt-1 w-full rounded-md border border-[#cbd8ca] px-3 py-2 text-sm outline-none focus:border-[#4d7a39] focus:ring-2 focus:ring-[#4d7a39]/20"
+                                        className="mt-1 w-full rounded-xl border border-farm-200 px-3 py-2 text-sm outline-none focus:border-farm-500 focus:ring-2 focus:ring-farm-500/20"
                                         value={form.field_id}
                                         onChange={(e) => setForm({ ...form, field_id: e.target.value })}
                                         required
@@ -188,9 +186,9 @@ export default function ProductionLogging() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Crop Type</label>
+                                    <label className="block text-sm font-medium text-farm-900">Crop Type</label>
                                     <input
-                                        className="mt-1 w-full rounded-md border border-[#cbd8ca] px-3 py-2 text-sm outline-none focus:border-[#4d7a39] focus:ring-2 focus:ring-[#4d7a39]/20"
+                                        className="mt-1 w-full rounded-xl border border-farm-200 px-3 py-2 text-sm outline-none focus:border-farm-500 focus:ring-2 focus:ring-farm-500/20"
                                         placeholder="e.g. Maize, Soybeans"
                                         value={form.crop_type}
                                         onChange={(e) => setForm({ ...form, crop_type: e.target.value })}
@@ -199,20 +197,20 @@ export default function ProductionLogging() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-[#243322]">Quantity</label>
+                                        <label className="block text-sm font-medium text-farm-900">Quantity</label>
                                         <input
                                             type="number"
                                             step="0.01"
-                                            className="mt-1 w-full rounded-md border border-[#cbd8ca] px-3 py-2 text-sm outline-none focus:border-[#4d7a39] focus:ring-2 focus:ring-[#4d7a39]/20"
+                                            className="mt-1 w-full rounded-xl border border-farm-200 px-3 py-2 text-sm outline-none focus:border-farm-500 focus:ring-2 focus:ring-farm-500/20"
                                             value={form.quantity}
                                             onChange={(e) => setForm({ ...form, quantity: e.target.value })}
                                             required
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-[#243322]">Unit</label>
+                                        <label className="block text-sm font-medium text-farm-900">Unit</label>
                                         <select
-                                            className="mt-1 w-full rounded-md border border-[#cbd8ca] px-3 py-2 text-sm outline-none focus:border-[#4d7a39] focus:ring-2 focus:ring-[#4d7a39]/20"
+                                            className="mt-1 w-full rounded-xl border border-farm-200 px-3 py-2 text-sm outline-none focus:border-farm-500 focus:ring-2 focus:ring-farm-500/20"
                                             value={form.unit}
                                             onChange={(e) => setForm({ ...form, unit: e.target.value })}
                                             required
@@ -224,19 +222,19 @@ export default function ProductionLogging() {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Harvest Date</label>
+                                    <label className="block text-sm font-medium text-farm-900">Harvest Date</label>
                                     <input
                                         type="date"
-                                        className="mt-1 w-full rounded-md border border-[#cbd8ca] px-3 py-2 text-sm outline-none focus:border-[#4d7a39] focus:ring-2 focus:ring-[#4d7a39]/20"
+                                        className="mt-1 w-full rounded-xl border border-farm-200 px-3 py-2 text-sm outline-none focus:border-farm-500 focus:ring-2 focus:ring-farm-500/20"
                                         value={form.harvest_date}
                                         onChange={(e) => setForm({ ...form, harvest_date: e.target.value })}
                                         required
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Quality Grade</label>
+                                    <label className="block text-sm font-medium text-farm-900">Quality Grade</label>
                                     <input
-                                        className="mt-1 w-full rounded-md border border-[#cbd8ca] px-3 py-2 text-sm outline-none focus:border-[#4d7a39] focus:ring-2 focus:ring-[#4d7a39]/20"
+                                        className="mt-1 w-full rounded-xl border border-farm-200 px-3 py-2 text-sm outline-none focus:border-farm-500 focus:ring-2 focus:ring-farm-500/20"
                                         placeholder="e.g. Grade A, Premium"
                                         value={form.quality_grade}
                                         onChange={(e) => setForm({ ...form, quality_grade: e.target.value })}
@@ -246,13 +244,13 @@ export default function ProductionLogging() {
                                     <button
                                         type="button"
                                         onClick={() => setIsModalOpen(false)}
-                                        className="rounded-md border border-[#cbd8ca] px-4 py-2 text-sm font-medium text-[#647260] transition hover:bg-[#fcfdfc]"
+                                        className="rounded-full border border-farm-200 px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-farm-50"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className="rounded-md bg-[#315f2b] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#264b22]"
+                                        className="rounded-full bg-farm-700 px-5 py-2 text-sm font-medium text-white transition hover:bg-farm-800"
                                     >
                                         {editingProduction ? 'Update Record' : 'Log Production'}
                                     </button>
@@ -262,6 +260,6 @@ export default function ProductionLogging() {
                     </div>
                 )}
             </div>
-        </main>
+        </ModuleLayout>
     );
 }

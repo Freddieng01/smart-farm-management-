@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from 'react';
+import ModuleLayout from '../components/ModuleLayout.jsx';
 
 const emptyForm = {
   field_id: '',
@@ -13,7 +14,7 @@ const emptyForm = {
 };
 
 const statusStyle = {
-  A: 'bg-green-100 text-green-700',
+  A: 'bg-farm-100 text-farm-700',
   B: 'bg-blue-100 text-blue-700',
   C: 'bg-yellow-100 text-yellow-700',
 };
@@ -249,24 +250,16 @@ export default function YieldRecords() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 md:p-8">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">
-              Yield Records
-            </h1>
-            <p className="mt-1 text-gray-600">
-              Record and monitor actual harvested quantities.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
+    <ModuleLayout
+      title="Yield Records"
+      subtitle="Record and monitor actual harvested quantities."
+      actions={<>
+<div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={loadData}
               disabled={loading}
-              className="rounded-lg border bg-white px-4 py-2 hover:bg-gray-50 disabled:opacity-50"
+              className="rounded-full bg-white/15 px-5 py-2 text-sm font-medium text-white ring-1 ring-white/30 transition hover:bg-white/25 disabled:opacity-60"
             >
               Refresh
             </button>
@@ -274,43 +267,45 @@ export default function YieldRecords() {
             <button
               type="button"
               onClick={createRecord}
-              className="rounded-lg bg-green-700 px-4 py-2 text-white hover:bg-green-800"
+              className="rounded-full bg-harvest-400 px-5 py-2 text-sm font-medium text-farm-900 transition hover:bg-harvest-500 disabled:opacity-60"
             >
               + Add Yield Record
             </button>
           </div>
-        </div>
+      </>}
+    >
+      <div className="mx-auto max-w-7xl">
 
         {error && (
-          <div className="mb-4 rounded-lg bg-red-50 p-3 text-red-700">
+          <div className="mb-4 rounded-2xl bg-red-50 p-3 text-red-700">
             {error}
           </div>
         )}
 
         {success && (
-          <div className="mb-4 rounded-lg bg-green-50 p-3 text-green-700">
+          <div className="mb-4 rounded-2xl bg-farm-50 p-3 text-farm-700">
             {success}
           </div>
         )}
 
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="rounded-xl bg-white p-5 shadow-sm">
-            <p className="text-sm text-gray-500">Yield Records</p>
-            <p className="mt-2 text-3xl font-bold text-gray-800">
+          <div className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+            <p className="text-sm text-slate-500">Yield Records</p>
+            <p className="mt-2 text-3xl font-bold text-farm-900">
               {records.length}
             </p>
           </div>
 
-          <div className="rounded-xl bg-white p-5 shadow-sm">
-            <p className="text-sm text-gray-500">
+          <div className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+            <p className="text-sm text-slate-500">
               Total Quantity Recorded
             </p>
-            <p className="mt-2 text-3xl font-bold text-gray-800">
+            <p className="mt-2 text-3xl font-bold text-farm-900">
               {totalQuantity.toLocaleString(undefined, {
                 maximumFractionDigits: 2,
               })}
             </p>
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-slate-500">
               Combined quantity; units may differ.
             </p>
           </div>
@@ -319,9 +314,9 @@ export default function YieldRecords() {
         {showForm && (
           <form
             onSubmit={submitForm}
-            className="mb-6 rounded-xl bg-white p-5 shadow-sm"
+            className="mb-6 rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]"
           >
-            <h2 className="mb-4 text-xl font-semibold text-gray-800">
+            <h2 className="mb-4 text-xl font-semibold text-farm-900">
               {editingId ? 'Edit Yield Record' : 'New Yield Record'}
             </h2>
 
@@ -339,7 +334,7 @@ export default function YieldRecords() {
                       field_id: '',
                     }));
                   }}
-                  className="w-full rounded-lg border p-2"
+                  className="w-full rounded-xl border p-2"
                   required
                 >
                   <option value="">Select farm</option>
@@ -359,7 +354,7 @@ export default function YieldRecords() {
                   name="field_id"
                   value={form.field_id}
                   onChange={changeForm}
-                  className="w-full rounded-lg border p-2"
+                  className="w-full rounded-xl border p-2"
                   required
                 >
                   <option value="">Select field</option>
@@ -380,7 +375,7 @@ export default function YieldRecords() {
                   name="harvest_date"
                   value={form.harvest_date}
                   onChange={changeForm}
-                  className="w-full rounded-lg border p-2"
+                  className="w-full rounded-xl border p-2"
                   required
                 />
               </div>
@@ -396,7 +391,7 @@ export default function YieldRecords() {
                   step="any"
                   value={form.quantity}
                   onChange={changeForm}
-                  className="w-full rounded-lg border p-2"
+                  className="w-full rounded-xl border p-2"
                   required
                 />
               </div>
@@ -409,7 +404,7 @@ export default function YieldRecords() {
                   name="unit"
                   value={form.unit}
                   onChange={changeForm}
-                  className="w-full rounded-lg border p-2"
+                  className="w-full rounded-xl border p-2"
                 >
                   <option value="kg">Kilograms (kg)</option>
                   <option value="tonnes">Tonnes</option>
@@ -427,7 +422,7 @@ export default function YieldRecords() {
                   name="quality_grade"
                   value={form.quality_grade}
                   onChange={changeForm}
-                  className="w-full rounded-lg border p-2"
+                  className="w-full rounded-xl border p-2"
                 >
                   <option value="">Not graded</option>
                   <option value="A">A - Excellent</option>
@@ -449,7 +444,7 @@ export default function YieldRecords() {
                   step="any"
                   value={form.moisture_percentage}
                   onChange={changeForm}
-                  className="w-full rounded-lg border p-2"
+                  className="w-full rounded-xl border p-2"
                 />
               </div>
 
@@ -464,7 +459,7 @@ export default function YieldRecords() {
                   step="any"
                   value={form.loss_quantity}
                   onChange={changeForm}
-                  className="w-full rounded-lg border p-2"
+                  className="w-full rounded-xl border p-2"
                 />
               </div>
 
@@ -477,7 +472,7 @@ export default function YieldRecords() {
                   value={form.notes}
                   onChange={changeForm}
                   rows="3"
-                  className="w-full rounded-lg border p-2"
+                  className="w-full rounded-xl border p-2"
                   placeholder="Optional observations..."
                 />
               </div>
@@ -487,7 +482,7 @@ export default function YieldRecords() {
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-lg bg-green-700 px-5 py-2 text-white hover:bg-green-800 disabled:opacity-50"
+                className="rounded-full bg-farm-700 px-5 py-2 text-white hover:bg-farm-800 disabled:opacity-50"
               >
                 {saving
                   ? 'Saving...'
@@ -503,7 +498,7 @@ export default function YieldRecords() {
                   setEditingId(null);
                   setError('');
                 }}
-                className="rounded-lg border px-5 py-2 hover:bg-gray-50"
+                className="rounded-full border px-5 py-2 hover:bg-farm-50"
               >
                 Cancel
               </button>
@@ -511,9 +506,9 @@ export default function YieldRecords() {
           </form>
         )}
 
-        <div className="rounded-xl bg-white p-5 shadow-sm">
+        <div className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
           <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row">
-            <h2 className="text-xl font-semibold text-gray-800">
+            <h2 className="text-xl font-semibold text-farm-900">
               Recorded Yields
             </h2>
 
@@ -522,23 +517,23 @@ export default function YieldRecords() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search field, date, grade, notes..."
-              className="w-full rounded-lg border p-2 sm:max-w-sm"
+              className="w-full rounded-xl border p-2 sm:max-w-sm"
             />
           </div>
 
           {loading ? (
-            <p className="py-8 text-center text-gray-500">
+            <p className="py-8 text-center text-slate-500">
               Loading yield records...
             </p>
           ) : filteredRecords.length === 0 ? (
-            <p className="py-8 text-center text-gray-500">
+            <p className="py-8 text-center text-slate-500">
               No yield records found.
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[950px] text-left">
                 <thead>
-                  <tr className="border-b bg-gray-50 text-sm text-gray-600">
+                  <tr className="border-b bg-farm-50 text-sm text-slate-600">
                     <th className="p-3">Field</th>
                     <th className="p-3">Date</th>
                     <th className="p-3">Quantity</th>
@@ -565,7 +560,7 @@ export default function YieldRecords() {
                         <span
                           className={`rounded-full px-2 py-1 text-xs ${
                             statusStyle[record.quality_grade] ||
-                            'bg-gray-100 text-gray-700'
+                            'bg-slate-100 text-slate-700'
                           }`}
                         >
                           {record.quality_grade || 'Not graded'}
@@ -605,6 +600,6 @@ export default function YieldRecords() {
           )}
         </div>
       </div>
-    </div>
+    </ModuleLayout>
   );
 }

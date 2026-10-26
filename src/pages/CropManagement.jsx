@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import ModuleLayout from '../components/ModuleLayout.jsx';
 
 export default function CropManagement() {
     const { api } = useAuth();
@@ -161,22 +162,17 @@ export default function CropManagement() {
     });
 
     return (
-        <div className="space-y-6 p-4 md:p-6">
-            <div>
-                <h1 className="text-2xl font-bold text-gray-800">
-                    Crop Management
-                </h1>
-                <p className="mt-1 text-sm text-gray-600">
-                    Register crops, manage crop information, and track
-                    maturity periods.
-                </p>
-            </div>
+        <ModuleLayout
+          title="Crop Management"
+          subtitle="Register crops, manage crop information, and track maturity periods."
+        >
+          <div className="space-y-6">
 
             {/* Notifications */}
             {error && (
                 <div
                     role="alert"
-                    className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+                    className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"
                 >
                     {error}
                 </div>
@@ -185,15 +181,15 @@ export default function CropManagement() {
             {success && (
                 <div
                     role="status"
-                    className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700"
+                    className="rounded-2xl border border-farm-200 bg-farm-50 p-3 text-sm text-farm-700"
                 >
                     {success}
                 </div>
             )}
 
             {/* Crop registration and editing form */}
-            <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                <h2 className="mb-4 text-lg font-semibold text-gray-800">
+            <section className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+                <h2 className="mb-4 text-lg font-semibold text-farm-900">
                     {editingCrop ? 'Edit Crop' : 'Register New Crop'}
                 </h2>
 
@@ -202,7 +198,7 @@ export default function CropManagement() {
                         <div>
                             <label
                                 htmlFor="name"
-                                className="mb-1 block text-sm font-medium text-gray-700"
+                                className="mb-1 block text-sm font-medium text-slate-700"
                             >
                                 Crop Name *
                             </label>
@@ -215,14 +211,14 @@ export default function CropManagement() {
                                 placeholder="e.g. Maize"
                                 maxLength={255}
                                 required
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+                                className="w-full rounded-xl border border-farm-200 px-3 py-2 focus:border-farm-600 focus:outline-none focus:ring-2 focus:ring-farm-100"
                             />
                         </div>
 
                         <div>
                             <label
                                 htmlFor="category"
-                                className="mb-1 block text-sm font-medium text-gray-700"
+                                className="mb-1 block text-sm font-medium text-slate-700"
                             >
                                 Category
                             </label>
@@ -234,14 +230,14 @@ export default function CropManagement() {
                                 onChange={handleChange}
                                 placeholder="e.g. Cereal, Legume, Vegetable"
                                 maxLength={100}
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+                                className="w-full rounded-xl border border-farm-200 px-3 py-2 focus:border-farm-600 focus:outline-none focus:ring-2 focus:ring-farm-100"
                             />
                         </div>
 
                         <div>
                             <label
                                 htmlFor="maturity_days"
-                                className="mb-1 block text-sm font-medium text-gray-700"
+                                className="mb-1 block text-sm font-medium text-slate-700"
                             >
                                 Maturity Period (days)
                             </label>
@@ -254,14 +250,14 @@ export default function CropManagement() {
                                 value={form.maturity_days}
                                 onChange={handleChange}
                                 placeholder="e.g. 120"
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+                                className="w-full rounded-xl border border-farm-200 px-3 py-2 focus:border-farm-600 focus:outline-none focus:ring-2 focus:ring-farm-100"
                             />
                         </div>
 
                         <div className="md:col-span-2">
                             <label
                                 htmlFor="description"
-                                className="mb-1 block text-sm font-medium text-gray-700"
+                                className="mb-1 block text-sm font-medium text-slate-700"
                             >
                                 Description
                             </label>
@@ -272,7 +268,7 @@ export default function CropManagement() {
                                 onChange={handleChange}
                                 rows="3"
                                 placeholder="Enter details about this crop..."
-                                className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100"
+                                className="w-full rounded-xl border border-farm-200 px-3 py-2 focus:border-farm-600 focus:outline-none focus:ring-2 focus:ring-farm-100"
                             />
                         </div>
                     </div>
@@ -281,7 +277,7 @@ export default function CropManagement() {
                         <button
                             type="submit"
                             disabled={saving}
-                            className="rounded-lg bg-green-700 px-5 py-2 font-medium text-white hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="rounded-full bg-farm-700 px-5 py-2 font-medium text-white hover:bg-farm-800 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             {saving
                                 ? 'Saving...'
@@ -294,7 +290,7 @@ export default function CropManagement() {
                             <button
                                 type="button"
                                 onClick={handleCancelEdit}
-                                className="rounded-lg border border-gray-300 px-5 py-2 font-medium text-gray-700 hover:bg-gray-100"
+                                className="rounded-full border border-farm-200 px-5 py-2 font-medium text-slate-700 hover:bg-slate-100"
                             >
                                 Cancel
                             </button>
@@ -304,13 +300,13 @@ export default function CropManagement() {
             </section>
 
             {/* Crop list */}
-            <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+            <section className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
                 <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h2 className="text-lg font-semibold text-gray-800">
+                        <h2 className="text-lg font-semibold text-farm-900">
                             Registered Crops
                         </h2>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-slate-500">
                             Showing {filteredCrops.length} crop(s) on this page
                         </p>
                     </div>
@@ -322,13 +318,13 @@ export default function CropManagement() {
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Search crops..."
                             aria-label="Search crops"
-                            className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-green-600 focus:outline-none"
+                            className="rounded-full border border-farm-200 px-3 py-2 text-sm focus:border-farm-600 focus:outline-none"
                         />
 
                         <button
                             type="button"
                             onClick={fetchCrops}
-                            className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+                            className="rounded-full border border-farm-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
                         >
                             Refresh
                         </button>
@@ -336,22 +332,22 @@ export default function CropManagement() {
                 </div>
 
                 {loading ? (
-                    <p className="py-8 text-center text-gray-500">
+                    <p className="py-8 text-center text-slate-500">
                         Loading crops...
                     </p>
                 ) : filteredCrops.length === 0 ? (
                     <div className="py-8 text-center">
-                        <p className="font-medium text-gray-700">
+                        <p className="font-medium text-slate-700">
                             No crops found.
                         </p>
-                        <p className="mt-1 text-sm text-gray-500">
+                        <p className="mt-1 text-sm text-slate-500">
                             Register a crop or change your search.
                         </p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full min-w-[650px] text-left text-sm">
-                            <thead className="border-b bg-gray-50 text-gray-600">
+                            <thead className="border-b bg-farm-50 text-slate-600">
                                 <tr>
                                     <th className="px-4 py-3 font-semibold">
                                         Crop Name
@@ -371,22 +367,22 @@ export default function CropManagement() {
                                 </tr>
                             </thead>
 
-                            <tbody className="divide-y divide-gray-100">
+                            <tbody className="divide-y divide-farm-100">
                                 {filteredCrops.map((crop) => (
                                     <tr
                                         key={crop.id}
-                                        className="hover:bg-gray-50"
+                                        className="hover:bg-farm-50"
                                     >
-                                        <td className="px-4 py-3 font-medium text-gray-800">
+                                        <td className="px-4 py-3 font-medium text-farm-900">
                                             {crop.name}
                                         </td>
-                                        <td className="px-4 py-3 text-gray-600">
+                                        <td className="px-4 py-3 text-slate-600">
                                             {crop.category || '—'}
                                         </td>
-                                        <td className="px-4 py-3 text-gray-600">
+                                        <td className="px-4 py-3 text-slate-600">
                                             {crop.maturity_days ?? '—'}
                                         </td>
-                                        <td className="max-w-xs px-4 py-3 text-gray-600">
+                                        <td className="max-w-xs px-4 py-3 text-slate-600">
                                             <span className="line-clamp-2">
                                                 {crop.description || '—'}
                                             </span>
@@ -421,6 +417,7 @@ export default function CropManagement() {
                     </div>
                 )}
             </section>
-        </div>
+          </div>
+        </ModuleLayout>
     );
 }

@@ -1,5 +1,6 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
+import ModuleLayout from '../components/ModuleLayout.jsx';
 
 const today = () => new Date().toISOString().slice(0, 10);
 const num = (n) => Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 2 });
@@ -18,10 +19,10 @@ const defaults = {
 };
 
 const inputClass =
-    'mt-1 w-full rounded-md border border-[#cbd8ca] px-3 py-2 text-sm outline-none focus:border-[#4d7a39] focus:ring-2 focus:ring-[#4d7a39]/20';
+    'mt-1 w-full rounded-xl border border-farm-200 px-3 py-2 text-sm outline-none focus:border-farm-500 focus:ring-2 focus:ring-farm-500/20';
 
 const qualityStyles = {
-    Good: 'bg-green-100 text-green-800',
+    Good: 'bg-farm-100 text-farm-800',
     Fair: 'bg-amber-100 text-amber-800',
     Spoiled: 'bg-red-100 text-red-800',
 };
@@ -42,7 +43,7 @@ const submitLabels = {
 
 function Badge({ styles, value }) {
     return (
-        <span className={`rounded-full px-2 py-1 text-xs font-medium ${styles[value] || 'bg-gray-100 text-gray-700'}`}>
+        <span className={`rounded-full px-2 py-1 text-xs font-medium ${styles[value] || 'bg-slate-100 text-slate-700'}`}>
             {value}
         </span>
     );
@@ -51,7 +52,7 @@ function Badge({ styles, value }) {
 function Field({ label, children }) {
     return (
         <div>
-            <label className="block text-sm font-medium text-[#243322]">{label}</label>
+            <label className="block text-sm font-medium text-farm-900">{label}</label>
             {children}
         </div>
     );
@@ -59,27 +60,27 @@ function Field({ label, children }) {
 
 function DataTable({ headers, loading, isEmpty, emptyText, children }) {
     return (
-        <div className="overflow-hidden rounded-lg border border-[#dfe9de] bg-white shadow-sm">
+        <div className="overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
             <table className="w-full text-left text-sm">
-                <thead className="bg-[#fcfdfc] text-[#647260]">
+                <thead className="bg-farm-50 text-slate-500">
                     <tr>
                         {headers.map((h, i) => (
-                            <th key={h} className={`px-6 py-3 font-medium ${i === headers.length - 1 ? 'text-right' : ''}`}>
+                            <th key={h} className={`px-6 py-3 font-semibold ${i === headers.length - 1 ? 'text-right' : ''}`}>
                                 {h}
                             </th>
                         ))}
                     </tr>
                 </thead>
-                <tbody className="divide-y divide-[#dfe9de]">
+                <tbody className="divide-y divide-farm-100">
                     {loading ? (
                         <tr>
-                            <td colSpan={headers.length} className="px-6 py-10 text-center text-[#647260]">
+                            <td colSpan={headers.length} className="px-6 py-10 text-center text-slate-500">
                                 Loading...
                             </td>
                         </tr>
                     ) : isEmpty ? (
                         <tr>
-                            <td colSpan={headers.length} className="px-6 py-10 text-center text-[#647260]">
+                            <td colSpan={headers.length} className="px-6 py-10 text-center text-slate-500">
                                 {emptyText}
                             </td>
                         </tr>
@@ -95,21 +96,21 @@ function DataTable({ headers, loading, isEmpty, emptyText, children }) {
 function Modal({ title, onClose, onSubmit, submitLabel, children }) {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-            <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
-                <h2 className="mb-6 text-xl font-semibold text-[#172316]">{title}</h2>
+            <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-6 shadow-xl">
+                <h2 className="mb-6 text-xl font-semibold text-farm-900">{title}</h2>
                 <form onSubmit={onSubmit} className="space-y-4">
                     {children}
                     <div className="mt-6 flex justify-end gap-3">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="rounded-md border border-[#cbd8ca] px-4 py-2 text-sm font-medium text-[#647260] transition hover:bg-[#fcfdfc]"
+                            className="rounded-full border border-farm-200 px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-farm-50"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="rounded-md bg-[#315f2b] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#264b22]"
+                            className="rounded-full bg-farm-700 px-5 py-2 text-sm font-medium text-white transition hover:bg-farm-800"
                         >
                             {submitLabel}
                         </button>
@@ -287,22 +288,19 @@ export default function StorageManagement() {
     };
 
     return (
-        <main className="min-h-screen bg-[#f7faf7] px-6 py-8">
-            <div className="mx-auto max-w-7xl">
-                <div className="mb-6 flex items-center justify-between">
-                    <div>
-                        <h1 className="text-2xl font-semibold text-[#172316]">Storage and post-harvest</h1>
-                        <p className="text-sm text-[#647260]">
-                            See what is in each warehouse, how long it has been there, and what has gone out the door.
-                        </p>
-                    </div>
-                    <button
+        <ModuleLayout
+          title="Storage and post-harvest"
+          subtitle="See what is in each warehouse, how long it has been there, and what has gone out the door."
+          actions={<>
+<button
                         onClick={addButtons[tab][1]}
-                        className="rounded-md bg-[#315f2b] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#264b22]"
+                        className="rounded-full bg-harvest-400 px-5 py-2 text-sm font-medium text-farm-900 transition hover:bg-harvest-500 disabled:opacity-60"
                     >
                         {addButtons[tab][0]}
                     </button>
-                </div>
+          </>}
+        >
+            <div className="mx-auto max-w-7xl">
 
                 <div className="mb-6 grid gap-4 sm:grid-cols-4">
                     {[
@@ -311,14 +309,14 @@ export default function StorageManagement() {
                         ['Spoiled batches', spoiledCount],
                         ['Stock value', money(stockValue)],
                     ].map(([label, value]) => (
-                        <article key={label} className="rounded-lg border border-[#dfe9de] bg-white p-5 shadow-sm">
-                            <p className="text-sm font-medium text-[#647260]">{label}</p>
-                            <p className="mt-2 text-2xl font-semibold text-[#172316]">{loading ? '...' : value}</p>
+                        <article key={label} className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+                            <p className="text-sm font-medium text-slate-500">{label}</p>
+                            <p className="mt-2 text-2xl font-semibold text-farm-900">{loading ? '...' : value}</p>
                         </article>
                     ))}
                 </div>
 
-                <div className="mb-4 flex gap-2 border-b border-[#dfe9de]">
+                <div className="mb-4 flex gap-2 border-b border-farm-100">
                     {[
                         ['produce', 'Stored produce'],
                         ['facilities', 'Facilities'],
@@ -328,8 +326,8 @@ export default function StorageManagement() {
                             onClick={() => setTab(key)}
                             className={`px-4 py-2 text-sm font-medium transition ${
                                 tab === key
-                                    ? 'border-b-2 border-[#315f2b] text-[#172316]'
-                                    : 'text-[#647260] hover:text-[#172316]'
+                                    ? 'border-b-2 border-farm-700 text-farm-900'
+                                    : 'text-slate-500 hover:text-farm-900'
                             }`}
                         >
                             {label}
@@ -337,7 +335,7 @@ export default function StorageManagement() {
                     ))}
                 </div>
 
-                {error && <p className="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
+                {error && <p className="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
 
                 {tab === 'produce' && (
                     <DataTable
@@ -348,26 +346,26 @@ export default function StorageManagement() {
                     >
                         {produce.map((p) => (
                             <Fragment key={p.id}>
-                                <tr className="transition hover:bg-[#fcfdfc]">
-                                    <td className="px-6 py-4 font-medium text-[#172316]">{p.crop_name}</td>
-                                    <td className="px-6 py-4 text-[#647260]">{facilityName(p.storage_facility_id)}</td>
-                                    <td className="px-6 py-4 text-[#647260]">
+                                <tr className="transition hover:bg-farm-50">
+                                    <td className="px-6 py-4 font-medium text-farm-900">{p.crop_name}</td>
+                                    <td className="px-6 py-4 text-slate-500">{facilityName(p.storage_facility_id)}</td>
+                                    <td className="px-6 py-4 text-slate-500">
                                         {num(p.quantity)} {p.unit}
                                     </td>
-                                    <td className="px-6 py-4 text-[#647260]">{p.grade || '-'}</td>
+                                    <td className="px-6 py-4 text-slate-500">{p.grade || '-'}</td>
                                     <td className="px-6 py-4">
                                         <Badge styles={qualityStyles} value={p.quality_status} />
                                     </td>
-                                    <td className="px-6 py-4 text-[#647260]">{daysSince(p.date_stored)}</td>
-                                    <td className="px-6 py-4 text-[#647260]">{p.valuation_amount != null ? money(p.valuation_amount) : '-'}</td>
+                                    <td className="px-6 py-4 text-slate-500">{daysSince(p.date_stored)}</td>
+                                    <td className="px-6 py-4 text-slate-500">{p.valuation_amount != null ? money(p.valuation_amount) : '-'}</td>
                                     <td className="space-x-3 px-6 py-4 text-right">
-                                        <button onClick={() => toggleHistory(p.id)} className="text-[#315f2b] hover:underline">
+                                        <button onClick={() => toggleHistory(p.id)} className="text-farm-700 hover:underline">
                                             {expanded === p.id ? 'Hide history' : 'History'}
                                         </button>
-                                        <button onClick={() => openModal('movement', p)} className="text-blue-600 hover:underline">
+                                        <button onClick={() => openModal('movement', p)} className="text-farm-700 hover:underline">
                                             Move stock
                                         </button>
-                                        <button onClick={() => openModal('dispatch', p)} className="text-blue-600 hover:underline">
+                                        <button onClick={() => openModal('dispatch', p)} className="text-farm-700 hover:underline">
                                             Dispatch
                                         </button>
                                         {p.quality_status !== 'Spoiled' && (
@@ -375,7 +373,7 @@ export default function StorageManagement() {
                                                 Mark spoiled
                                             </button>
                                         )}
-                                        <button onClick={() => openModal('produce', p)} className="text-blue-600 hover:underline">
+                                        <button onClick={() => openModal('produce', p)} className="text-farm-700 hover:underline">
                                             Edit
                                         </button>
                                         <button
@@ -389,18 +387,18 @@ export default function StorageManagement() {
                                     </td>
                                 </tr>
                                 {expanded === p.id && (
-                                    <tr className="bg-[#f7faf7]">
+                                    <tr className="bg-farm-50">
                                         <td colSpan="8" className="px-6 py-4">
                                             {!history[p.id] ? (
-                                                <p className="text-sm text-[#647260]">Loading history...</p>
+                                                <p className="text-sm text-slate-500">Loading history...</p>
                                             ) : (
                                                 <div className="grid gap-6 md:grid-cols-2">
                                                     <div>
-                                                        <p className="mb-2 text-sm font-semibold text-[#172316]">Stock movements</p>
+                                                        <p className="mb-2 text-sm font-semibold text-farm-900">Stock movements</p>
                                                         {history[p.id].movements.length === 0 ? (
-                                                            <p className="text-sm text-[#647260]">No movements recorded.</p>
+                                                            <p className="text-sm text-slate-500">No movements recorded.</p>
                                                         ) : (
-                                                            <ul className="space-y-1 text-sm text-[#243322]">
+                                                            <ul className="space-y-1 text-sm text-farm-900">
                                                                 {history[p.id].movements.map((m) => (
                                                                     <li key={m.id}>
                                                                         {String(m.movement_date).slice(0, 10)}: {m.movement_type}, {num(m.quantity)} {p.unit}
@@ -411,11 +409,11 @@ export default function StorageManagement() {
                                                         )}
                                                     </div>
                                                     <div>
-                                                        <p className="mb-2 text-sm font-semibold text-[#172316]">Dispatches</p>
+                                                        <p className="mb-2 text-sm font-semibold text-farm-900">Dispatches</p>
                                                         {history[p.id].dispatches.length === 0 ? (
-                                                            <p className="text-sm text-[#647260]">Nothing dispatched yet.</p>
+                                                            <p className="text-sm text-slate-500">Nothing dispatched yet.</p>
                                                         ) : (
-                                                            <ul className="space-y-1 text-sm text-[#243322]">
+                                                            <ul className="space-y-1 text-sm text-farm-900">
                                                                 {history[p.id].dispatches.map((d) => (
                                                                     <li key={d.id}>
                                                                         {String(d.dispatch_date).slice(0, 10)}: {num(d.quantity_dispatched)} {p.unit} to{' '}
@@ -423,7 +421,7 @@ export default function StorageManagement() {
                                                                         {d.status === 'Dispatched' && (
                                                                             <button
                                                                                 onClick={() => markDelivered(d, p.id)}
-                                                                                className="ml-2 text-green-700 hover:underline"
+                                                                                className="ml-2 text-farm-700 hover:underline"
                                                                             >
                                                                                 Mark delivered
                                                                             </button>
@@ -454,21 +452,21 @@ export default function StorageManagement() {
                             const used = usedIn(f);
                             const nearlyFull = f.capacity && used / Number(f.capacity) >= 0.9;
                             return (
-                                <tr key={f.id} className="transition hover:bg-[#fcfdfc]">
-                                    <td className="px-6 py-4 font-medium text-[#172316]">{f.name}</td>
-                                    <td className="px-6 py-4 text-[#647260]">{f.facility_type}</td>
-                                    <td className={`px-6 py-4 ${nearlyFull ? 'font-medium text-amber-700' : 'text-[#647260]'}`}>
+                                <tr key={f.id} className="transition hover:bg-farm-50">
+                                    <td className="px-6 py-4 font-medium text-farm-900">{f.name}</td>
+                                    <td className="px-6 py-4 text-slate-500">{f.facility_type}</td>
+                                    <td className={`px-6 py-4 ${nearlyFull ? 'font-medium text-amber-700' : 'text-slate-500'}`}>
                                         {f.capacity ? `${num(used)} of ${num(f.capacity)} ${f.capacity_unit}` : 'No capacity set'}
                                         {nearlyFull ? ' (nearly full)' : ''}
                                     </td>
-                                    <td className="px-6 py-4 text-[#647260]">
+                                    <td className="px-6 py-4 text-slate-500">
                                         {f.current_temperature_c != null ? `${num(f.current_temperature_c)} °C` : '-'}
                                     </td>
-                                    <td className="px-6 py-4 text-[#647260]">
+                                    <td className="px-6 py-4 text-slate-500">
                                         {produce.filter((p) => p.storage_facility_id === f.id).length}
                                     </td>
                                     <td className="space-x-3 px-6 py-4 text-right">
-                                        <button onClick={() => openModal('facility', f)} className="text-blue-600 hover:underline">
+                                        <button onClick={() => openModal('facility', f)} className="text-farm-700 hover:underline">
                                             Edit
                                         </button>
                                         <button
@@ -582,7 +580,7 @@ export default function StorageManagement() {
 
                         {modal.type === 'movement' && (
                             <>
-                                <p className="rounded-md bg-[#f3f9f1] px-3 py-2 text-sm text-[#243322]">
+                                <p className="rounded-2xl bg-farm-50 px-3 py-2 text-sm text-farm-900">
                                     In stock now: <strong>{num(modal.record.quantity)} {modal.record.unit}</strong>
                                 </p>
                                 <Field label="Movement type">
@@ -606,7 +604,7 @@ export default function StorageManagement() {
 
                         {modal.type === 'dispatch' && (
                             <>
-                                <p className="rounded-md bg-[#f3f9f1] px-3 py-2 text-sm text-[#243322]">
+                                <p className="rounded-2xl bg-farm-50 px-3 py-2 text-sm text-farm-900">
                                     Available to dispatch: <strong>{num(modal.record.quantity)} {modal.record.unit}</strong>
                                 </p>
                                 <Field label={`Quantity (${modal.record.unit})`}>
@@ -623,6 +621,6 @@ export default function StorageManagement() {
                     </Modal>
                 )}
             </div>
-        </main>
+        </ModuleLayout>
     );
 }

@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
+import ModuleLayout from '../components/ModuleLayout.jsx';
 
 const CATEGORIES = ['seeds', 'fertilizer', 'chemical', 'feed', 'medicine', 'packaging', 'fuel', 'tool'];
 
-const input = 'mt-1 w-full rounded-md border border-[#cbd8ca] px-3 py-2 text-sm outline-none focus:border-[#4d7a39] focus:ring-2 focus:ring-[#4d7a39]/20';
-const primaryBtn = 'rounded-md bg-[#315f2b] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#264b22]';
-const ghostBtn = 'rounded-md border border-[#cbd8ca] px-4 py-2 text-sm font-medium text-[#647260] transition hover:bg-[#fcfdfc]';
+const input = 'mt-1 w-full rounded-xl border border-farm-200 px-3 py-2 text-sm outline-none focus:border-farm-500 focus:ring-2 focus:ring-farm-500/20';
+const primaryBtn = 'rounded-full bg-farm-700 px-5 py-2 text-sm font-medium text-white transition hover:bg-farm-800';
+const ghostBtn = 'rounded-full border border-farm-200 px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-farm-50';
 
 function errorText(err, fallback) {
     const errors = err.response?.data?.errors;
@@ -164,28 +165,27 @@ export default function InventoryManagement() {
     };
 
     return (
-        <main className="min-h-screen bg-[#f7faf7] px-6 py-8">
+        <ModuleLayout
+          title="Inventory &amp; Inputs"
+          subtitle="Seeds, fertilizer, chemicals, feed, medicine and other farm resources."
+          actions={<>
+<button className="rounded-full bg-harvest-400 px-5 py-2 text-sm font-medium text-farm-900 transition hover:bg-harvest-500 disabled:opacity-60" onClick={() => openForm()}>+ Add Resource</button>
+          </>}
+        >
             <div className="mx-auto max-w-7xl">
-                <div className="mb-6 flex items-center justify-between">
-                    <div>
-                        <h1 className="text-2xl font-semibold text-[#172316]">Inventory &amp; Inputs</h1>
-                        <p className="text-sm text-[#647260]">Seeds, fertilizer, chemicals, feed, medicine and other farm resources.</p>
-                    </div>
-                    <button className={primaryBtn} onClick={() => openForm()}>+ Add Resource</button>
-                </div>
 
                 <div className="mb-6 grid gap-4 sm:grid-cols-3">
-                    <div className="rounded-lg border border-[#dfe9de] bg-white p-4 shadow-sm">
-                        <p className="text-sm text-[#647260]">Low stock</p>
-                        <p className="mt-1 text-2xl font-semibold text-[#172316]">{alerts.low.length}</p>
+                    <div className="rounded-3xl bg-white p-4 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+                        <p className="text-sm text-slate-500">Low stock</p>
+                        <p className="mt-1 text-2xl font-semibold text-farm-900">{alerts.low.length}</p>
                     </div>
-                    <div className="rounded-lg border border-[#dfe9de] bg-white p-4 shadow-sm">
-                        <p className="text-sm text-[#647260]">Expiring soon</p>
-                        <p className="mt-1 text-2xl font-semibold text-[#172316]">{alerts.soon.length}</p>
+                    <div className="rounded-3xl bg-white p-4 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+                        <p className="text-sm text-slate-500">Expiring soon</p>
+                        <p className="mt-1 text-2xl font-semibold text-farm-900">{alerts.soon.length}</p>
                     </div>
-                    <div className="rounded-lg border border-[#dfe9de] bg-white p-4 shadow-sm">
-                        <p className="text-sm text-[#647260]">Expired</p>
-                        <p className="mt-1 text-2xl font-semibold text-[#172316]">{alerts.expired.length}</p>
+                    <div className="rounded-3xl bg-white p-4 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+                        <p className="text-sm text-slate-500">Expired</p>
+                        <p className="mt-1 text-2xl font-semibold text-farm-900">{alerts.expired.length}</p>
                     </div>
                 </div>
 
@@ -200,11 +200,11 @@ export default function InventoryManagement() {
                     </select>
                 </div>
 
-                {error && <p className="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
+                {error && <p className="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
 
-                <div className="overflow-x-auto rounded-lg border border-[#dfe9de] bg-white shadow-sm">
+                <div className="overflow-x-auto rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
                     <table className="w-full text-left text-sm">
-                        <thead className="bg-[#fcfdfc] uppercase text-[#647260]">
+                        <thead className="bg-farm-50 text-farm-700 text-xs">
                             <tr>
                                 <th className="px-4 py-3 font-medium">Name</th>
                                 <th className="px-4 py-3 font-medium">Farm</th>
@@ -216,27 +216,27 @@ export default function InventoryManagement() {
                                 <th className="px-4 py-3 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-[#dfe9de]">
+                        <tbody className="divide-y divide-farm-100">
                             {loading ? (
-                                <tr><td colSpan="8" className="px-4 py-10 text-center text-[#647260]">Loading inventory...</td></tr>
+                                <tr><td colSpan="8" className="px-4 py-10 text-center text-slate-500">Loading inventory...</td></tr>
                             ) : resources.length === 0 ? (
-                                <tr><td colSpan="8" className="px-4 py-10 text-center text-[#647260]">No resources yet.</td></tr>
+                                <tr><td colSpan="8" className="px-4 py-10 text-center text-slate-500">No resources yet.</td></tr>
                             ) : resources.map((r) => (
-                                <tr key={r.id} className="hover:bg-[#fcfdfc]">
-                                    <td className="px-4 py-3 font-medium text-[#172316]">{r.name}{expiryBadge(r)}</td>
-                                    <td className="px-4 py-3 text-[#647260]">{r.farm?.name}</td>
-                                    <td className="px-4 py-3 capitalize text-[#647260]">{r.category}</td>
-                                    <td className={`px-4 py-3 font-medium ${isLow(r) ? 'text-red-700' : 'text-[#172316]'}`}>
+                                <tr key={r.id} className="hover:bg-farm-50">
+                                    <td className="px-4 py-3 font-medium text-farm-900">{r.name}{expiryBadge(r)}</td>
+                                    <td className="px-4 py-3 text-slate-500">{r.farm?.name}</td>
+                                    <td className="px-4 py-3 capitalize text-slate-500">{r.category}</td>
+                                    <td className={`px-4 py-3 font-medium ${isLow(r) ? 'text-red-700' : 'text-farm-900'}`}>
                                         {r.quantity} {r.unit}{isLow(r) && <span className="ml-2 rounded bg-red-100 px-2 py-0.5 text-xs">Low</span>}
                                     </td>
-                                    <td className="px-4 py-3 text-[#647260]">{r.minimum_stock}</td>
-                                    <td className="px-4 py-3 text-[#647260]">${r.unit_cost}</td>
-                                    <td className="px-4 py-3 text-[#647260]">{r.expiry_date ? r.expiry_date.slice(0, 10) : '—'}</td>
+                                    <td className="px-4 py-3 text-slate-500">{r.minimum_stock}</td>
+                                    <td className="px-4 py-3 text-slate-500">${r.unit_cost}</td>
+                                    <td className="px-4 py-3 text-slate-500">{r.expiry_date ? r.expiry_date.slice(0, 10) : '—'}</td>
                                     <td className="space-x-3 px-4 py-3 text-right whitespace-nowrap">
-                                        <button className="text-green-700 hover:underline" onClick={() => openStock(r, 'in')}>Stock in</button>
+                                        <button className="text-farm-700 hover:underline" onClick={() => openStock(r, 'in')}>Stock in</button>
                                         <button className="text-amber-700 hover:underline" onClick={() => openStock(r, 'out')}>Stock out</button>
-                                        <button className="text-[#647260] hover:underline" onClick={() => openHistory(r)}>History</button>
-                                        <button className="text-blue-600 hover:underline" onClick={() => openForm(r)}>Edit</button>
+                                        <button className="text-slate-500 hover:underline" onClick={() => openHistory(r)}>History</button>
+                                        <button className="text-farm-700 hover:underline" onClick={() => openForm(r)}>Edit</button>
                                         <button className="text-red-600 hover:underline" onClick={() => deleteResource(r)}>Delete</button>
                                     </td>
                                 </tr>
@@ -247,12 +247,12 @@ export default function InventoryManagement() {
 
                 {modal === 'form' && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-                        <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
-                            <h2 className="mb-4 text-xl font-semibold text-[#172316]">{editing ? 'Edit Resource' : 'Add Resource'}</h2>
-                            {formError && <p className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">{formError}</p>}
+                        <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-6 shadow-xl">
+                            <h2 className="mb-4 text-xl font-semibold text-farm-900">{editing ? 'Edit Resource' : 'Add Resource'}</h2>
+                            {formError && <p className="mb-4 rounded-2xl bg-red-50 px-3 py-2 text-sm text-red-800">{formError}</p>}
                             <form onSubmit={saveResource} className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Farm</label>
+                                    <label className="block text-sm font-medium text-farm-900">Farm</label>
                                     <select className={input} value={form.farm_id} disabled={!!editing} required
                                         onChange={(e) => setForm({ ...form, farm_id: e.target.value })}>
                                         <option value="">Choose a farm...</option>
@@ -260,41 +260,41 @@ export default function InventoryManagement() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Name</label>
+                                    <label className="block text-sm font-medium text-farm-900">Name</label>
                                     <input className={input} value={form.name} required onChange={(e) => setForm({ ...form, name: e.target.value })} />
                                 </div>
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="block text-sm font-medium text-[#243322]">Category</label>
+                                        <label className="block text-sm font-medium text-farm-900">Category</label>
                                         <select className={input} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
                                             {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-[#243322]">Unit</label>
+                                        <label className="block text-sm font-medium text-farm-900">Unit</label>
                                         <input className={input} placeholder="kg, L, bags" value={form.unit} required onChange={(e) => setForm({ ...form, unit: e.target.value })} />
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-3 gap-3">
                                     <div>
-                                        <label className="block text-sm font-medium text-[#243322]">Opening qty</label>
+                                        <label className="block text-sm font-medium text-farm-900">Opening qty</label>
                                         <input type="number" step="0.01" min="0" className={input} value={form.quantity} disabled={!!editing}
                                             onChange={(e) => setForm({ ...form, quantity: e.target.value })} />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-[#243322]">Min stock</label>
+                                        <label className="block text-sm font-medium text-farm-900">Min stock</label>
                                         <input type="number" step="0.01" min="0" className={input} value={form.minimum_stock}
                                             onChange={(e) => setForm({ ...form, minimum_stock: e.target.value })} />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-[#243322]">Unit cost</label>
+                                        <label className="block text-sm font-medium text-farm-900">Unit cost</label>
                                         <input type="number" step="0.01" min="0" className={input} value={form.unit_cost}
                                             onChange={(e) => setForm({ ...form, unit_cost: e.target.value })} />
                                     </div>
                                 </div>
-                                {editing && <p className="text-xs text-[#647260]">Quantity changes only through Stock in / Stock out so the history stays accurate.</p>}
+                                {editing && <p className="text-xs text-slate-500">Quantity changes only through Stock in / Stock out so the history stays accurate.</p>}
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Expiry date (optional)</label>
+                                    <label className="block text-sm font-medium text-farm-900">Expiry date (optional)</label>
                                     <input type="date" className={input} value={form.expiry_date} onChange={(e) => setForm({ ...form, expiry_date: e.target.value })} />
                                 </div>
                                 <div className="flex justify-end gap-3 pt-2">
@@ -308,27 +308,27 @@ export default function InventoryManagement() {
 
                 {modal === 'stock' && stockTarget && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-                        <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-xl">
-                            <h2 className="mb-1 text-xl font-semibold text-[#172316]">
+                        <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-xl">
+                            <h2 className="mb-1 text-xl font-semibold text-farm-900">
                                 {stock.direction === 'in' ? 'Stock in' : 'Stock out'}: {stockTarget.name}
                             </h2>
-                            <p className="mb-4 text-sm text-[#647260]">Currently {stockTarget.quantity} {stockTarget.unit}</p>
-                            {formError && <p className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">{formError}</p>}
+                            <p className="mb-4 text-sm text-slate-500">Currently {stockTarget.quantity} {stockTarget.unit}</p>
+                            {formError && <p className="mb-4 rounded-2xl bg-red-50 px-3 py-2 text-sm text-red-800">{formError}</p>}
                             <form onSubmit={saveStock} className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Quantity ({stockTarget.unit})</label>
+                                    <label className="block text-sm font-medium text-farm-900">Quantity ({stockTarget.unit})</label>
                                     <input type="number" step="0.01" min="0.01" className={input} value={stock.quantity} required
                                         onChange={(e) => setStock({ ...stock, quantity: e.target.value })} />
                                 </div>
                                 {stock.direction === 'in' && (
                                     <div>
-                                        <label className="block text-sm font-medium text-[#243322]">Unit cost (optional)</label>
+                                        <label className="block text-sm font-medium text-farm-900">Unit cost (optional)</label>
                                         <input type="number" step="0.01" min="0" className={input} value={stock.unit_cost}
                                             onChange={(e) => setStock({ ...stock, unit_cost: e.target.value })} />
                                     </div>
                                 )}
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Reason (optional)</label>
+                                    <label className="block text-sm font-medium text-farm-900">Reason (optional)</label>
                                     <input className={input} value={stock.reason} onChange={(e) => setStock({ ...stock, reason: e.target.value })} />
                                 </div>
                                 <div className="flex justify-end gap-3 pt-2">
@@ -342,22 +342,22 @@ export default function InventoryManagement() {
 
                 {modal === 'history' && stockTarget && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-                        <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
-                            <h2 className="mb-4 text-xl font-semibold text-[#172316]">Stock history: {stockTarget.name}</h2>
+                        <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-white p-6 shadow-xl">
+                            <h2 className="mb-4 text-xl font-semibold text-farm-900">Stock history: {stockTarget.name}</h2>
                             {history.length === 0 ? (
-                                <p className="text-sm text-[#647260]">No movements recorded.</p>
+                                <p className="text-sm text-slate-500">No movements recorded.</p>
                             ) : (
                                 <table className="w-full text-left text-sm">
-                                    <thead className="text-[#647260]"><tr>
+                                    <thead className="text-slate-500"><tr>
                                         <th className="py-2">Date</th><th>Type</th><th>Qty</th><th>Reason</th>
                                     </tr></thead>
-                                    <tbody className="divide-y divide-[#dfe9de]">
+                                    <tbody className="divide-y divide-farm-100">
                                         {history.map((t) => (
                                             <tr key={t.id}>
-                                                <td className="py-2 text-[#647260]">{t.created_at?.slice(0, 10)}</td>
-                                                <td className={t.type === 'stock_in' ? 'text-green-700' : 'text-amber-700'}>{t.type === 'stock_in' ? 'In' : 'Out'}</td>
+                                                <td className="py-2 text-slate-500">{t.created_at?.slice(0, 10)}</td>
+                                                <td className={t.type === 'stock_in' ? 'text-farm-700' : 'text-amber-700'}>{t.type === 'stock_in' ? 'In' : 'Out'}</td>
                                                 <td>{t.quantity}</td>
-                                                <td className="text-[#647260]">{t.reason || '—'}</td>
+                                                <td className="text-slate-500">{t.reason || '—'}</td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -370,6 +370,6 @@ export default function InventoryManagement() {
                     </div>
                 )}
             </div>
-        </main>
+        </ModuleLayout>
     );
 }
