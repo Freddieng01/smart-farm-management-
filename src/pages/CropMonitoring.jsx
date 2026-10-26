@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
+import ModuleLayout from '../components/ModuleLayout.jsx';
 
 const emptyForm = {
   planting_id: '',
@@ -167,7 +168,7 @@ export default function CropMonitoring() {
   function getHealthClass(status) {
     switch ((status || '').toLowerCase()) {
       case 'healthy':
-        return 'bg-green-100 text-green-800';
+        return 'bg-farm-100 text-farm-800';
       case 'poor':
       case 'critical':
         return 'bg-red-100 text-red-800';
@@ -175,44 +176,40 @@ export default function CropMonitoring() {
       case 'moderate':
         return 'bg-yellow-100 text-yellow-800';
       default:
-        return 'bg-gray-100 text-gray-700';
+        return 'bg-slate-100 text-slate-700';
     }
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">
-          Crop Monitoring
-        </h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Monitor crop growth, health, and estimated yield.
-        </p>
-      </div>
+    <ModuleLayout
+      title="Crop Monitoring"
+      subtitle="Monitor crop growth, health, and estimated yield."
+    >
+      <div className="space-y-6">
 
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
           {error}
         </div>
       )}
 
       {success && (
-        <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700">
+        <div className="rounded-2xl border border-farm-200 bg-farm-50 p-3 text-sm text-farm-700">
           {success}
         </div>
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border bg-white p-5 shadow-sm">
-          <p className="text-sm text-gray-500">Monitoring Records</p>
-          <p className="mt-2 text-2xl font-bold text-gray-900">
+        <div className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+          <p className="text-sm text-slate-500">Monitoring Records</p>
+          <p className="mt-2 text-2xl font-bold text-farm-900">
             {records.length}
           </p>
         </div>
 
-        <div className="rounded-xl border bg-white p-5 shadow-sm">
-          <p className="text-sm text-gray-500">Healthy Crops</p>
-          <p className="mt-2 text-2xl font-bold text-green-700">
+        <div className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+          <p className="text-sm text-slate-500">Healthy Crops</p>
+          <p className="mt-2 text-2xl font-bold text-farm-700">
             {records.filter(
               (record) =>
                 (record.health_status || '').toLowerCase() === 'healthy'
@@ -220,8 +217,8 @@ export default function CropMonitoring() {
           </p>
         </div>
 
-        <div className="rounded-xl border bg-white p-5 shadow-sm">
-          <p className="text-sm text-gray-500">Plantings Available</p>
+        <div className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+          <p className="text-sm text-slate-500">Plantings Available</p>
           <p className="mt-2 text-2xl font-bold text-blue-700">
             {plantings.length}
           </p>
@@ -230,15 +227,15 @@ export default function CropMonitoring() {
 
       <form
         onSubmit={handleSubmit}
-        className="space-y-4 rounded-xl border bg-white p-5 shadow-sm"
+        className="space-y-4 rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]"
       >
-        <h2 className="text-lg font-semibold text-gray-900">
+        <h2 className="text-lg font-semibold text-farm-900">
           {editingId ? 'Edit Monitoring Record' : 'Add Monitoring Record'}
         </h2>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-slate-700">
               Planting Record *
             </label>
             <select
@@ -246,7 +243,7 @@ export default function CropMonitoring() {
               value={form.planting_id}
               onChange={handleChange}
               required
-              className="w-full rounded-lg border border-gray-300 p-2.5"
+              className="w-full rounded-xl border border-farm-200 p-2.5"
             >
               <option value="">Select a planting</option>
               {plantings.map((planting) => (
@@ -263,7 +260,7 @@ export default function CropMonitoring() {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-slate-700">
               Monitoring Date *
             </label>
             <input
@@ -272,19 +269,19 @@ export default function CropMonitoring() {
               value={form.monitoring_date}
               onChange={handleChange}
               required
-              className="w-full rounded-lg border border-gray-300 p-2.5"
+              className="w-full rounded-xl border border-farm-200 p-2.5"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-slate-700">
               Growth Stage
             </label>
             <select
               name="growth_stage"
               value={form.growth_stage}
               onChange={handleChange}
-              className="w-full rounded-lg border border-gray-300 p-2.5"
+              className="w-full rounded-xl border border-farm-200 p-2.5"
             >
               <option value="">Select growth stage</option>
               <option value="Germination">Germination</option>
@@ -297,7 +294,7 @@ export default function CropMonitoring() {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-slate-700">
               Plant Height (cm)
             </label>
             <input
@@ -308,19 +305,19 @@ export default function CropMonitoring() {
               min="0"
               step="any"
               placeholder="e.g. 35"
-              className="w-full rounded-lg border border-gray-300 p-2.5"
+              className="w-full rounded-xl border border-farm-200 p-2.5"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-slate-700">
               Health Status
             </label>
             <select
               name="health_status"
               value={form.health_status}
               onChange={handleChange}
-              className="w-full rounded-lg border border-gray-300 p-2.5"
+              className="w-full rounded-xl border border-farm-200 p-2.5"
             >
               <option value="Healthy">Healthy</option>
               <option value="Fair">Fair</option>
@@ -330,7 +327,7 @@ export default function CropMonitoring() {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-slate-700">
               Estimated Yield
             </label>
             <input
@@ -341,12 +338,12 @@ export default function CropMonitoring() {
               min="0"
               step="any"
               placeholder="Enter estimated yield"
-              className="w-full rounded-lg border border-gray-300 p-2.5"
+              className="w-full rounded-xl border border-farm-200 p-2.5"
             />
           </div>
 
           <div className="md:col-span-2">
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-slate-700">
               Notes and Observations
             </label>
             <textarea
@@ -355,7 +352,7 @@ export default function CropMonitoring() {
               onChange={handleChange}
               rows="3"
               placeholder="Record growth observations, pests, disease symptoms, or other issues..."
-              className="w-full rounded-lg border border-gray-300 p-2.5"
+              className="w-full rounded-xl border border-farm-200 p-2.5"
             />
           </div>
         </div>
@@ -364,7 +361,7 @@ export default function CropMonitoring() {
           <button
             type="submit"
             disabled={saving || plantings.length === 0}
-            className="rounded-lg bg-green-700 px-5 py-2.5 font-medium text-white hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-full bg-farm-700 px-5 py-2.5 font-medium text-white hover:bg-farm-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving
               ? 'Saving...'
@@ -377,7 +374,7 @@ export default function CropMonitoring() {
             <button
               type="button"
               onClick={resetForm}
-              className="rounded-lg border border-gray-300 px-5 py-2.5 font-medium text-gray-700 hover:bg-gray-50"
+              className="rounded-full border border-farm-200 px-5 py-2.5 font-medium text-slate-700 hover:bg-farm-50"
             >
               Cancel Edit
             </button>
@@ -385,24 +382,24 @@ export default function CropMonitoring() {
         </div>
       </form>
 
-      <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
+      <div className="overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
         <div className="border-b p-5">
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-lg font-semibold text-farm-900">
             Monitoring History
           </h2>
         </div>
 
         {loading ? (
-          <p className="p-6 text-gray-500">Loading monitoring records...</p>
+          <p className="p-6 text-slate-500">Loading monitoring records...</p>
         ) : records.length === 0 ? (
-          <p className="p-6 text-gray-500">
+          <p className="p-6 text-slate-500">
             No monitoring records yet. Use the form above to add your first
             record.
           </p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-farm-100">
+              <thead className="bg-farm-50">
                 <tr>
                   {[
                     'Date',
@@ -416,7 +413,7 @@ export default function CropMonitoring() {
                   ].map((heading) => (
                     <th
                       key={heading}
-                      className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500"
+                      className="px-4 py-3 text-left text-xs font-semibold text-slate-500"
                     >
                       {heading}
                     </th>
@@ -424,27 +421,27 @@ export default function CropMonitoring() {
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-farm-100">
                 {records.map((record) => {
                   const planting = record.planting || {};
 
                   return (
-                    <tr key={record.id} className="hover:bg-gray-50">
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-700">
+                    <tr key={record.id} className="hover:bg-farm-50">
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-700">
                         {String(record.monitoring_date || '').slice(0, 10)}
                       </td>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                      <td className="px-4 py-3 text-sm font-medium text-farm-900">
                         {planting.crop?.name ||
                           planting.crop?.crop_type ||
                           '—'}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">
+                      <td className="px-4 py-3 text-sm text-slate-700">
                         {planting.field?.name || '—'}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">
+                      <td className="px-4 py-3 text-sm text-slate-700">
                         {record.growth_stage || '—'}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">
+                      <td className="px-4 py-3 text-sm text-slate-700">
                         {record.plant_height ?? '—'}
                       </td>
                       <td className="px-4 py-3 text-sm">
@@ -454,7 +451,7 @@ export default function CropMonitoring() {
                           {record.health_status || 'Not recorded'}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">
+                      <td className="px-4 py-3 text-sm text-slate-700">
                         {record.estimated_yield ?? '—'}
                       </td>
                       <td className="whitespace-nowrap px-4 py-3 text-sm">
@@ -481,6 +478,7 @@ export default function CropMonitoring() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </ModuleLayout>
   );
 }

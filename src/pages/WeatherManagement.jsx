@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
+import ModuleLayout from '../components/ModuleLayout.jsx';
 
 export default function WeatherManagement() {
     const { api } = useAuth();
@@ -138,24 +139,17 @@ export default function WeatherManagement() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
+        <ModuleLayout
+          title="Weather Management"
+          subtitle="Monitor current weather, forecasts and weather alerts for your farms."
+        >
             <div className="max-w-7xl mx-auto">
-                <div className="mb-6">
-                    <h1 className="text-3xl font-bold text-gray-900">
-                        Weather Management
-                    </h1>
-
-                    <p className="text-gray-600 mt-1">
-                        Monitor current weather, forecasts and weather alerts
-                        for your farms.
-                    </p>
-                </div>
 
                 {/* Farm selector */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 mb-6">
+                <div className="bg-white rounded-3xl shadow-[0_2px_16px_rgba(15,60,35,0.07)] p-5 mb-6">
                     <label
                         htmlFor="farm"
-                        className="block text-sm font-medium text-gray-700 mb-2"
+                        className="block text-sm font-medium text-slate-700 mb-2"
                     >
                         Select Farm
                     </label>
@@ -165,7 +159,7 @@ export default function WeatherManagement() {
                         value={selectedFarm}
                         onChange={(e) => setSelectedFarm(e.target.value)}
                         disabled={loadingFarms || loadingWeather}
-                        className="w-full md:w-96 border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#315f2b]"
+                        className="w-full md:w-96 border border-farm-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-farm-500"
                     >
                         <option value="">
                             {loadingFarms
@@ -182,14 +176,14 @@ export default function WeatherManagement() {
                 </div>
 
                 {error && (
-                    <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 mb-6">
+                    <div className="bg-red-50 border border-red-200 text-red-700 rounded-2xl p-4 mb-6">
                         <strong>Error:</strong> {error}
                     </div>
                 )}
 
                 {loadingWeather && (
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center mb-6">
-                        <p className="text-gray-600">
+                    <div className="bg-white rounded-3xl shadow-[0_2px_16px_rgba(15,60,35,0.07)] p-8 text-center mb-6">
+                        <p className="text-slate-600">
                             Loading weather information...
                         </p>
                     </div>
@@ -198,14 +192,14 @@ export default function WeatherManagement() {
                 {!loadingWeather && weather && (
                     <>
                         {/* Current weather */}
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+                        <div className="bg-white rounded-3xl shadow-[0_2px_16px_rgba(15,60,35,0.07)] p-6 mb-6">
                             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                                 <div>
-                                    <h2 className="text-xl font-semibold text-gray-900">
+                                    <h2 className="text-xl font-semibold text-farm-900">
                                         Current Weather
                                     </h2>
 
-                                    <p className="text-gray-500">
+                                    <p className="text-slate-500">
                                         {currentWeather?.farm || 'Selected farm'}
                                     </p>
                                 </div>
@@ -229,11 +223,11 @@ export default function WeatherManagement() {
                                     )}
 
                                     <div>
-                                        <p className="text-4xl font-bold text-gray-900">
+                                        <p className="text-4xl font-bold text-farm-900">
                                             {weather.main?.temp ?? 'N/A'}°C
                                         </p>
 
-                                        <p className="text-gray-600 capitalize">
+                                        <p className="text-slate-600 capitalize">
                                             {weather.weather?.[0]?.description ||
                                                 'N/A'}
                                         </p>
@@ -242,38 +236,38 @@ export default function WeatherManagement() {
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-                                <div className="bg-gray-50 rounded-lg p-4">
-                                    <p className="text-sm text-gray-500">
+                                <div className="bg-farm-50 rounded-2xl p-4">
+                                    <p className="text-sm text-slate-500">
                                         Feels Like
                                     </p>
-                                    <p className="text-xl font-semibold text-gray-900">
+                                    <p className="text-xl font-semibold text-farm-900">
                                         {weather.main?.feels_like ?? 'N/A'}°C
                                     </p>
                                 </div>
 
-                                <div className="bg-gray-50 rounded-lg p-4">
-                                    <p className="text-sm text-gray-500">
+                                <div className="bg-farm-50 rounded-2xl p-4">
+                                    <p className="text-sm text-slate-500">
                                         Humidity
                                     </p>
-                                    <p className="text-xl font-semibold text-gray-900">
+                                    <p className="text-xl font-semibold text-farm-900">
                                         {weather.main?.humidity ?? 'N/A'}%
                                     </p>
                                 </div>
 
-                                <div className="bg-gray-50 rounded-lg p-4">
-                                    <p className="text-sm text-gray-500">
+                                <div className="bg-farm-50 rounded-2xl p-4">
+                                    <p className="text-sm text-slate-500">
                                         Wind Speed
                                     </p>
-                                    <p className="text-xl font-semibold text-gray-900">
+                                    <p className="text-xl font-semibold text-farm-900">
                                         {weather.wind?.speed ?? 'N/A'} m/s
                                     </p>
                                 </div>
 
-                                <div className="bg-gray-50 rounded-lg p-4">
-                                    <p className="text-sm text-gray-500">
+                                <div className="bg-farm-50 rounded-2xl p-4">
+                                    <p className="text-sm text-slate-500">
                                         Pressure
                                     </p>
-                                    <p className="text-xl font-semibold text-gray-900">
+                                    <p className="text-xl font-semibold text-farm-900">
                                         {weather.main?.pressure ?? 'N/A'} hPa
                                     </p>
                                 </div>
@@ -281,26 +275,26 @@ export default function WeatherManagement() {
                         </div>
 
                         {/* Weather alerts */}
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+                        <div className="bg-white rounded-3xl shadow-[0_2px_16px_rgba(15,60,35,0.07)] p-6 mb-6">
                             <div className="flex items-center justify-between mb-4">
                                 <div>
-                                    <h2 className="text-xl font-semibold text-gray-900">
+                                    <h2 className="text-xl font-semibold text-farm-900">
                                         Weather Alerts
                                     </h2>
 
-                                    <p className="text-sm text-gray-500">
+                                    <p className="text-sm text-slate-500">
                                         Conditions identified from the forecast
                                     </p>
                                 </div>
 
-                                <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
+                                <span className="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-sm">
                                     {alerts.length} alert
                                     {alerts.length === 1 ? '' : 's'}
                                 </span>
                             </div>
 
                             {alerts.length === 0 ? (
-                                <div className="bg-green-50 border border-green-200 text-green-700 rounded-lg p-4">
+                                <div className="bg-farm-50 border border-farm-200 text-farm-700 rounded-2xl p-4">
                                     No weather alerts detected.
                                 </div>
                             ) : (
@@ -308,7 +302,7 @@ export default function WeatherManagement() {
                                     {alerts.map((alert, index) => (
                                         <div
                                             key={`${alert.type}-${alert.date_time}-${index}`}
-                                            className={`rounded-lg p-4 border ${
+                                            className={`rounded-xl p-4 border ${
                                                 alert.severity === 'high'
                                                     ? 'bg-red-50 border-red-200'
                                                     : 'bg-yellow-50 border-yellow-200'
@@ -316,18 +310,18 @@ export default function WeatherManagement() {
                                         >
                                             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                                                 <div>
-                                                    <p className="font-semibold text-gray-900">
+                                                    <p className="font-semibold text-farm-900">
                                                         {alert.message}
                                                     </p>
 
-                                                    <p className="text-sm text-gray-600 mt-1">
+                                                    <p className="text-sm text-slate-600 mt-1">
                                                         {formatDateTime(
                                                             alert.date_time
                                                         )}
                                                     </p>
                                                 </div>
 
-                                                <span className="uppercase text-xs font-bold">
+                                                <span className="text-xs font-bold">
                                                     {alert.severity}
                                                 </span>
                                             </div>
@@ -338,20 +332,20 @@ export default function WeatherManagement() {
                         </div>
 
                         {/* Forecast */}
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <div className="bg-white rounded-3xl shadow-[0_2px_16px_rgba(15,60,35,0.07)] p-6">
                             <div className="mb-4">
-                                <h2 className="text-xl font-semibold text-gray-900">
+                                <h2 className="text-xl font-semibold text-farm-900">
                                     Weather Forecast
                                 </h2>
 
-                                <p className="text-sm text-gray-500">
+                                <p className="text-sm text-slate-500">
                                     Upcoming forecast information for the
                                     selected farm
                                 </p>
                             </div>
 
                             {forecastItems.length === 0 ? (
-                                <div className="bg-gray-50 rounded-lg p-4 text-gray-600">
+                                <div className="bg-farm-50 rounded-2xl p-4 text-slate-600">
                                     No forecast information is available.
                                 </div>
                             ) : (
@@ -359,9 +353,9 @@ export default function WeatherManagement() {
                                     {forecastItems.slice(0, 10).map((item, index) => (
                                         <div
                                             key={`${item.dt}-${index}`}
-                                            className="border border-gray-200 rounded-lg p-4"
+                                            className="border border-farm-100 rounded-xl p-4"
                                         >
-                                            <p className="text-sm font-medium text-gray-700">
+                                            <p className="text-sm font-medium text-slate-700">
                                                 {formatDateTime(item.dt_txt)}
                                             </p>
 
@@ -384,17 +378,17 @@ export default function WeatherManagement() {
                                                     </span>
                                                 )}
 
-                                                <span className="text-2xl font-bold text-gray-900">
+                                                <span className="text-2xl font-bold text-farm-900">
                                                     {item.main?.temp ?? 'N/A'}°C
                                                 </span>
                                             </div>
 
-                                            <p className="text-sm text-gray-600 capitalize mb-3">
+                                            <p className="text-sm text-slate-600 capitalize mb-3">
                                                 {item.weather?.[0]?.description ||
                                                     'N/A'}
                                             </p>
 
-                                            <div className="space-y-1 text-sm text-gray-600">
+                                            <div className="space-y-1 text-sm text-slate-600">
                                                 <p>
                                                     Humidity:{' '}
                                                     {item.main?.humidity ?? 'N/A'}%
@@ -424,12 +418,12 @@ export default function WeatherManagement() {
                 {!loadingFarms &&
                     farms.length === 0 &&
                     !error && (
-                        <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg p-4">
+                        <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-2xl p-4">
                             No farms are available. Create a farm with GPS
                             coordinates before using Weather Management.
                         </div>
                     )}
             </div>
-        </div>
+        </ModuleLayout>
     );
 }

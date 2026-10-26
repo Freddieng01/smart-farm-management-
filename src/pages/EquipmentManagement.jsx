@@ -1,23 +1,24 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
+import ModuleLayout from '../components/ModuleLayout.jsx';
 
 const TYPES = ['tractor', 'harvester', 'sprayer', 'pump', 'vehicle', 'implement', 'generator', 'other'];
 const STATUSES = ['available', 'in_use', 'maintenance', 'retired'];
 const MAINT_TYPES = ['routine', 'repair', 'inspection'];
 
-const input = 'mt-1 w-full rounded-md border border-[#cbd8ca] px-3 py-2 text-sm outline-none focus:border-[#4d7a39] focus:ring-2 focus:ring-[#4d7a39]/20';
-const primaryBtn = 'rounded-md bg-[#315f2b] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#264b22]';
-const ghostBtn = 'rounded-md border border-[#cbd8ca] px-4 py-2 text-sm font-medium text-[#647260] transition hover:bg-[#fcfdfc]';
+const input = 'mt-1 w-full rounded-xl border border-farm-200 px-3 py-2 text-sm outline-none focus:border-farm-500 focus:ring-2 focus:ring-farm-500/20';
+const primaryBtn = 'rounded-full bg-farm-700 px-5 py-2 text-sm font-medium text-white transition hover:bg-farm-800';
+const ghostBtn = 'rounded-full border border-farm-200 px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-farm-50';
 const label = (s) => s.replace(/_/g, ' ');
 const money = (n) => `$${Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const today = () => new Date().toISOString().slice(0, 10);
 const day = (d) => (d ? String(d).slice(0, 10) : '—');
 
 const STATUS_STYLE = {
-    available: 'bg-green-100 text-green-800',
+    available: 'bg-farm-100 text-farm-800',
     in_use: 'bg-blue-100 text-blue-800',
     maintenance: 'bg-amber-100 text-amber-800',
-    retired: 'bg-gray-200 text-gray-700',
+    retired: 'bg-slate-200 text-slate-700',
 };
 
 function errorText(err, fallback) {
@@ -194,18 +195,14 @@ export default function EquipmentManagement() {
     }
 
     return (
-        <main className="min-h-screen bg-[#f7faf7] px-6 py-8">
+        <ModuleLayout
+          title="Farm Equipment &amp; Machinery"
+          subtitle="Equipment register, maintenance, fuel and availability."
+          actions={<>
+<button className="rounded-full bg-harvest-400 px-5 py-2 text-sm font-medium text-farm-900 transition hover:bg-harvest-500 disabled:opacity-60" onClick={() => openForm()}>+ Add Equipment</button>
+          </>}
+        >
             <div className="mx-auto max-w-7xl">
-                <div className="mb-2">
-                    <a href="/dashboard" className="text-sm text-[#4d7a39] hover:underline">← Back to Dashboard</a>
-                </div>
-                <div className="mb-6 flex items-center justify-between">
-                    <div>
-                        <h1 className="text-2xl font-semibold text-[#172316]">Farm Equipment &amp; Machinery</h1>
-                        <p className="text-sm text-[#647260]">Equipment register, maintenance, fuel and availability.</p>
-                    </div>
-                    <button className={primaryBtn} onClick={() => openForm()}>+ Add Equipment</button>
-                </div>
 
                 <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {[
@@ -214,9 +211,9 @@ export default function EquipmentManagement() {
                         ['In maintenance', count('maintenance')],
                         ['Service due (14 days)', items.filter(isDue).length],
                     ].map(([t, v]) => (
-                        <div key={t} className="rounded-lg border border-[#dfe9de] bg-white p-4 shadow-sm">
-                            <p className="text-sm text-[#647260]">{t}</p>
-                            <p className="mt-1 text-2xl font-semibold text-[#172316]">{v}</p>
+                        <div key={t} className="rounded-3xl bg-white p-4 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+                            <p className="text-sm text-slate-500">{t}</p>
+                            <p className="mt-1 text-2xl font-semibold text-farm-900">{v}</p>
                         </div>
                     ))}
                 </div>
@@ -232,11 +229,11 @@ export default function EquipmentManagement() {
                     </select>
                 </div>
 
-                {error && <p className="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
+                {error && <p className="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
 
-                <div className="overflow-x-auto rounded-lg border border-[#dfe9de] bg-white shadow-sm">
+                <div className="overflow-x-auto rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
                     <table className="w-full text-left text-sm">
-                        <thead className="bg-[#fcfdfc] uppercase text-[#647260]">
+                        <thead className="bg-farm-50 text-farm-700 text-xs">
                             <tr>
                                 <th className="px-4 py-3 font-medium">Name</th>
                                 <th className="px-4 py-3 font-medium">Farm</th>
@@ -247,19 +244,19 @@ export default function EquipmentManagement() {
                                 <th className="px-4 py-3 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-[#dfe9de]">
+                        <tbody className="divide-y divide-farm-100">
                             {loading ? (
-                                <tr><td colSpan="7" className="px-4 py-10 text-center text-[#647260]">Loading equipment...</td></tr>
+                                <tr><td colSpan="7" className="px-4 py-10 text-center text-slate-500">Loading equipment...</td></tr>
                             ) : items.length === 0 ? (
-                                <tr><td colSpan="7" className="px-4 py-10 text-center text-[#647260]">No equipment registered yet.</td></tr>
+                                <tr><td colSpan="7" className="px-4 py-10 text-center text-slate-500">No equipment registered yet.</td></tr>
                             ) : items.map((e) => (
-                                <tr key={e.id} className="hover:bg-[#fcfdfc]">
-                                    <td className="px-4 py-3 font-medium text-[#172316]">
+                                <tr key={e.id} className="hover:bg-farm-50">
+                                    <td className="px-4 py-3 font-medium text-farm-900">
                                         {e.name}
-                                        {e.serial_number && <span className="ml-2 text-xs font-normal text-[#647260]">#{e.serial_number}</span>}
+                                        {e.serial_number && <span className="ml-2 text-xs font-normal text-slate-500">#{e.serial_number}</span>}
                                     </td>
-                                    <td className="px-4 py-3 text-[#647260]">{e.farm?.name}</td>
-                                    <td className="px-4 py-3 capitalize text-[#647260]">{e.type}</td>
+                                    <td className="px-4 py-3 text-slate-500">{e.farm?.name}</td>
+                                    <td className="px-4 py-3 capitalize text-slate-500">{e.type}</td>
                                     <td className="px-4 py-3">
                                         <select
                                             className={`rounded px-2 py-1 text-xs font-medium capitalize ${STATUS_STYLE[e.status]}`}
@@ -269,15 +266,15 @@ export default function EquipmentManagement() {
                                             {STATUSES.map((s) => <option key={s} value={s}>{label(s)}</option>)}
                                         </select>
                                     </td>
-                                    <td className="px-4 py-3 text-[#647260]">
+                                    <td className="px-4 py-3 text-slate-500">
                                         {day(nextService(e))}
                                         {isDue(e) && <span className="ml-2 rounded bg-red-100 px-2 py-0.5 text-xs text-red-800">Due</span>}
                                     </td>
-                                    <td className="px-4 py-3 text-[#647260]">{money(e.purchase_cost)}</td>
+                                    <td className="px-4 py-3 text-slate-500">{money(e.purchase_cost)}</td>
                                     <td className="space-x-3 px-4 py-3 text-right whitespace-nowrap">
-                                        <button className="text-green-700 hover:underline" onClick={() => openLog(e, 'maintenance')}>Maintenance</button>
+                                        <button className="text-farm-700 hover:underline" onClick={() => openLog(e, 'maintenance')}>Maintenance</button>
                                         <button className="text-amber-700 hover:underline" onClick={() => openLog(e, 'fuel')}>Fuel</button>
-                                        <button className="text-blue-600 hover:underline" onClick={() => openForm(e)}>Edit</button>
+                                        <button className="text-farm-700 hover:underline" onClick={() => openForm(e)}>Edit</button>
                                         <button className="text-red-600 hover:underline" onClick={() => remove(e)}>Delete</button>
                                     </td>
                                 </tr>
@@ -288,12 +285,12 @@ export default function EquipmentManagement() {
 
                 {modal === 'form' && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-                        <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
-                            <h2 className="mb-4 text-xl font-semibold text-[#172316]">{editing ? 'Edit Equipment' : 'Add Equipment'}</h2>
-                            {formError && <p className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">{formError}</p>}
+                        <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-6 shadow-xl">
+                            <h2 className="mb-4 text-xl font-semibold text-farm-900">{editing ? 'Edit Equipment' : 'Add Equipment'}</h2>
+                            {formError && <p className="mb-4 rounded-2xl bg-red-50 px-3 py-2 text-sm text-red-800">{formError}</p>}
                             <form onSubmit={save} className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Farm</label>
+                                    <label className="block text-sm font-medium text-farm-900">Farm</label>
                                     <select className={input} value={form.farm_id} disabled={!!editing} required
                                         onChange={(e) => setForm({ ...form, farm_id: e.target.value })}>
                                         <option value="">Choose a farm...</option>
@@ -301,42 +298,42 @@ export default function EquipmentManagement() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Name</label>
+                                    <label className="block text-sm font-medium text-farm-900">Name</label>
                                     <input className={input} placeholder="e.g. John Deere 5075E" value={form.name} required
                                         onChange={(e) => setForm({ ...form, name: e.target.value })} />
                                 </div>
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="block text-sm font-medium text-[#243322]">Type</label>
+                                        <label className="block text-sm font-medium text-farm-900">Type</label>
                                         <select className={input} value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
                                             {TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-[#243322]">Status</label>
+                                        <label className="block text-sm font-medium text-farm-900">Status</label>
                                         <select className={input} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
                                             {STATUSES.map((s) => <option key={s} value={s}>{label(s)}</option>)}
                                         </select>
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Serial number (optional)</label>
+                                    <label className="block text-sm font-medium text-farm-900">Serial number (optional)</label>
                                     <input className={input} value={form.serial_number} onChange={(e) => setForm({ ...form, serial_number: e.target.value })} />
                                 </div>
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="block text-sm font-medium text-[#243322]">Purchase date</label>
+                                        <label className="block text-sm font-medium text-farm-900">Purchase date</label>
                                         <input type="date" max={today()} className={input} value={form.purchase_date}
                                             onChange={(e) => setForm({ ...form, purchase_date: e.target.value })} />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-[#243322]">Purchase cost ($)</label>
+                                        <label className="block text-sm font-medium text-farm-900">Purchase cost ($)</label>
                                         <input type="number" step="0.01" min="0" className={input} value={form.purchase_cost}
                                             onChange={(e) => setForm({ ...form, purchase_cost: e.target.value })} />
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Notes (optional)</label>
+                                    <label className="block text-sm font-medium text-farm-900">Notes (optional)</label>
                                     <textarea rows="2" className={input} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
                                 </div>
                                 <div className="flex justify-end gap-3 pt-2">
@@ -350,52 +347,52 @@ export default function EquipmentManagement() {
 
                 {modal === 'log' && target && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-                        <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
-                            <h2 className="mb-1 text-xl font-semibold text-[#172316]">{target.name}</h2>
-                            <p className="mb-4 text-sm text-[#647260]">Maintenance and fuel records</p>
+                        <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-6 shadow-xl">
+                            <h2 className="mb-1 text-xl font-semibold text-farm-900">{target.name}</h2>
+                            <p className="mb-4 text-sm text-slate-500">Maintenance and fuel records</p>
 
-                            <div className="mb-4 flex gap-2 border-b border-[#dfe9de]">
+                            <div className="mb-4 flex gap-2 border-b border-farm-100">
                                 {['maintenance', 'fuel'].map((t) => (
                                     <button key={t} type="button" onClick={() => { setLogTab(t); setFormError(null); }}
-                                        className={`px-4 py-2 text-sm font-medium capitalize ${logTab === t ? 'border-b-2 border-[#315f2b] text-[#315f2b]' : 'text-[#647260]'}`}>
+                                        className={`px-4 py-2 text-sm font-medium capitalize ${logTab === t ? 'border-b-2 border-farm-700 text-farm-700' : 'text-slate-500'}`}>
                                         {t}
                                     </button>
                                 ))}
                             </div>
 
-                            {formError && <p className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">{formError}</p>}
+                            {formError && <p className="mb-4 rounded-2xl bg-red-50 px-3 py-2 text-sm text-red-800">{formError}</p>}
 
                             {logTab === 'maintenance' ? (
                                 <>
                                     <form onSubmit={saveMaint} className="space-y-3">
                                         <div className="grid grid-cols-2 gap-3">
                                             <div>
-                                                <label className="block text-sm font-medium text-[#243322]">Type</label>
+                                                <label className="block text-sm font-medium text-farm-900">Type</label>
                                                 <select className={input} value={maint.type} onChange={(e) => setMaint({ ...maint, type: e.target.value })}>
                                                     {MAINT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
                                                 </select>
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-[#243322]">Cost ($)</label>
+                                                <label className="block text-sm font-medium text-farm-900">Cost ($)</label>
                                                 <input type="number" step="0.01" min="0" className={input} value={maint.cost}
                                                     onChange={(e) => setMaint({ ...maint, cost: e.target.value })} />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-[#243322]">Date done</label>
+                                                <label className="block text-sm font-medium text-farm-900">Date done</label>
                                                 <input type="date" max={today()} className={input} value={maint.maintenance_date} required
                                                     onChange={(e) => setMaint({ ...maint, maintenance_date: e.target.value })} />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-[#243322]">Next service (optional)</label>
+                                                <label className="block text-sm font-medium text-farm-900">Next service (optional)</label>
                                                 <input type="date" className={input} value={maint.next_service_date}
                                                     onChange={(e) => setMaint({ ...maint, next_service_date: e.target.value })} />
                                             </div>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-[#243322]">What was done (optional)</label>
+                                            <label className="block text-sm font-medium text-farm-900">What was done (optional)</label>
                                             <input className={input} value={maint.description} onChange={(e) => setMaint({ ...maint, description: e.target.value })} />
                                         </div>
-                                        <label className="flex items-center gap-2 text-sm text-[#243322]">
+                                        <label className="flex items-center gap-2 text-sm text-farm-900">
                                             <input type="checkbox" checked={maint.record_expense}
                                                 onChange={(e) => setMaint({ ...maint, record_expense: e.target.checked })} />
                                             Also record this cost as a finance expense
@@ -403,21 +400,21 @@ export default function EquipmentManagement() {
                                         <div className="flex justify-end"><button type="submit" className={primaryBtn}>Record maintenance</button></div>
                                     </form>
 
-                                    <h3 className="mb-2 mt-6 text-sm font-semibold text-[#172316]">Recent maintenance</h3>
-                                    {!detail ? <p className="text-sm text-[#647260]">Loading...</p>
-                                    : detail.maintenance_records.length === 0 ? <p className="text-sm text-[#647260]">No maintenance recorded.</p> : (
+                                    <h3 className="mb-2 mt-6 text-sm font-semibold text-farm-900">Recent maintenance</h3>
+                                    {!detail ? <p className="text-sm text-slate-500">Loading...</p>
+                                    : detail.maintenance_records.length === 0 ? <p className="text-sm text-slate-500">No maintenance recorded.</p> : (
                                         <table className="w-full text-left text-sm">
-                                            <thead className="text-[#647260]"><tr>
+                                            <thead className="text-slate-500"><tr>
                                                 <th className="py-2">Date</th><th>Type</th><th>Cost</th><th>Next service</th><th>Notes</th>
                                             </tr></thead>
-                                            <tbody className="divide-y divide-[#dfe9de]">
+                                            <tbody className="divide-y divide-farm-100">
                                                 {detail.maintenance_records.map((r) => (
                                                     <tr key={r.id}>
-                                                        <td className="py-2 text-[#647260]">{day(r.maintenance_date)}</td>
+                                                        <td className="py-2 text-slate-500">{day(r.maintenance_date)}</td>
                                                         <td className="capitalize">{r.type}</td>
                                                         <td>{money(r.cost)}</td>
-                                                        <td className="text-[#647260]">{day(r.next_service_date)}</td>
-                                                        <td className="text-[#647260]">{r.description || '—'}</td>
+                                                        <td className="text-slate-500">{day(r.next_service_date)}</td>
+                                                        <td className="text-slate-500">{r.description || '—'}</td>
                                                     </tr>
                                                 ))}
                                             </tbody>
@@ -429,27 +426,27 @@ export default function EquipmentManagement() {
                                     <form onSubmit={saveFuel} className="space-y-3">
                                         <div className="grid grid-cols-2 gap-3">
                                             <div>
-                                                <label className="block text-sm font-medium text-[#243322]">Date</label>
+                                                <label className="block text-sm font-medium text-farm-900">Date</label>
                                                 <input type="date" max={today()} className={input} value={fuel.log_date} required
                                                     onChange={(e) => setFuel({ ...fuel, log_date: e.target.value })} />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-[#243322]">Litres</label>
+                                                <label className="block text-sm font-medium text-farm-900">Litres</label>
                                                 <input type="number" step="0.01" min="0.01" className={input} value={fuel.litres} required
                                                     onChange={(e) => setFuel({ ...fuel, litres: e.target.value })} />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-[#243322]">Cost ($)</label>
+                                                <label className="block text-sm font-medium text-farm-900">Cost ($)</label>
                                                 <input type="number" step="0.01" min="0" className={input} value={fuel.cost}
                                                     onChange={(e) => setFuel({ ...fuel, cost: e.target.value })} />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-[#243322]">Hours reading (optional)</label>
+                                                <label className="block text-sm font-medium text-farm-900">Hours reading (optional)</label>
                                                 <input type="number" step="0.1" min="0" className={input} value={fuel.hours_reading}
                                                     onChange={(e) => setFuel({ ...fuel, hours_reading: e.target.value })} />
                                             </div>
                                         </div>
-                                        <label className="flex items-center gap-2 text-sm text-[#243322]">
+                                        <label className="flex items-center gap-2 text-sm text-farm-900">
                                             <input type="checkbox" checked={fuel.record_expense}
                                                 onChange={(e) => setFuel({ ...fuel, record_expense: e.target.checked })} />
                                             Also record this cost as a finance expense
@@ -457,20 +454,20 @@ export default function EquipmentManagement() {
                                         <div className="flex justify-end"><button type="submit" className={primaryBtn}>Record fuel</button></div>
                                     </form>
 
-                                    <h3 className="mb-2 mt-6 text-sm font-semibold text-[#172316]">Recent fuel logs</h3>
-                                    {!detail ? <p className="text-sm text-[#647260]">Loading...</p>
-                                    : detail.fuel_logs.length === 0 ? <p className="text-sm text-[#647260]">No fuel recorded.</p> : (
+                                    <h3 className="mb-2 mt-6 text-sm font-semibold text-farm-900">Recent fuel logs</h3>
+                                    {!detail ? <p className="text-sm text-slate-500">Loading...</p>
+                                    : detail.fuel_logs.length === 0 ? <p className="text-sm text-slate-500">No fuel recorded.</p> : (
                                         <table className="w-full text-left text-sm">
-                                            <thead className="text-[#647260]"><tr>
+                                            <thead className="text-slate-500"><tr>
                                                 <th className="py-2">Date</th><th>Litres</th><th>Cost</th><th>Hours</th>
                                             </tr></thead>
-                                            <tbody className="divide-y divide-[#dfe9de]">
+                                            <tbody className="divide-y divide-farm-100">
                                                 {detail.fuel_logs.map((r) => (
                                                     <tr key={r.id}>
-                                                        <td className="py-2 text-[#647260]">{day(r.log_date)}</td>
+                                                        <td className="py-2 text-slate-500">{day(r.log_date)}</td>
                                                         <td>{r.litres}</td>
                                                         <td>{money(r.cost)}</td>
-                                                        <td className="text-[#647260]">{r.hours_reading ?? '—'}</td>
+                                                        <td className="text-slate-500">{r.hours_reading ?? '—'}</td>
                                                     </tr>
                                                 ))}
                                             </tbody>
@@ -486,6 +483,6 @@ export default function EquipmentManagement() {
                     </div>
                 )}
             </div>
-        </main>
+        </ModuleLayout>
     );
 }

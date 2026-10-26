@@ -1,6 +1,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
+import ModuleLayout from '../components/ModuleLayout.jsx';
 
 const emptyForm = {
   water_source_id: '',
@@ -12,7 +13,7 @@ const emptyForm = {
 };
 
 const inputClass =
-  'mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100';
+  'mt-1 w-full rounded-xl border border-farm-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-farm-600 focus:ring-2 focus:ring-farm-100';
 
 function getRows(response) {
   const data = response?.data;
@@ -54,9 +55,9 @@ function Field({ label, children }) {
 
 function StatCard({ label, value, description }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
       <p className="text-sm text-slate-500">{label}</p>
-      <p className="mt-2 text-2xl font-bold text-slate-900">{value}</p>
+      <p className="mt-2 text-2xl font-bold text-farm-900">{value}</p>
 
       {description && (
         <p className="mt-1 text-xs text-slate-500">{description}</p>
@@ -74,7 +75,7 @@ function StatusLabel({ status }) {
   if (
     ['operational', 'running', 'active', 'working'].includes(normalised)
   ) {
-    style = 'bg-emerald-50 text-emerald-700';
+    style = 'bg-farm-50 text-farm-700';
   } else if (
     ['maintenance', 'under maintenance', 'servicing'].includes(normalised)
   ) {
@@ -258,8 +259,7 @@ export default function PumpMonitoring() {
 
   async function deleteRecord(record) {
     const confirmed = window.confirm(
-      `Delete the pump monitoring record for ${
-        record.water_source?.name ||
+      `Delete the pump monitoring record for ${ record.water_source?.name ||
         `water source #${record.water_source_id}`
       } dated ${formatDate(record.monitoring_date)}?`
     );
@@ -328,36 +328,25 @@ export default function PumpMonitoring() {
   });
 
   return (
-    <main className="min-h-screen bg-slate-50 p-4 text-slate-800 sm:p-6 lg:p-8">
-      <div className="mx-auto max-w-7xl space-y-6">
-        <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
-              Irrigation &amp; Water Management
-            </p>
-
-            <h1 className="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">
-              Pump Monitoring
-            </h1>
-
-            <p className="mt-2 text-sm text-slate-600">
-              Monitor pump condition, operating hours and water flow readings.
-            </p>
-          </div>
-
-          <button
+    <ModuleLayout
+      title="Pump Monitoring"
+      subtitle="Monitor pump condition, operating hours and water flow readings."
+      actions={<>
+<button
             type="button"
             onClick={startCreate}
-            className="rounded-lg bg-emerald-700 px-4 py-2.5 font-semibold text-white hover:bg-emerald-800"
+            className="rounded-full bg-harvest-400 px-5 py-2 text-sm font-medium text-farm-900 transition hover:bg-harvest-500 disabled:opacity-60"
           >
             + Add monitoring record
           </button>
-        </header>
+      </>}
+    >
+      <div className="mx-auto max-w-7xl space-y-6">
 
         {error && (
           <div
             role="alert"
-            className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+            className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"
           >
             {error}
           </div>
@@ -366,7 +355,7 @@ export default function PumpMonitoring() {
         {notice && (
           <div
             role="status"
-            className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800"
+            className="rounded-2xl border border-farm-200 bg-farm-50 p-3 text-sm text-farm-800"
           >
             {notice}
           </div>
@@ -405,23 +394,23 @@ export default function PumpMonitoring() {
         </section>
 
         {showForm && (
-          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <section className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
             <div className="mb-5 flex items-center justify-between gap-3">
-              <h2 className="text-lg font-bold text-slate-900">
+              <h2 className="text-lg font-bold text-farm-900">
                 {editingId ? 'Edit monitoring record' : 'New monitoring record'}
               </h2>
 
               <button
                 type="button"
                 onClick={closeForm}
-                className="rounded-md px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100"
+                className="rounded-full px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100"
               >
                 Close
               </button>
             </div>
 
             {waterSources.length === 0 && (
-              <p className="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
+              <p className="mb-4 rounded-2xl bg-amber-50 p-3 text-sm text-amber-800">
                 No water sources were loaded. Create a water source first and
                 check that the water-sources API is available.
               </p>
@@ -525,7 +514,7 @@ export default function PumpMonitoring() {
                 <button
                   type="submit"
                   disabled={saving || waterSources.length === 0}
-                  className="rounded-lg bg-emerald-700 px-5 py-2.5 font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-full bg-farm-700 px-5 py-2.5 font-semibold text-white hover:bg-farm-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {saving
                     ? 'Saving...'
@@ -538,7 +527,7 @@ export default function PumpMonitoring() {
                   type="button"
                   onClick={closeForm}
                   disabled={saving}
-                  className="rounded-lg border border-slate-300 px-5 py-2.5 font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                  className="rounded-full border border-farm-200 px-5 py-2.5 font-semibold text-slate-700 hover:bg-farm-50 disabled:opacity-50"
                 >
                   Cancel
                 </button>
@@ -547,10 +536,10 @@ export default function PumpMonitoring() {
           </section>
         )}
 
-        <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex flex-col gap-3 border-b border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <section className="overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+          <div className="flex flex-col gap-3 border-b border-farm-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="font-bold text-slate-900">Monitoring history</h2>
+              <h2 className="font-bold text-farm-900">Monitoring history</h2>
               <p className="mt-1 text-sm text-slate-500">
                 Review and manage pump monitoring records.
               </p>
@@ -562,7 +551,7 @@ export default function PumpMonitoring() {
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search records..."
               aria-label="Search monitoring records"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-600 sm:max-w-xs"
+              className="w-full rounded-xl border border-farm-200 px-3 py-2 text-sm outline-none focus:border-farm-600 sm:max-w-xs"
             />
           </div>
 
@@ -572,7 +561,7 @@ export default function PumpMonitoring() {
             </p>
           ) : filteredRecords.length === 0 ? (
             <div className="p-8 text-center">
-              <p className="font-semibold text-slate-800">
+              <p className="font-semibold text-farm-900">
                 No monitoring records found
               </p>
               <p className="mt-1 text-sm text-slate-500">
@@ -581,8 +570,8 @@ export default function PumpMonitoring() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200 text-sm">
-                <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+              <table className="min-w-full divide-y divide-farm-100 text-sm">
+                <thead className="bg-farm-50 text-left text-xs text-farm-700">
                   <tr>
                     <th className="px-4 py-3">Date</th>
                     <th className="px-4 py-3">Water source</th>
@@ -596,7 +585,7 @@ export default function PumpMonitoring() {
 
                 <tbody className="divide-y divide-slate-100">
                   {filteredRecords.map((record) => (
-                    <tr key={record.id} className="hover:bg-slate-50">
+                    <tr key={record.id} className="hover:bg-farm-50">
                       <td className="whitespace-nowrap px-4 py-3 font-medium">
                         {formatDate(record.monitoring_date)}
                       </td>
@@ -630,7 +619,7 @@ export default function PumpMonitoring() {
                         <button
                           type="button"
                           onClick={() => startEdit(record)}
-                          className="mr-3 font-semibold text-emerald-700 hover:text-emerald-900"
+                          className="mr-3 font-semibold text-farm-700 hover:text-farm-900"
                         >
                           Edit
                         </button>
@@ -651,6 +640,6 @@ export default function PumpMonitoring() {
           )}
         </section>
       </div>
-    </main>
+    </ModuleLayout>
   );
 }

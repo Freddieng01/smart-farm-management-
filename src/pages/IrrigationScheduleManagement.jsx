@@ -1,6 +1,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
+import ModuleLayout from '../components/ModuleLayout.jsx';
 
 const emptyForm = {
   field_id: '',
@@ -15,7 +16,7 @@ const emptyForm = {
 };
 
 const inputClass =
-  'mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100';
+  'mt-1 w-full rounded-xl border border-farm-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-farm-600 focus:ring-2 focus:ring-farm-100';
 
 function getRows(response) {
   const data = response?.data;
@@ -47,9 +48,9 @@ function Field({ label, children }) {
 
 function StatCard({ label, value }) {
   return (
-    <div className="min-w-0 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="min-w-0 rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
       <p className="text-sm text-slate-500">{label}</p>
-      <p className="mt-2 break-words text-2xl font-bold text-slate-900">
+      <p className="mt-2 break-words text-2xl font-bold text-farm-900">
         {value}
       </p>
     </div>
@@ -59,7 +60,7 @@ function StatCard({ label, value }) {
 function StatusLabel({ status }) {
   const styles = {
     scheduled: 'bg-blue-50 text-blue-700',
-    completed: 'bg-emerald-50 text-emerald-700',
+    completed: 'bg-farm-50 text-farm-700',
     cancelled: 'bg-red-50 text-red-700',
   };
 
@@ -248,8 +249,7 @@ export default function IrrigationScheduleManagement() {
 
   async function deleteSchedule(schedule) {
     const confirmed = window.confirm(
-      `Delete the irrigation schedule for ${
-        schedule.field?.name || `field #${schedule.field_id}`
+      `Delete the irrigation schedule for ${ schedule.field?.name || `field #${schedule.field_id}`
       } on ${formatDate(schedule.irrigation_date)}?`
     );
 
@@ -314,34 +314,25 @@ export default function IrrigationScheduleManagement() {
       .join(', ') || '0';
 
   return (
-    <main className="min-h-screen bg-slate-50 p-4 text-slate-800 sm:p-6 lg:p-8">
-      <div className="mx-auto max-w-7xl space-y-6">
-        <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
-              Irrigation &amp; Water Management
-            </p>
-            <h1 className="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">
-              Irrigation Schedules
-            </h1>
-            <p className="mt-2 text-sm text-slate-600">
-              Plan watering activities and track water use across your fields.
-            </p>
-          </div>
-
-          <button
+    <ModuleLayout
+      title="Irrigation Schedules"
+      subtitle="Plan watering activities and track water use across your fields."
+      actions={<>
+<button
             type="button"
             onClick={startCreate}
-            className="rounded-lg bg-emerald-700 px-4 py-2.5 font-semibold text-white hover:bg-emerald-800"
+            className="rounded-full bg-harvest-400 px-5 py-2 text-sm font-medium text-farm-900 transition hover:bg-harvest-500 disabled:opacity-60"
           >
             + New schedule
           </button>
-        </header>
+      </>}
+    >
+      <div className="mx-auto max-w-7xl space-y-6">
 
         {error && (
           <div
             role="alert"
-            className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+            className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"
           >
             {error}
           </div>
@@ -350,7 +341,7 @@ export default function IrrigationScheduleManagement() {
         {notice && (
           <div
             role="status"
-            className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800"
+            className="rounded-2xl border border-farm-200 bg-farm-50 p-3 text-sm text-farm-800"
           >
             {notice}
           </div>
@@ -364,9 +355,9 @@ export default function IrrigationScheduleManagement() {
         </section>
 
         {showForm && (
-          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <section className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
             <div className="mb-5 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-slate-900">
+              <h2 className="text-lg font-bold text-farm-900">
                 {editingId !== null
                   ? 'Edit irrigation schedule'
                   : 'Create irrigation schedule'}
@@ -375,21 +366,21 @@ export default function IrrigationScheduleManagement() {
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="rounded-md px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100"
+                className="rounded-full px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100"
               >
                 Close
               </button>
             </div>
 
             {fields.length === 0 && (
-              <p className="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
+              <p className="mb-4 rounded-2xl bg-amber-50 p-3 text-sm text-amber-800">
                 No fields are available. Check the field API and ensure a farm
                 has at least one registered field.
               </p>
             )}
 
             {waterSources.length === 0 && (
-              <p className="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
+              <p className="mb-4 rounded-2xl bg-amber-50 p-3 text-sm text-amber-800">
                 No water sources are available. Register a water source first.
               </p>
             )}
@@ -545,7 +536,7 @@ export default function IrrigationScheduleManagement() {
                   disabled={
                     saving || fields.length === 0 || waterSources.length === 0
                   }
-                  className="rounded-lg bg-emerald-700 px-5 py-2.5 font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-full bg-farm-700 px-5 py-2.5 font-semibold text-white hover:bg-farm-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {saving
                     ? 'Saving...'
@@ -562,7 +553,7 @@ export default function IrrigationScheduleManagement() {
                     setForm({ ...emptyForm });
                     setError('');
                   }}
-                  className="rounded-lg border border-slate-300 px-5 py-2.5 font-semibold text-slate-700 hover:bg-slate-50"
+                  className="rounded-full border border-farm-200 px-5 py-2.5 font-semibold text-slate-700 hover:bg-farm-50"
                 >
                   Cancel
                 </button>
@@ -571,9 +562,9 @@ export default function IrrigationScheduleManagement() {
           </section>
         )}
 
-        <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <div className="border-b border-slate-200 px-5 py-4">
-            <h2 className="font-bold text-slate-900">
+        <section className="overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+          <div className="border-b border-farm-100 px-5 py-4">
+            <h2 className="font-bold text-farm-900">
               All irrigation schedules
             </h2>
             <p className="mt-1 text-sm text-slate-500">
@@ -594,8 +585,8 @@ export default function IrrigationScheduleManagement() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200 text-sm">
-                <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+              <table className="min-w-full divide-y divide-farm-100 text-sm">
+                <thead className="bg-farm-50 text-left text-xs text-farm-700">
                   <tr>
                     <th className="px-4 py-3">Date &amp; time</th>
                     <th className="px-4 py-3">Field</th>
@@ -609,7 +600,7 @@ export default function IrrigationScheduleManagement() {
 
                 <tbody className="divide-y divide-slate-100">
                   {schedules.map((schedule) => (
-                    <tr key={schedule.id} className="hover:bg-slate-50">
+                    <tr key={schedule.id} className="hover:bg-farm-50">
                       <td className="whitespace-nowrap px-4 py-3">
                         <div className="font-medium">
                           {formatDate(schedule.irrigation_date)}
@@ -651,7 +642,7 @@ export default function IrrigationScheduleManagement() {
                         <button
                           type="button"
                           onClick={() => startEdit(schedule)}
-                          className="mr-3 font-semibold text-emerald-700 hover:text-emerald-900"
+                          className="mr-3 font-semibold text-farm-700 hover:text-farm-900"
                         >
                           Edit
                         </button>
@@ -672,6 +663,6 @@ export default function IrrigationScheduleManagement() {
           )}
         </section>
       </div>
-    </main>
+    </ModuleLayout>
   );
 }

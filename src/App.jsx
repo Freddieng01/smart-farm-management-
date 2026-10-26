@@ -29,6 +29,7 @@ import AcceptInvitation from './pages/AcceptInvitation.jsx';
 import NotificationsManagement from './pages/NotificationsManagement.jsx';
 import SupplierManagement from './pages/SupplierManagement.jsx';
 import SalesManagement from './pages/SalesManagement.jsx';
+import StorageManagement from './pages/StorageManagement.jsx';
 import ForgotPassword from './pages/ForgotPassword.jsx';
 import ResetPassword from './pages/ResetPassword.jsx';
 import InventoryManagement from './pages/InventoryManagement.jsx';
@@ -247,6 +248,15 @@ function AppRoutes() {
                         ]}
                     >
                         <ProductionLogging />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/storage"
+                element={
+                    <ProtectedRoute>
+                        <StorageManagement />
                     </ProtectedRoute>
                 }
             />

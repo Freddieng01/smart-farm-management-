@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
+import ModuleLayout from '../components/ModuleLayout.jsx';
 
-const input = 'rounded-md border border-[#cbd8ca] px-3 py-2 text-sm outline-none focus:border-[#4d7a39] focus:ring-2 focus:ring-[#4d7a39]/20';
+const input = 'rounded-full border border-farm-200 px-3 py-2 text-sm outline-none focus:border-farm-500 focus:ring-2 focus:ring-farm-500/20';
 const money = (n) => `$${Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const label = (s) => s.replace(/_/g, ' ');
 
 function Card({ title, value, tone }) {
     return (
-        <article className="rounded-lg border border-[#dfe9de] bg-white p-5 shadow-sm">
-            <p className="text-sm font-medium text-[#647260]">{title}</p>
-            <p className={`mt-2 text-2xl font-semibold ${tone || 'text-[#172316]'}`}>{value}</p>
+        <article className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+            <p className="text-sm font-medium text-slate-500">{title}</p>
+            <p className={`mt-2 text-2xl font-semibold ${tone || 'text-farm-900'}`}>{value}</p>
         </article>
     );
 }
@@ -17,14 +18,14 @@ function Card({ title, value, tone }) {
 function Breakdown({ title, data }) {
     const entries = Object.entries(data || {});
     return (
-        <div className="rounded-lg border border-[#dfe9de] bg-white p-5 shadow-sm">
-            <h3 className="mb-3 text-base font-semibold text-[#172316]">{title}</h3>
-            {entries.length === 0 ? <p className="text-sm text-[#647260]">No records.</p> : (
-                <ul className="divide-y divide-[#dfe9de] text-sm">
+        <div className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+            <h3 className="mb-3 text-base font-semibold text-farm-900">{title}</h3>
+            {entries.length === 0 ? <p className="text-sm text-slate-500">No records.</p> : (
+                <ul className="divide-y divide-farm-100 text-sm">
                     {entries.map(([k, v]) => (
                         <li key={k} className="flex justify-between py-2">
-                            <span className="capitalize text-[#647260]">{label(k)}</span>
-                            <span className="font-medium text-[#172316]">{money(v)}</span>
+                            <span className="capitalize text-slate-500">{label(k)}</span>
+                            <span className="font-medium text-farm-900">{money(v)}</span>
                         </li>
                     ))}
                 </ul>
@@ -84,34 +85,33 @@ export default function ReportsAnalytics() {
     useEffect(() => { load(); }, [load]);
 
     return (
-        <main className="min-h-screen bg-[#f7faf7] px-6 py-8">
+        <ModuleLayout
+          title="Reports &amp; Analytics"
+          subtitle="Profit and loss, cost per hectare, inventory value and budget performance."
+        >
             <div className="mx-auto max-w-7xl">
-                <div className="mb-6">
-                    <h1 className="text-2xl font-semibold text-[#172316]">Reports &amp; Analytics</h1>
-                    <p className="text-sm text-[#647260]">Profit and loss, cost per hectare, inventory value and budget performance.</p>
-                </div>
 
                 <div className="mb-6 flex flex-wrap items-end gap-3">
                     <div>
-                        <label className="block text-xs font-medium text-[#647260]">Farm</label>
+                        <label className="block text-xs font-medium text-slate-500">Farm</label>
                         <select className={input} value={farmId} onChange={(e) => setFarmId(e.target.value)}>
                             {farms.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
                         </select>
                     </div>
                     <div>
-                        <label className="block text-xs font-medium text-[#647260]">From</label>
+                        <label className="block text-xs font-medium text-slate-500">From</label>
                         <input type="date" className={input} value={from} onChange={(e) => setFrom(e.target.value)} />
                     </div>
                     <div>
-                        <label className="block text-xs font-medium text-[#647260]">To</label>
+                        <label className="block text-xs font-medium text-slate-500">To</label>
                         <input type="date" className={input} value={to} onChange={(e) => setTo(e.target.value)} />
                     </div>
-                    <button className="rounded-md border border-[#cbd8ca] px-3 py-2 text-sm text-[#647260] hover:bg-white"
+                    <button className="rounded-full border border-farm-200 px-3 py-2 text-sm text-slate-500 hover:bg-white"
                         onClick={() => { setFrom(''); setTo(''); }}>Clear dates</button>
                 </div>
 
-                {error && <p className="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
-                {loading && <p className="mb-4 text-sm text-[#647260]">Loading reports...</p>}
+                {error && <p className="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
+                {loading && <p className="mb-4 text-sm text-slate-500">Loading reports...</p>}
 
                 {summary && (
                     <>
@@ -119,7 +119,7 @@ export default function ReportsAnalytics() {
                             <Card title="Total income" value={money(summary.total_income)} />
                             <Card title="Total expenses" value={money(summary.total_expenses)} />
                             <Card title="Net profit" value={money(summary.net_profit)}
-                                tone={summary.net_profit < 0 ? 'text-red-700' : 'text-green-700'} />
+                                tone={summary.net_profit < 0 ? 'text-red-700' : 'text-farm-700'} />
                             <Card title="Inventory value" value={money(summary.inventory_value)} />
                         </div>
                         <div className="mt-4 grid gap-4 sm:grid-cols-3">
@@ -138,39 +138,39 @@ export default function ReportsAnalytics() {
                 )}
 
                 {perHa && (
-                    <div className="mt-6 rounded-lg border border-[#dfe9de] bg-white p-5 shadow-sm">
-                        <h3 className="mb-2 text-base font-semibold text-[#172316]">Production cost per hectare</h3>
+                    <div className="mt-6 rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+                        <h3 className="mb-2 text-base font-semibold text-farm-900">Production cost per hectare</h3>
                         {perHa.data?.cost_per_hectare != null ? (
-                            <p className="text-sm text-[#647260]">
-                                <span className="text-2xl font-semibold text-[#172316]">{money(perHa.data.cost_per_hectare)}</span> per ha
+                            <p className="text-sm text-slate-500">
+                                <span className="text-2xl font-semibold text-farm-900">{money(perHa.data.cost_per_hectare)}</span> per ha
                                 {' '}({money(perHa.data.total_cost)} over {perHa.data.size_hectares} ha)
                             </p>
                         ) : (
-                            <p className="text-sm text-[#647260]">{perHa.message || 'Not available.'}</p>
+                            <p className="text-sm text-slate-500">{perHa.message || 'Not available.'}</p>
                         )}
                     </div>
                 )}
 
-                <div className="mt-6 overflow-x-auto rounded-lg border border-[#dfe9de] bg-white shadow-sm">
-                    <h3 className="px-5 pt-5 text-base font-semibold text-[#172316]">Budget vs actual</h3>
+                <div className="mt-6 overflow-x-auto rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+                    <h3 className="px-5 pt-5 text-base font-semibold text-farm-900">Budget vs actual</h3>
                     <table className="mt-3 w-full text-left text-sm">
-                        <thead className="bg-[#fcfdfc] uppercase text-[#647260]"><tr>
+                        <thead className="bg-farm-50 text-farm-700 text-xs"><tr>
                             <th className="px-5 py-3 font-medium">Category</th>
                             <th className="px-5 py-3 font-medium">Period</th>
                             <th className="px-5 py-3 font-medium">Planned</th>
                             <th className="px-5 py-3 font-medium">Actual</th>
                             <th className="px-5 py-3 font-medium">Variance</th>
                         </tr></thead>
-                        <tbody className="divide-y divide-[#dfe9de]">
+                        <tbody className="divide-y divide-farm-100">
                             {bva.length === 0 ? (
-                                <tr><td colSpan="5" className="px-5 py-8 text-center text-[#647260]">No budgets for this farm.</td></tr>
+                                <tr><td colSpan="5" className="px-5 py-8 text-center text-slate-500">No budgets for this farm.</td></tr>
                             ) : bva.map((r) => (
                                 <tr key={r.budget_id}>
-                                    <td className="px-5 py-3 capitalize text-[#172316]">{label(r.category)}</td>
-                                    <td className="px-5 py-3 text-[#647260]">{r.period_start} → {r.period_end}</td>
+                                    <td className="px-5 py-3 capitalize text-farm-900">{label(r.category)}</td>
+                                    <td className="px-5 py-3 text-slate-500">{r.period_start} → {r.period_end}</td>
                                     <td className="px-5 py-3">{money(r.planned_amount)}</td>
                                     <td className="px-5 py-3">{money(r.actual_amount)}</td>
-                                    <td className={`px-5 py-3 font-medium ${r.variance < 0 ? 'text-red-700' : 'text-green-700'}`}>
+                                    <td className={`px-5 py-3 font-medium ${r.variance < 0 ? 'text-red-700' : 'text-farm-700'}`}>
                                         {money(r.variance)} {r.variance < 0 ? '(over)' : '(under)'}
                                     </td>
                                 </tr>
@@ -179,6 +179,6 @@ export default function ReportsAnalytics() {
                     </table>
                 </div>
             </div>
-        </main>
+        </ModuleLayout>
     );
 }

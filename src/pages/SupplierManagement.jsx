@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
-import BackButton from '../components/BackButton.jsx';
+import ModuleLayout from '../components/ModuleLayout.jsx';
 
 const emptySupplier = {
     farm_id: '',
@@ -19,17 +19,17 @@ const newOrderForm = () => ({
 });
 
 const inputClass =
-    'mt-1 w-full rounded-md border border-[#cbd8ca] px-3 py-2 text-sm outline-none focus:border-[#4d7a39] focus:ring-2 focus:ring-[#4d7a39]/20';
+    'mt-1 w-full rounded-xl border border-farm-200 px-3 py-2 text-sm outline-none focus:border-farm-500 focus:ring-2 focus:ring-farm-500/20';
 
 const approvalStyles = {
     Pending: 'bg-amber-100 text-amber-800',
-    Approved: 'bg-green-100 text-green-800',
+    Approved: 'bg-farm-100 text-farm-800',
     Rejected: 'bg-red-100 text-red-800',
 };
 
 const fulfillmentStyles = {
-    Pending: 'bg-gray-100 text-gray-700',
-    Received: 'bg-green-100 text-green-800',
+    Pending: 'bg-slate-100 text-slate-700',
+    Received: 'bg-farm-100 text-farm-800',
     Cancelled: 'bg-red-100 text-red-800',
 };
 
@@ -154,31 +154,27 @@ export default function SupplierManagement() {
     const pendingApprovals = orders.filter((o) => o.approval_status === 'Pending').length;
 
     return (
-        <main className="min-h-screen bg-[#f7faf7] px-6 py-8">
-            <div className="mx-auto max-w-7xl">
-                <BackButton />
-                <div className="mb-6 flex items-center justify-between">
-                    <div>
-                        <h1 className="text-2xl font-semibold text-[#172316]">Suppliers and procurement</h1>
-                        <p className="text-sm text-[#647260]">
-                            Keep track of who you buy from, and approve purchase orders before they go out.
-                        </p>
-                    </div>
-                    <button
+        <ModuleLayout
+          title="Suppliers and procurement"
+          subtitle="Keep track of who you buy from, and approve purchase orders before they go out."
+          actions={<>
+<button
                         onClick={() => (tab === 'suppliers' ? openSupplierModal() : openOrderModal())}
-                        className="rounded-md bg-[#315f2b] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#264b22]"
+                        className="rounded-full bg-harvest-400 px-5 py-2 text-sm font-medium text-farm-900 transition hover:bg-harvest-500 disabled:opacity-60"
                     >
                         {tab === 'suppliers' ? '+ Add supplier' : '+ New purchase order'}
                     </button>
-                </div>
+          </>}
+        >
+            <div className="mx-auto max-w-7xl">
 
-                <div className="mb-4 flex gap-2 border-b border-[#dfe9de]">
+                <div className="mb-4 flex gap-2 border-b border-farm-100">
                     <button
                         onClick={() => setTab('suppliers')}
                         className={`px-4 py-2 text-sm font-medium transition ${
                             tab === 'suppliers'
-                                ? 'border-b-2 border-[#315f2b] text-[#172316]'
-                                : 'text-[#647260] hover:text-[#172316]'
+                                ? 'border-b-2 border-farm-700 text-farm-900'
+                                : 'text-slate-500 hover:text-farm-900'
                         }`}
                     >
                         Suppliers
@@ -187,57 +183,57 @@ export default function SupplierManagement() {
                         onClick={() => setTab('orders')}
                         className={`px-4 py-2 text-sm font-medium transition ${
                             tab === 'orders'
-                                ? 'border-b-2 border-[#315f2b] text-[#172316]'
-                                : 'text-[#647260] hover:text-[#172316]'
+                                ? 'border-b-2 border-farm-700 text-farm-900'
+                                : 'text-slate-500 hover:text-farm-900'
                         }`}
                     >
                         Purchase orders{pendingApprovals > 0 ? ` (${pendingApprovals} awaiting approval)` : ''}
                     </button>
                 </div>
 
-                {error && <p className="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
+                {error && <p className="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
 
                 {tab === 'suppliers' && (
-                    <div className="overflow-hidden rounded-lg border border-[#dfe9de] bg-white shadow-sm">
+                    <div className="overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
                         <table className="w-full text-left text-sm">
-                            <thead className="bg-[#fcfdfc] text-[#647260]">
+                            <thead className="bg-farm-50 text-slate-500">
                                 <tr>
-                                    <th className="px-6 py-3 font-medium">Name</th>
-                                    <th className="px-6 py-3 font-medium">Supplies</th>
-                                    <th className="px-6 py-3 font-medium">Contact</th>
-                                    <th className="px-6 py-3 font-medium">Rating</th>
-                                    <th className="px-6 py-3 text-right font-medium">Actions</th>
+                                    <th className="px-6 py-3 font-semibold">Name</th>
+                                    <th className="px-6 py-3 font-semibold">Supplies</th>
+                                    <th className="px-6 py-3 font-semibold">Contact</th>
+                                    <th className="px-6 py-3 font-semibold">Rating</th>
+                                    <th className="px-6 py-3 text-right font-semibold">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-[#dfe9de]">
+                            <tbody className="divide-y divide-farm-100">
                                 {loading ? (
                                     <tr>
-                                        <td colSpan="5" className="px-6 py-10 text-center text-[#647260]">
+                                        <td colSpan="5" className="px-6 py-10 text-center text-slate-500">
                                             Loading suppliers...
                                         </td>
                                     </tr>
                                 ) : suppliers.length === 0 ? (
                                     <tr>
-                                        <td colSpan="5" className="px-6 py-10 text-center text-[#647260]">
+                                        <td colSpan="5" className="px-6 py-10 text-center text-slate-500">
                                             No suppliers yet. Add your first supplier to start raising purchase orders.
                                         </td>
                                     </tr>
                                 ) : (
                                     suppliers.map((s) => (
-                                        <tr key={s.id} className="transition hover:bg-[#fcfdfc]">
-                                            <td className="px-6 py-4 font-medium text-[#172316]">{s.name}</td>
-                                            <td className="px-6 py-4 text-[#647260]">{s.supplies_category || '-'}</td>
-                                            <td className="px-6 py-4 text-[#647260]">
+                                        <tr key={s.id} className="transition hover:bg-farm-50">
+                                            <td className="px-6 py-4 font-medium text-farm-900">{s.name}</td>
+                                            <td className="px-6 py-4 text-slate-500">{s.supplies_category || '-'}</td>
+                                            <td className="px-6 py-4 text-slate-500">
                                                 <p>{s.contact_phone || '-'}</p>
                                                 <p className="text-xs">{s.contact_email || ''}</p>
                                             </td>
-                                            <td className="px-6 py-4 text-[#647260]">
+                                            <td className="px-6 py-4 text-slate-500">
                                                 {s.performance_rating != null ? `${s.performance_rating} / 5` : 'Not rated'}
                                             </td>
                                             <td className="space-x-3 px-6 py-4 text-right">
                                                 <button
                                                     onClick={() => openSupplierModal(s)}
-                                                    className="text-blue-600 hover:underline"
+                                                    className="text-farm-700 hover:underline"
                                                 >
                                                     Edit
                                                 </button>
@@ -257,37 +253,37 @@ export default function SupplierManagement() {
                 )}
 
                 {tab === 'orders' && (
-                    <div className="overflow-hidden rounded-lg border border-[#dfe9de] bg-white shadow-sm">
+                    <div className="overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
                         <table className="w-full text-left text-sm">
-                            <thead className="bg-[#fcfdfc] text-[#647260]">
+                            <thead className="bg-farm-50 text-slate-500">
                                 <tr>
-                                    <th className="px-6 py-3 font-medium">Order number</th>
-                                    <th className="px-6 py-3 font-medium">Supplier</th>
-                                    <th className="px-6 py-3 font-medium">Order date</th>
-                                    <th className="px-6 py-3 font-medium">Approval</th>
-                                    <th className="px-6 py-3 font-medium">Delivery</th>
-                                    <th className="px-6 py-3 text-right font-medium">Actions</th>
+                                    <th className="px-6 py-3 font-semibold">Order number</th>
+                                    <th className="px-6 py-3 font-semibold">Supplier</th>
+                                    <th className="px-6 py-3 font-semibold">Order date</th>
+                                    <th className="px-6 py-3 font-semibold">Approval</th>
+                                    <th className="px-6 py-3 font-semibold">Delivery</th>
+                                    <th className="px-6 py-3 text-right font-semibold">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-[#dfe9de]">
+                            <tbody className="divide-y divide-farm-100">
                                 {loading ? (
                                     <tr>
-                                        <td colSpan="6" className="px-6 py-10 text-center text-[#647260]">
+                                        <td colSpan="6" className="px-6 py-10 text-center text-slate-500">
                                             Loading purchase orders...
                                         </td>
                                     </tr>
                                 ) : orders.length === 0 ? (
                                     <tr>
-                                        <td colSpan="6" className="px-6 py-10 text-center text-[#647260]">
+                                        <td colSpan="6" className="px-6 py-10 text-center text-slate-500">
                                             No purchase orders yet. Create one once you have a supplier.
                                         </td>
                                     </tr>
                                 ) : (
                                     orders.map((o) => (
-                                        <tr key={o.id} className="transition hover:bg-[#fcfdfc]">
-                                            <td className="px-6 py-4 font-medium text-[#172316]">{o.order_number}</td>
-                                            <td className="px-6 py-4 text-[#647260]">{o.supplier?.name || `#${o.supplier_id}`}</td>
-                                            <td className="px-6 py-4 text-[#647260]">
+                                        <tr key={o.id} className="transition hover:bg-farm-50">
+                                            <td className="px-6 py-4 font-medium text-farm-900">{o.order_number}</td>
+                                            <td className="px-6 py-4 text-slate-500">{o.supplier?.name || `#${o.supplier_id}`}</td>
+                                            <td className="px-6 py-4 text-slate-500">
                                                 {o.order_date ? String(o.order_date).slice(0, 10) : '-'}
                                             </td>
                                             <td className="px-6 py-4">
@@ -315,7 +311,7 @@ export default function SupplierManagement() {
                                                             onClick={() =>
                                                                 updateOrder(o.id, { approval_status: 'Approved' }, 'Could not approve the order.')
                                                             }
-                                                            className="text-green-700 hover:underline"
+                                                            className="text-farm-700 hover:underline"
                                                         >
                                                             Approve
                                                         </button>
@@ -334,7 +330,7 @@ export default function SupplierManagement() {
                                                         onClick={() =>
                                                             updateOrder(o.id, { fulfillment_status: 'Received' }, 'Could not mark the order as received.')
                                                         }
-                                                        className="text-blue-600 hover:underline"
+                                                        className="text-farm-700 hover:underline"
                                                     >
                                                         Mark as received
                                                     </button>
@@ -356,13 +352,13 @@ export default function SupplierManagement() {
 
                 {supplierModal && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-                        <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
-                            <h2 className="mb-6 text-xl font-semibold text-[#172316]">
+                        <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-6 shadow-xl">
+                            <h2 className="mb-6 text-xl font-semibold text-farm-900">
                                 {editingSupplier ? 'Edit supplier' : 'Add supplier'}
                             </h2>
                             <form onSubmit={handleSupplierSubmit} className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Farm ID</label>
+                                    <label className="block text-sm font-medium text-farm-900">Farm ID</label>
                                     <input
                                         type="number"
                                         className={inputClass}
@@ -373,7 +369,7 @@ export default function SupplierManagement() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Supplier name</label>
+                                    <label className="block text-sm font-medium text-farm-900">Supplier name</label>
                                     <input
                                         className={inputClass}
                                         value={supplierForm.name}
@@ -382,7 +378,7 @@ export default function SupplierManagement() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">What they supply</label>
+                                    <label className="block text-sm font-medium text-farm-900">What they supply</label>
                                     <input
                                         className={inputClass}
                                         placeholder="e.g. Seeds, Fertilizer, Equipment"
@@ -391,7 +387,7 @@ export default function SupplierManagement() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Phone</label>
+                                    <label className="block text-sm font-medium text-farm-900">Phone</label>
                                     <input
                                         className={inputClass}
                                         value={supplierForm.contact_phone}
@@ -399,7 +395,7 @@ export default function SupplierManagement() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Email</label>
+                                    <label className="block text-sm font-medium text-farm-900">Email</label>
                                     <input
                                         type="email"
                                         className={inputClass}
@@ -408,7 +404,7 @@ export default function SupplierManagement() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Address</label>
+                                    <label className="block text-sm font-medium text-farm-900">Address</label>
                                     <input
                                         className={inputClass}
                                         value={supplierForm.address}
@@ -416,7 +412,7 @@ export default function SupplierManagement() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Performance rating (0 to 5)</label>
+                                    <label className="block text-sm font-medium text-farm-900">Performance rating (0 to 5)</label>
                                     <input
                                         type="number"
                                         min="0"
@@ -431,13 +427,13 @@ export default function SupplierManagement() {
                                     <button
                                         type="button"
                                         onClick={() => setSupplierModal(false)}
-                                        className="rounded-md border border-[#cbd8ca] px-4 py-2 text-sm font-medium text-[#647260] transition hover:bg-[#fcfdfc]"
+                                        className="rounded-full border border-farm-200 px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-farm-50"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className="rounded-md bg-[#315f2b] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#264b22]"
+                                        className="rounded-full bg-farm-700 px-5 py-2 text-sm font-medium text-white transition hover:bg-farm-800"
                                     >
                                         {editingSupplier ? 'Save changes' : 'Add supplier'}
                                     </button>
@@ -449,11 +445,11 @@ export default function SupplierManagement() {
 
                 {orderModal && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-                        <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
-                            <h2 className="mb-6 text-xl font-semibold text-[#172316]">New purchase order</h2>
+                        <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-6 shadow-xl">
+                            <h2 className="mb-6 text-xl font-semibold text-farm-900">New purchase order</h2>
                             <form onSubmit={handleOrderSubmit} className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Supplier</label>
+                                    <label className="block text-sm font-medium text-farm-900">Supplier</label>
                                     <select
                                         className={inputClass}
                                         value={orderForm.supplier_id}
@@ -469,7 +465,7 @@ export default function SupplierManagement() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Order number</label>
+                                    <label className="block text-sm font-medium text-farm-900">Order number</label>
                                     <input
                                         className={inputClass}
                                         value={orderForm.order_number}
@@ -478,7 +474,7 @@ export default function SupplierManagement() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-[#243322]">Order date</label>
+                                    <label className="block text-sm font-medium text-farm-900">Order date</label>
                                     <input
                                         type="date"
                                         className={inputClass}
@@ -491,13 +487,13 @@ export default function SupplierManagement() {
                                     <button
                                         type="button"
                                         onClick={() => setOrderModal(false)}
-                                        className="rounded-md border border-[#cbd8ca] px-4 py-2 text-sm font-medium text-[#647260] transition hover:bg-[#fcfdfc]"
+                                        className="rounded-full border border-farm-200 px-4 py-2 text-sm font-medium text-slate-500 transition hover:bg-farm-50"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className="rounded-md bg-[#315f2b] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#264b22]"
+                                        className="rounded-full bg-farm-700 px-5 py-2 text-sm font-medium text-white transition hover:bg-farm-800"
                                     >
                                         Create order
                                     </button>
@@ -507,6 +503,6 @@ export default function SupplierManagement() {
                     </div>
                 )}
             </div>
-        </main>
+        </ModuleLayout>
     );
 }

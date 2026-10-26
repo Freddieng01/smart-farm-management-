@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
+import ModuleLayout from '../components/ModuleLayout.jsx';
 
 const emptyForm = {
     farm_id: '',
@@ -161,9 +162,9 @@ export default function WaterSourceManagement() {
     function statusClass(status) {
         switch ((status || '').toLowerCase()) {
             case 'active':
-                return 'bg-green-100 text-green-800';
+                return 'bg-farm-100 text-farm-800';
             case 'inactive':
-                return 'bg-gray-100 text-gray-700';
+                return 'bg-slate-100 text-slate-700';
             case 'maintenance':
                 return 'bg-yellow-100 text-yellow-800';
             default:
@@ -172,39 +173,35 @@ export default function WaterSourceManagement() {
     }
 
     return (
-        <div className="space-y-6 p-4 md:p-6">
-            <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                    Water Source Management
-                </h1>
-                <p className="mt-1 text-sm text-gray-600">
-                    Register and manage water sources available to your farms.
-                </p>
-            </div>
+        <ModuleLayout
+          title="Water Source Management"
+          subtitle="Register and manage water sources available to your farms."
+        >
+          <div className="space-y-6">
 
             {error && (
-                <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                <div className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
                     {error}
                 </div>
             )}
 
             {success && (
-                <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700">
+                <div className="rounded-2xl border border-farm-200 bg-farm-50 p-3 text-sm text-farm-700">
                     {success}
                 </div>
             )}
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div className="rounded-xl border bg-white p-5 shadow-sm">
-                    <p className="text-sm text-gray-500">Total Sources</p>
-                    <p className="mt-2 text-2xl font-bold text-gray-900">
+                <div className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+                    <p className="text-sm text-slate-500">Total Sources</p>
+                    <p className="mt-2 text-2xl font-bold text-farm-900">
                         {waterSources.length}
                     </p>
                 </div>
 
-                <div className="rounded-xl border bg-white p-5 shadow-sm">
-                    <p className="text-sm text-gray-500">Active Sources</p>
-                    <p className="mt-2 text-2xl font-bold text-green-700">
+                <div className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+                    <p className="text-sm text-slate-500">Active Sources</p>
+                    <p className="mt-2 text-2xl font-bold text-farm-700">
                         {waterSources.filter(
                             (source) =>
                                 (source.status || '').toLowerCase() === 'active'
@@ -212,8 +209,8 @@ export default function WaterSourceManagement() {
                     </p>
                 </div>
 
-                <div className="rounded-xl border bg-white p-5 shadow-sm">
-                    <p className="text-sm text-gray-500">Registered Farms</p>
+                <div className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+                    <p className="text-sm text-slate-500">Registered Farms</p>
                     <p className="mt-2 text-2xl font-bold text-blue-700">
                         {farms.length}
                     </p>
@@ -222,15 +219,15 @@ export default function WaterSourceManagement() {
 
             <form
                 onSubmit={handleSubmit}
-                className="space-y-4 rounded-xl border bg-white p-5 shadow-sm"
+                className="space-y-4 rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]"
             >
-                <h2 className="text-lg font-semibold text-gray-900">
+                <h2 className="text-lg font-semibold text-farm-900">
                     {editingId ? 'Edit Water Source' : 'Register Water Source'}
                 </h2>
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-700">
+                        <label className="mb-1 block text-sm font-medium text-slate-700">
                             Farm *
                         </label>
                         <select
@@ -238,7 +235,7 @@ export default function WaterSourceManagement() {
                             value={form.farm_id}
                             onChange={handleChange}
                             required
-                            className="w-full rounded-lg border border-gray-300 p-2.5"
+                            className="w-full rounded-xl border border-farm-200 p-2.5"
                         >
                             <option value="">Select a farm</option>
                             {farms.map((farm) => (
@@ -256,7 +253,7 @@ export default function WaterSourceManagement() {
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-700">
+                        <label className="mb-1 block text-sm font-medium text-slate-700">
                             Water Source Name *
                         </label>
                         <input
@@ -266,12 +263,12 @@ export default function WaterSourceManagement() {
                             required
                             maxLength={255}
                             placeholder="e.g. North Farm Borehole"
-                            className="w-full rounded-lg border border-gray-300 p-2.5"
+                            className="w-full rounded-xl border border-farm-200 p-2.5"
                         />
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-700">
+                        <label className="mb-1 block text-sm font-medium text-slate-700">
                             Source Type *
                         </label>
                         <select
@@ -279,7 +276,7 @@ export default function WaterSourceManagement() {
                             value={form.type}
                             onChange={handleChange}
                             required
-                            className="w-full rounded-lg border border-gray-300 p-2.5"
+                            className="w-full rounded-xl border border-farm-200 p-2.5"
                         >
                             <option value="Borehole">Borehole</option>
                             <option value="Well">Well</option>
@@ -294,7 +291,7 @@ export default function WaterSourceManagement() {
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-700">
+                        <label className="mb-1 block text-sm font-medium text-slate-700">
                             Location
                         </label>
                         <input
@@ -303,12 +300,12 @@ export default function WaterSourceManagement() {
                             onChange={handleChange}
                             maxLength={255}
                             placeholder="e.g. Northern boundary"
-                            className="w-full rounded-lg border border-gray-300 p-2.5"
+                            className="w-full rounded-xl border border-farm-200 p-2.5"
                         />
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-700">
+                        <label className="mb-1 block text-sm font-medium text-slate-700">
                             Capacity
                         </label>
                         <input
@@ -319,22 +316,22 @@ export default function WaterSourceManagement() {
                             min="0"
                             step="any"
                             placeholder="Enter capacity"
-                            className="w-full rounded-lg border border-gray-300 p-2.5"
+                            className="w-full rounded-xl border border-farm-200 p-2.5"
                         />
-                        <p className="mt-1 text-xs text-gray-500">
+                        <p className="mt-1 text-xs text-slate-500">
                             Use the same unit consistently, such as litres or m³.
                         </p>
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-sm font-medium text-gray-700">
+                        <label className="mb-1 block text-sm font-medium text-slate-700">
                             Status
                         </label>
                         <select
                             name="status"
                             value={form.status}
                             onChange={handleChange}
-                            className="w-full rounded-lg border border-gray-300 p-2.5"
+                            className="w-full rounded-xl border border-farm-200 p-2.5"
                         >
                             <option value="Active">Active</option>
                             <option value="Inactive">Inactive</option>
@@ -343,7 +340,7 @@ export default function WaterSourceManagement() {
                     </div>
 
                     <div className="md:col-span-2">
-                        <label className="mb-1 block text-sm font-medium text-gray-700">
+                        <label className="mb-1 block text-sm font-medium text-slate-700">
                             Notes
                         </label>
                         <textarea
@@ -352,7 +349,7 @@ export default function WaterSourceManagement() {
                             onChange={handleChange}
                             rows="3"
                             placeholder="Add details about water availability, quality, or maintenance."
-                            className="w-full rounded-lg border border-gray-300 p-2.5"
+                            className="w-full rounded-xl border border-farm-200 p-2.5"
                         />
                     </div>
                 </div>
@@ -361,7 +358,7 @@ export default function WaterSourceManagement() {
                     <button
                         type="submit"
                         disabled={saving || farms.length === 0}
-                        className="rounded-lg bg-green-700 px-5 py-2.5 font-medium text-white hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-full bg-farm-700 px-5 py-2.5 font-medium text-white hover:bg-farm-800 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         {saving
                             ? 'Saving...'
@@ -374,7 +371,7 @@ export default function WaterSourceManagement() {
                         <button
                             type="button"
                             onClick={resetForm}
-                            className="rounded-lg border border-gray-300 px-5 py-2.5 font-medium text-gray-700 hover:bg-gray-50"
+                            className="rounded-full border border-farm-200 px-5 py-2.5 font-medium text-slate-700 hover:bg-farm-50"
                         >
                             Cancel
                         </button>
@@ -382,25 +379,25 @@ export default function WaterSourceManagement() {
                 </div>
             </form>
 
-            <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
+            <div className="overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
                 <div className="border-b p-5">
-                    <h2 className="text-lg font-semibold text-gray-900">
+                    <h2 className="text-lg font-semibold text-farm-900">
                         Registered Water Sources
                     </h2>
                 </div>
 
                 {loading ? (
-                    <p className="p-6 text-gray-500">
+                    <p className="p-6 text-slate-500">
                         Loading water sources...
                     </p>
                 ) : waterSources.length === 0 ? (
-                    <p className="p-6 text-gray-500">
+                    <p className="p-6 text-slate-500">
                         No water sources registered yet.
                     </p>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
+                        <table className="min-w-full divide-y divide-farm-100">
+                            <thead className="bg-farm-50">
                                 <tr>
                                     {[
                                         'Name',
@@ -413,7 +410,7 @@ export default function WaterSourceManagement() {
                                     ].map((heading) => (
                                         <th
                                             key={heading}
-                                            className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500"
+                                            className="px-4 py-3 text-left text-xs font-semibold text-slate-500"
                                         >
                                             {heading}
                                         </th>
@@ -421,22 +418,22 @@ export default function WaterSourceManagement() {
                                 </tr>
                             </thead>
 
-                            <tbody className="divide-y divide-gray-200">
+                            <tbody className="divide-y divide-farm-100">
                                 {waterSources.map((source) => (
-                                    <tr key={source.id} className="hover:bg-gray-50">
-                                        <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                                    <tr key={source.id} className="hover:bg-farm-50">
+                                        <td className="px-4 py-3 text-sm font-medium text-farm-900">
                                             {source.name}
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-700">
+                                        <td className="px-4 py-3 text-sm text-slate-700">
                                             {source.farm?.name || '—'}
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-700">
+                                        <td className="px-4 py-3 text-sm text-slate-700">
                                             {source.type}
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-700">
+                                        <td className="px-4 py-3 text-sm text-slate-700">
                                             {source.location || '—'}
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-700">
+                                        <td className="px-4 py-3 text-sm text-slate-700">
                                             {source.capacity ?? '—'}
                                         </td>
                                         <td className="px-4 py-3 text-sm">
@@ -469,6 +466,7 @@ export default function WaterSourceManagement() {
                     </div>
                 )}
             </div>
-        </div>
+          </div>
+        </ModuleLayout>
     );
 }

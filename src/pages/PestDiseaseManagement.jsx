@@ -1,6 +1,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
+import ModuleLayout from '../components/ModuleLayout.jsx';
 
 const sections = [
   { id: 'scouting', label: 'Scouting Records' },
@@ -283,7 +284,7 @@ function PestDiseaseManagement() {
         value={form.field_id}
         onChange={updateForm}
         required
-        className="w-full rounded-lg border border-gray-300 px-3 py-2"
+        className="w-full rounded-xl border border-farm-200 px-3 py-2"
       >
         <option value="">Select a field</option>
         {fields.map((field) => (
@@ -311,7 +312,7 @@ function PestDiseaseManagement() {
         min={min}
         step={step}
         placeholder={placeholder}
-        className="w-full rounded-lg border border-gray-300 px-3 py-2"
+        className="w-full rounded-xl border border-farm-200 px-3 py-2"
       />
     </label>
   );
@@ -324,7 +325,7 @@ function PestDiseaseManagement() {
         value={form[name] ?? ''}
         onChange={updateForm}
         required={required}
-        className="w-full rounded-lg border border-gray-300 px-3 py-2"
+        className="w-full rounded-xl border border-farm-200 px-3 py-2"
       >
         {options.map((option) => (
           <option key={option} value={option}>
@@ -344,7 +345,7 @@ function PestDiseaseManagement() {
         onChange={updateForm}
         required={required}
         rows={3}
-        className="w-full rounded-lg border border-gray-300 px-3 py-2"
+        className="w-full rounded-xl border border-farm-200 px-3 py-2"
       />
     </label>
   );
@@ -462,15 +463,11 @@ function PestDiseaseManagement() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">
-          Pest & Disease Management
-        </h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Monitor crop health, plan treatments, and manage outbreak alerts.
-        </p>
-      </div>
+    <ModuleLayout
+      title="Pest & Disease Management"
+      subtitle="Monitor crop health, plan treatments, and manage outbreak alerts."
+    >
+      <div className="space-y-6">
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {sections.map((section) => (
@@ -480,12 +477,12 @@ function PestDiseaseManagement() {
             onClick={() => switchTab(section.id)}
             className={`rounded-xl border p-4 text-left font-semibold ${
               activeTab === section.id
-                ? 'border-green-700 bg-green-50 text-green-800'
-                : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                ? 'border-farm-700 bg-farm-50 text-farm-800'
+                : 'border-farm-100 bg-white text-slate-700 hover:bg-farm-50'
             }`}
           >
             {section.label}
-            <span className="mt-2 block text-sm font-normal text-gray-500">
+            <span className="mt-2 block text-sm font-normal text-slate-500">
               {records[section.id].length} loaded records
             </span>
           </button>
@@ -495,7 +492,7 @@ function PestDiseaseManagement() {
       {error && (
         <div
           role="alert"
-          className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+          className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"
         >
           {error}
         </div>
@@ -504,14 +501,14 @@ function PestDiseaseManagement() {
       {success && (
         <div
           role="status"
-          className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700"
+          className="rounded-2xl border border-farm-200 bg-farm-50 p-3 text-sm text-farm-700"
         >
           {success}
         </div>
       )}
 
-      <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:p-6">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">
+      <section className="rounded-3xl bg-white p-4 shadow-[0_2px_16px_rgba(15,60,35,0.07)] md:p-6">
+        <h2 className="mb-4 text-lg font-semibold text-farm-900">
           {editingId ? 'Edit record' : `Add ${sections.find((s) => s.id === activeTab)?.label}`}
         </h2>
 
@@ -524,7 +521,7 @@ function PestDiseaseManagement() {
             <button
               type="submit"
               disabled={saving || fields.length === 0}
-              className="rounded-lg bg-green-700 px-5 py-2 font-medium text-white hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-full bg-farm-700 px-5 py-2 font-medium text-white hover:bg-farm-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {saving
                 ? 'Saving...'
@@ -537,7 +534,7 @@ function PestDiseaseManagement() {
               <button
                 type="button"
                 onClick={cancelEditing}
-                className="rounded-lg border border-gray-300 px-5 py-2 text-gray-700 hover:bg-gray-50"
+                className="rounded-full border border-farm-200 px-5 py-2 text-slate-700 hover:bg-farm-50"
               >
                 Cancel
               </button>
@@ -553,9 +550,9 @@ function PestDiseaseManagement() {
         </form>
       </section>
 
-      <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm md:p-6">
+      <section className="rounded-3xl bg-white p-4 shadow-[0_2px_16px_rgba(15,60,35,0.07)] md:p-6">
         <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-lg font-semibold text-farm-900">
             {sections.find((s) => s.id === activeTab)?.label}
           </h2>
 
@@ -564,20 +561,20 @@ function PestDiseaseManagement() {
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search records..."
-            className="rounded-lg border border-gray-300 px-3 py-2"
+            className="rounded-full border border-farm-200 px-3 py-2"
           />
         </div>
 
         {loading ? (
-          <p className="py-8 text-center text-gray-500">Loading records...</p>
+          <p className="py-8 text-center text-slate-500">Loading records...</p>
         ) : filteredRecords.length === 0 ? (
-          <p className="py-8 text-center text-gray-500">
+          <p className="py-8 text-center text-slate-500">
             No records found. Add your first record using the form above.
           </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[750px] text-left text-sm">
-              <thead className="bg-gray-50 text-gray-600">
+              <thead className="bg-farm-50 text-slate-600">
                 <tr>
                   <th className="p-3">Field</th>
                   {columns[activeTab].map(([, label]) => (
@@ -589,9 +586,9 @@ function PestDiseaseManagement() {
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-farm-100">
                 {filteredRecords.map((record) => (
-                  <tr key={record.id} className="hover:bg-gray-50">
+                  <tr key={record.id} className="hover:bg-farm-50">
                     <td className="p-3">{fieldName(record)}</td>
 
                     {columns[activeTab].map(([key]) => (
@@ -629,11 +626,12 @@ function PestDiseaseManagement() {
           </div>
         )}
 
-        <p className="mt-3 text-xs text-gray-500">
+        <p className="mt-3 text-xs text-slate-500">
           The API currently returns up to 25 records per category.
         </p>
       </section>
-    </div>
+      </div>
+    </ModuleLayout>
   );
 }
 

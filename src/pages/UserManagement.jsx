@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import BackButton from '../components/BackButton.jsx';
+import ModuleLayout from '../components/ModuleLayout.jsx';
 
 const UserManagement = () => {
     const { api } = useAuth();
@@ -83,47 +83,47 @@ const UserManagement = () => {
     if (loading) return <div className="p-8 text-center">Loading users...</div>;
 
     return (
-        <div className="p-8 max-w-6xl mx-auto">
-            <BackButton />
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
-                <button
+        <ModuleLayout
+          title="User Management"
+          actions={<>
+<button
                     onClick={openInvitationModal}
-                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+                    className="rounded-full bg-harvest-400 px-5 py-2 text-sm font-medium text-farm-900 transition hover:bg-harvest-500 disabled:opacity-60"
                 >
                     + Invite User
                 </button>
-            </div>
+          </>}
+        >
 
             {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4">{error}</div>}
 
-            <div className="bg-white shadow-md rounded-lg overflow-hidden">
+            <div className="bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)] rounded-3xl overflow-hidden">
                 <table className="w-full text-left">
-                    <thead className="bg-gray-50 border-b">
+                    <thead className="bg-farm-50 border-b">
                         <tr>
-                            <th className="px-6 py-3 text-sm font-semibold text-gray-600">Name</th>
-                            <th className="px-6 py-3 text-sm font-semibold text-gray-600">Email</th>
-                            <th className="px-6 py-3 text-sm font-semibold text-gray-600">Role</th>
-                            <th className="px-6 py-3 text-sm font-semibold text-gray-600 text-right">Actions</th>
+                            <th className="px-6 py-3 text-sm font-semibold text-slate-600">Name</th>
+                            <th className="px-6 py-3 text-sm font-semibold text-slate-600">Email</th>
+                            <th className="px-6 py-3 text-sm font-semibold text-slate-600">Role</th>
+                            <th className="px-6 py-3 text-sm font-semibold text-slate-600 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y">
                         {users.map(user => (
-                            <tr key={user.id} className="hover:bg-gray-50 transition">
-                                <td className="px-6 py-4 text-sm text-gray-800">{user.name}</td>
-                                <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
+                            <tr key={user.id} className="hover:bg-farm-50 transition">
+                                <td className="px-6 py-4 text-sm text-farm-900">{user.name}</td>
+                                <td className="px-6 py-4 text-sm text-slate-600">{user.email}</td>
                                 <td className="px-6 py-4 text-sm">
                                     <span className={`px-2 py-1 rounded-full text-xs font-medium
                                         ${user.role === 'Admin' ? 'bg-purple-100 text-purple-700' :
                                           user.role === 'Manager' ? 'bg-blue-100 text-blue-700' :
-                                          'bg-gray-100 text-gray-700'}`}>
+                                          'bg-slate-100 text-slate-700'}`}>
                                         {user.role}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 text-right text-sm">
                                     <button
                                         onClick={() => handleEdit(user)}
-                                        className="text-blue-600 hover:underline mr-3"
+                                        className="text-farm-700 hover:underline mr-3"
                                     >
                                         Edit
                                     </button>
@@ -142,35 +142,35 @@ const UserManagement = () => {
 
             {showModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-lg w-full max-w-md p-6 shadow-xl">
+                    <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-xl">
                         <h2 className="text-xl font-bold mb-4">
                             {editingUser ? 'Edit User' : 'Invite New User'}
                         </h2>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Full Name</label>
+                                <label className="block text-sm font-medium text-slate-700">Full Name</label>
                                 <input
-                                    className="w-full border rounded-lg p-2 mt-1"
+                                    className="w-full border rounded-xl p-2 mt-1"
                                     value={newUser.name}
                                     onChange={e => setNewUser({...newUser, name: e.target.value})}
                                     required
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Email</label>
+                                <label className="block text-sm font-medium text-slate-700">Email</label>
                                 <input
                                     type="email"
-                                    className="w-full border rounded-lg p-2 mt-1"
+                                    className="w-full border rounded-xl p-2 mt-1"
                                     value={newUser.email}
                                     onChange={e => setNewUser({...newUser, email: e.target.value})}
                                     required
                                 />
                             </div>
-                            {!editingUser && <p className="rounded-md bg-green-50 p-3 text-sm text-green-800">The new user will receive an email invitation and choose their own password.</p>}
+                            {!editingUser && <p className="rounded-2xl bg-farm-50 p-3 text-sm text-farm-800">The new user will receive an email invitation and choose their own password.</p>}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Role</label>
+                                <label className="block text-sm font-medium text-slate-700">Role</label>
                                 <select
-                                    className="w-full border rounded-lg p-2 mt-1"
+                                    className="w-full border rounded-xl p-2 mt-1"
                                     value={newUser.role}
                                     onChange={e => setNewUser({...newUser, role: e.target.value})}
                                 >
@@ -186,13 +186,13 @@ const UserManagement = () => {
                                 <button
                                     type="button"
                                     onClick={closeModal}
-                                    className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                                    className="px-4 py-2 text-slate-600 hover:text-farm-900"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                                    className="bg-farm-600 text-white px-4 py-2 rounded-full hover:bg-farm-700"
                                 >
                                     {editingUser ? 'Update User' : 'Send Invitation'}
                                 </button>
@@ -201,7 +201,7 @@ const UserManagement = () => {
                     </div>
                 </div>
             )}
-        </div>
+        </ModuleLayout>
     );
 };
 
