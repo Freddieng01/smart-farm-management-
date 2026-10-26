@@ -61,6 +61,12 @@ class FarmAccess
 
     public static function farmIdFor(Model $model): ?int
     {
+        // A Farm record IS the farm, so its own id is the farm id. Without this,
+        // opening a farm (or its fields) returned null and every non-Admin got a 403.
+        if ($model instanceof Farm) {
+            return (int) $model->getKey();
+        }
+
         if ($model->getAttribute('farm_id')) {
             return (int) $model->getAttribute('farm_id');
         }

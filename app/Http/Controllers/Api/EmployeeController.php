@@ -113,7 +113,7 @@ class EmployeeController extends Controller
     private function authorizeAssignment(Request $request, ?Employee $employee = null): void
     {
         $user = $request->user();
-        abort_unless(in_array($user?->role, ['Admin', 'Manager', 'Farm-owner'], true), 403, 'You may not assign employees.');
+        abort_unless(in_array($user?->role, ['Manager', 'Farm-owner'], true), 403, 'Only the farm owner or a manager may assign employees.');
 
         $farmId = (int) ($request->input('farm_id') ?: $employee?->farm_id);
         FarmAccess::authorizeFarm($farmId);
