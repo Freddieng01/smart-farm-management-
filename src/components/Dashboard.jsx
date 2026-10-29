@@ -39,8 +39,6 @@ const actionIcons = {
     '/reports': 'chart',
 };
 
-// How the modules are grouped into tabs. Any page that is not listed here
-// still shows up, under "More", so new modules never disappear.
 const groups = [
     { title: 'Farm and land', paths: ['/farms', '/crops', '/plantings', '/crop-monitoring', '/pest-disease', '/livestock'] },
     { title: 'Water and weather', paths: ['/irrigation-schedules', '/weather'] },
@@ -51,7 +49,6 @@ const groups = [
     { title: 'Administration', paths: ['/notifications', '/users'] },
 ];
 
-// The hero sky changes with the time of day (always in the brand greens).
 function getSky(date) {
     const hour = date.getHours() + date.getMinutes() / 60;
     let greeting = 'Good evening';
@@ -111,6 +108,58 @@ function Panel({ title, className = '', children }) {
     );
 }
 
+function RoleGreeting({ role, farmCount, fieldCount, loading }) {
+    if (loading) return <p className="mt-2 max-w-xl text-sm text-white/80 animate-pulse">Checking on the farm...</p>;
+
+    const greetings = {
+        'Admin': farmCount > 0 
+            ? `Monitoring the organization's ${farmCount} farm${farmCount === 1 ? '' : 's'} and ${fieldCount} field${fieldCount === 1 ? '' : 's'}.`
+            : `Let's start by onboarding your first farm.`,
+        'Accountant': farmCount > 0
+            ? `Reviewing financial performance and budgets for ${farmCount} farm${farmCount === 1 ? '' : 's'}.`
+            : `Awaiting financial data to begin auditing.`,
+        'Agronomist': fieldCount > 0
+            ? `Analyzing crop health and soil data across ${fieldCount} field${fieldCount === 1 ? '' : 's'}.`
+            : `Ready to analyze your first field.`,
+        'Worker': fieldCount > 0
+            ? `Ready for today's assignments across ${fieldCount} field${fieldCount === 1 ? '' : 's'}.`
+            : `Waiting for your first field assignment.`,
+        'Manager': farmCount > 0
+            ? `Overseeing operations and staff across ${farmCount} farm${farmCount === 1 ? '' : 's'}.`
+            : `Let's get your first farm operations set up.`,
+    };
+
+    const message = greetings[role] || `Keeping an eye on ${farmCount} farm${farmCount === 1 ? '' : 's'} and ${fieldCount} field${fieldCount === 1 ? '' : 's'}.`;
+    return <p className="mt-2 max-w-xl text-sm text-white/80">{message}</p>;
+}
+
+function WeatherMatrix({ farms, onSelectFarm, currentFarmId }) {
+    return (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {farms.map(farm => (
+                <button 
+                    key={farm.id}
+                    onClick={() => onSelectFarm(farm.id)}
+                    className={`flex items-center justify-between p-3 rounded-2xl border transition text-left ${
+                        currentFarmId === farm.id 
+                        ? 'bg-farm-50 border-farm-500 ring-1 ring-farm-500' 
+                        : 'bg-white border-slate-200 hover:border-farm-300'
+                    }`}
+                >
+                    <div className="min-w-0 overflow-hidden">
+                        <p className="text-sm font-semibold text-farm-900 truncate">{farm.name}</p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0 ml-2">
+                        <Icon name="cloudsun" className="h-4 w-4 text-farm-600" />
+                        <span className="text-sm font-medium text-slate-700">Check</span>
+                    </div>
+                </button>
+            ))}
+            {farms.length === 0 && <p className="text-sm text-slate-500 col-span-2">No farms available to monitor.</p>}
+        </div>
+    );
+}
+
 export default function Dashboard() {
     const { api, user, logout } = useAuth();
     const navigate = useNavigate();
@@ -118,12 +167,17 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [farmId, setFarmId] = useState(null);
+    const [farmsList, setFarmsList] = useState([]);
+    const [fieldsList, setFieldsList] = useState([]);
     const [now, setNow] = useState(() => new Date());
     const [query, setQuery] = useState('');
     const [searchOpen, setSearchOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('All');
 
-    // keep the sky in step with the clock
+    // Map Drill-down State
+    const [mapView, setMapView] = useState('farms'); // 'farms' | 'fields' | 'map'
+    const [selectedFarmForMap, setSelectedFarmForMap] = useState(null);
+
     useEffect(() => {
         const id = setInterval(() => setNow(new Date()), 60000);
         return () => clearInterval(id);
@@ -143,16 +197,14 @@ export default function Dashboard() {
     useEffect(() => {
         let ignore = false;
 
-        async function loadSummary() {
+        async function loadDashboardData() {
             setLoading(true);
             setError(null);
 
             try {
                 const response = await api.get('/api/dashboard/summary');
-
                 if (!ignore) {
                     const data = response.data.data || {};
-
                     setSummary({
                         ...initialSummary,
                         ...data,
@@ -161,9 +213,12 @@ export default function Dashboard() {
                         production: { ...initialSummary.production, ...(data.production || {}) },
                     });
 
-                    if (data.infrastructure?.farms > 0) {
-                        const farmRes = await api.get('/api/farms');
-                        setFarmId(farmRes.data.data?.[0]?.id || null);
+                    const farmRes = await api.get('/api/farms');
+                    const farms = farmRes.data.data || [];
+                    setFarmsList(farms);
+
+                    if (farms.length > 0) {
+                        setFarmId(farms[0].id);
                     }
                 }
             } catch {
@@ -177,7 +232,7 @@ export default function Dashboard() {
             }
         }
 
-        loadSummary();
+        loadDashboardData();
 
         return () => {
             ignore = true;
@@ -186,14 +241,6 @@ export default function Dashboard() {
 
     const farmCount = summary.infrastructure?.farms ?? 0;
     const fieldCount = summary.infrastructure?.fields ?? 0;
-
-    let subtitle = 'Checking on the farm…';
-    if (!loading) {
-        subtitle =
-            farmCount > 0
-                ? `${today}. Keeping an eye on ${farmCount} farm${farmCount === 1 ? '' : 's'} and ${fieldCount} field${fieldCount === 1 ? '' : 's'}.`
-                : `${today}. Let’s get your first farm set up.`;
-    }
 
     const farmTone = 'bg-farm-50 text-farm-700';
     const moneyTone = 'bg-harvest-50 text-harvest-600';
@@ -263,6 +310,26 @@ export default function Dashboard() {
 
     const canSeeNotifications = actions.some((action) => action.path === '/notifications');
 
+    const handleSelectFarm = async (id) => {
+        setSelectedFarmForMap(id);
+        setMapView('fields');
+        try {
+            const res = await api.get(`/api/farms/${id}/fields`);
+            setFieldsList(res.data.data || []);
+        } catch (err) {
+            console.error('Error fetching fields', err);
+        }
+    };
+
+    const handleSelectField = (field) => {
+        setMapView('map');
+    };
+
+    const goBackMap = () => {
+        if (mapView === 'map') setMapView('fields');
+        else if (mapView === 'fields') setMapView('farms');
+    };
+
     return (
         <main className="min-h-screen bg-farm-50 text-slate-800">
             <header className={`relative bg-gradient-to-b ${sky.gradient} text-white`}>
@@ -316,7 +383,7 @@ export default function Dashboard() {
                         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
                             {sky.greeting}, {firstName}
                         </h1>
-                        <p className="mt-2 max-w-xl text-sm text-white/80">{subtitle}</p>
+                        <RoleGreeting role={user?.role} farmCount={farmCount} fieldCount={fieldCount} loading={loading} />
                     </div>
 
                     <div className="relative mt-6 max-w-xl">
@@ -363,8 +430,17 @@ export default function Dashboard() {
                 {error && <p className="mb-6 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
 
                 <div className="grid items-start gap-6 lg:grid-cols-3 lg:grid-rows-[auto_1fr]">
-                    <div className="lg:col-start-1 lg:row-start-1">
-                        <WeatherWidget farmId={farmId} />
+                    <div className="lg:col-start-1 lg:row-start-1 space-y-6">
+                        <Panel title="Regional Weather Intelligence">
+                            <div className="space-y-6">
+                                <WeatherMatrix farms={farmsList} currentFarmId={farmId} onSelectFarm={(id) => setFarmId(id)} />
+                                {farmId && (
+                                    <div className="pt-6 border-t border-dashed border-slate-200">
+                                        <WeatherWidget farmId={farmId} />
+                                    </div>
+                                )}
+                            </div>
+                        </Panel>
                     </div>
 
                     <div className="space-y-6 lg:col-span-2 lg:col-start-2 lg:row-span-2 lg:row-start-1">
@@ -382,21 +458,78 @@ export default function Dashboard() {
                             ))}
                         </div>
 
-                        <Panel title="Farm location and fields">
-                            <MapWidget farmId={farmId} />
+                        <Panel title={
+                            <div className="flex items-center gap-2">
+                                <span>{
+                                    mapView === 'farms' ? 'Farm location and fields' : 
+                                    mapView === 'fields' ? `Fields in ${farmsList.find(f => f.id === selectedFarmForMap)?.name}` : 
+                                    'Field Map'
+                                }</span>
+                                {mapView !== 'farms' && (
+                                    <button 
+                                        onClick={goBackMap}
+                                        className="text-xs text-farm-600 hover:text-farm-800 underline"
+                                    >
+                                        &larr; back
+                                    </button>
+                                )}
+                            </div>
+                        }>
+                            {mapView === 'farms' && (
+                                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                                    {farmsList.map(farm => (
+                                        <button
+                                            key={farm.id}
+                                            onClick={() => handleSelectFarm(farm.id)}
+                                            className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50 hover:bg-farm-50 hover:border-farm-200 transition text-left"
+                                        >
+                                            <div className="min-w-0 overflow-hidden">
+                                                <p className="text-sm font-medium text-slate-800 truncate">{farm.name}</p>
+                                            </div>
+                                            <Icon name="chevron-right" className="h-4 w-4 text-slate-400 shrink-0 ml-2" />
+                                        </button>
+                                    ))}
+                                    {farmsList.length === 0 && <p className="text-sm text-slate-500 col-span-2 text-center py-4">No farms found. Please create one.</p>}
+                                </div>
+                            )}
+
+                            {mapView === 'fields' && (
+                                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                                    {fieldsList.map(field => (
+                                        <button
+                                            key={field.id}
+                                            onClick={() => handleSelectField(field)}
+                                            className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50 hover:bg-farm-50 hover:border-farm-200 transition text-left"
+                                        >
+                                            <div className="min-w-0 overflow-hidden">
+                                                <p className="text-sm font-medium text-slate-800 truncate">{field.name}</p>
+                                                <p className="text-xs text-slate-500">{field.size_hectares} hectares</p>
+                                            </div>
+                                            <Icon name="map-pin" className="h-4 w-4 text-slate-400 shrink-0 ml-2" />
+                                        </button>
+                                    ))}
+                                    {fieldsList.length === 0 && <p className="text-sm text-slate-500 col-span-2 text-center py-4">No fields found in this farm.</p>}
+                                </div>
+                            )}
+
+                            {mapView === 'map' && (
+                                <MapWidget farmId={selectedFarmForMap} />
+                            )}
                         </Panel>
                     </div>
 
                     <div className="lg:col-start-1 lg:row-start-2">
                         <Panel title="System status">
                             <dl className="space-y-3 text-sm">
-                                <div className="flex items-center justify-between gap-3">
-                                    <dt className="text-slate-500">System health</dt>
-                                    <dd className="flex items-center gap-2 font-medium text-farm-700">
-                                        <span className="h-2 w-2 rounded-full bg-farm-500" />
-                                        Online
-                                    </dd>
-                                </div>
+                                {['Admin', 'Manager'].includes(user?.role) && (
+                                    <div className="flex items-center justify-between gap-3">
+                                        <dt className="text-slate-500">System health</dt>
+                                        <dd className="flex items-center gap-2 font-medium text-farm-700">
+                                            <span className="h-2 w-2 rounded-full bg-farm-500" />
+                                            Online
+                                        </dd>
+                                    </div>
+                                )}
                                 <div className="flex items-center justify-between gap-3">
                                     <dt className="text-slate-500">Signed in as</dt>
                                     <dd className="font-medium text-slate-800">{user?.role || 'Unknown'}</dd>

@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>FFMS</title>
         <?php echo app('Illuminate\Foundation\Vite')->reactRefresh(); ?>
-        <?php echo app('Illuminate\Foundation\Vite')(['resources/js/app.jsx']); ?>
+        <?php echo app('Illuminate\Foundation\Vite')(['src/main.jsx']); ?>
     </head>
     <body>
         <div id="root"></div>
