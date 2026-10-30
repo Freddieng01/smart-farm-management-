@@ -9,7 +9,7 @@ class RoleAccess
 {
     private const ROLES = [
         'farms' => ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Accountant', 'Worker'],
-        'fields' => ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'],
+        'fields' => ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Accountant', 'Worker'],
         'employees' => ['Farm-owner', 'Manager'],
         'tasks' => ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'],
         'agronomy' => ['Admin', 'Farm-owner', 'Manager', 'Agronomist'],
@@ -17,7 +17,7 @@ class RoleAccess
         'finance' => ['Farm-owner', 'Manager', 'Accountant'],
         'commercial' => ['Farm-owner', 'Manager', 'Accountant'],
         'storage' => ['Admin', 'Farm-owner', 'Manager', 'Accountant', 'Worker'],
-        'weather' => ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'],
+        'weather' => ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Accountant', 'Worker'],
         'notifications' => ['Admin', 'Farm-owner', 'Manager', 'Accountant', 'Agronomist', 'Worker'],
     ];
 
@@ -30,6 +30,9 @@ class RoleAccess
      */
     private const ADMIN_VIEW_ONLY = ['fields', 'tasks', 'agronomy', 'operations', 'storage', 'weather'];
 
+    /** Accountants can look at these so the dashboard weather and map work, but cannot change them. */
+    private const ACCOUNTANT_VIEW_ONLY = ['fields', 'weather'];
+
     public function handle(Request $request, Closure $next, string $module)
     {
         $user = $request->user();
@@ -41,6 +44,12 @@ class RoleAccess
             && in_array($module, self::ADMIN_VIEW_ONLY, true)
             && ! in_array($request->method(), ['GET', 'HEAD'], true)) {
             return response()->json(['message' => 'Admins have view-only access to farm records. Ask the farm owner to make this change.'], 403);
+        }
+
+        if ($user->role === 'Accountant'
+            && in_array($module, self::ACCOUNTANT_VIEW_ONLY, true)
+            && ! in_array($request->method(), ['GET', 'HEAD'], true)) {
+            return response()->json(['message' => 'Accountants have view-only access to this module.'], 403);
         }
 
         if ($module === 'farms'

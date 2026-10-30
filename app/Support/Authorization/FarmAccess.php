@@ -6,6 +6,7 @@ use App\Models\Farm;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class FarmAccess
 {
@@ -27,7 +28,9 @@ class FarmAccess
             return $query->where('owner_id', $user->id);
         }
 
-        return $query->whereHas('employees', fn (Builder $employees) => $employees->where('user_id', $user->id));
+        // Plain query on purpose: going through the Employee model would apply the farm-access
+        // scope, which calls this method again and never finishes.
+        return $query->whereIn('farms.id', DB::table('employees')->select('farm_id')->where('user_id', $user->id));
     }
 
     public static function canAccessFarm(?int $farmId): bool
