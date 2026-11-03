@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useNotifications } from '../context/NotificationContext.jsx';
 import ModuleLayout from '../components/ModuleLayout.jsx';
 
 const emptyNotification = { farm_id: '', type: '', title: '', message: '', priority: 'Normal' };
@@ -29,6 +30,7 @@ const priorityStyles = {
 
 export default function NotificationsManagement() {
     const { api, user } = useAuth();
+    const { openNotification, targetFor } = useNotifications();
     const [tab, setTab] = useState('notifications');
     const [notifications, setNotifications] = useState([]);
     const [rules, setRules] = useState([]);
@@ -63,8 +65,8 @@ export default function NotificationsManagement() {
         }
         const fresh = list.filter((n) => !knownIds.current.has(n.id) && !n.read_at);
         list.forEach((n) => knownIds.current.add(n.id));
-        if (fresh.length === 1) setToast(`${fresh[0].title}`);
-        else if (fresh.length > 1) setToast(`${fresh.length} new notifications`);
+        // New-notification pop-ups are handled app-wide by NotificationContext.
+        void fresh;
     }
 
     // Quiet background refresh (no loading spinner).
@@ -91,6 +93,7 @@ export default function NotificationsManagement() {
             announceNew(list);
             setNotifications(list);
             setRules(rulesRes.data.data ?? rulesRes.data);
+            window.dispatchEvent(new Event('notifications:changed'));
         } catch (err) {
             setError('Could not load notifications and alert rules. Check that the API is running and you are logged in.');
         } finally {
@@ -305,6 +308,14 @@ export default function NotificationsManagement() {
                                                     {n.created_at ? new Date(n.created_at).toLocaleString() : '-'}
                                                 </td>
                                                 <td className="space-x-3 px-6 py-4 text-right">
+                                                    {targetFor(n) && (
+                                                        <button
+                                                            onClick={() => openNotification(n)}
+                                                            className="rounded-full bg-farm-700 px-3 py-1 text-xs font-medium text-white transition hover:bg-farm-800"
+                                                        >
+                                                            {targetFor(n).label}
+                                                        </button>
+                                                    )}
                                                     {!n.read_at && (
                                                         <button
                                                             onClick={() => handleMarkAsRead(n.id)}

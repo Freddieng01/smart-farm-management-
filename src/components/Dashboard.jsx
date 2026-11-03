@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useNotifications } from '../context/NotificationContext.jsx';
 import { useNavigate } from 'react-router-dom';
 import WeatherWidget from './WeatherWidget.jsx';
 import MapWidget from './MapWidget.jsx';
@@ -163,6 +164,7 @@ function WeatherMatrix({ farms, onSelectFarm, currentFarmId }) {
 export default function Dashboard() {
     const { api, user, logout } = useAuth();
     const navigate = useNavigate();
+    const { unreadCount } = useNotifications();
     const [summary, setSummary] = useState(initialSummary);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -382,10 +384,15 @@ export default function Dashboard() {
                                 <button
                                     type="button"
                                     onClick={() => navigate('/notifications')}
-                                    className="grid h-10 w-10 place-items-center rounded-full bg-white/15 ring-1 ring-white/25 transition hover:bg-white/25"
-                                    aria-label="Notifications"
+                                    className="relative grid h-10 w-10 place-items-center rounded-full bg-white/15 ring-1 ring-white/25 transition hover:bg-white/25"
+                                    aria-label={unreadCount > 0 ? `Notifications (${unreadCount} unread)` : 'Notifications'}
                                 >
                                     <Icon name="bell" className="h-5 w-5" />
+                                {unreadCount > 0 && (
+    <span className="absolute -right-1 -top-1 grid min-w-[1.25rem] place-items-center rounded-full bg-red-500 px-1 text-[11px] font-semibold leading-5 text-white ring-2 ring-white/40">
+        {unreadCount > 99 ? '99+' : unreadCount}
+    </span>
+)}
                                 </button>
                             )}
                             <div className="hidden text-right leading-tight sm:block">
