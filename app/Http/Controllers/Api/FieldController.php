@@ -12,12 +12,23 @@ use Illuminate\Validation\ValidationException;
 
 class FieldController extends Controller
 {
-    public function index(Farm $farm): JsonResponse
+    public function index(Request $request, ?Farm $farm = null): JsonResponse
     {
-        $fields = $farm->fields()
+        // /farms/{farm}/fields lists one farm's fields. /fields (used by the pest, irrigation and
+        // planting pages) lists every field this user may see; the farm-access scope on Field
+        // already limits that, and ?farm_id= narrows it further.
+        $query = $farm ? $farm->fields() : Field::query();
+
+        if (! $farm && $request->filled('farm_id')) {
+            $query->where('farm_id', $request->integer('farm_id'));
+        }
+
+        $perPage = $farm ? 25 : min(max($request->integer('per_page', 200), 1), 500);
+
+        $fields = $query
             ->with('farm:id,name')
             ->latest()
-            ->paginate(25);
+            ->paginate($perPage);
 
         return response()->json($fields);
     }
