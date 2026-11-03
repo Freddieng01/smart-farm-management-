@@ -20,12 +20,16 @@ class Livestock extends Model
         'death_date',
         'status',
         'current_weight_kg',
+        'head_count',
+        'sire_id',
+        'dam_id',
     ];
 
     protected $casts = [
         'birth_date' => 'date',
         'death_date' => 'date',
         'current_weight_kg' => 'decimal:2',
+        'head_count' => 'integer',
     ];
 
     public function farm(): BelongsTo
@@ -46,5 +50,15 @@ class Livestock extends Model
     public function breedingRecords(): HasMany
     {
         return $this->hasMany(LivestockBreedingRecord::class);
+    }
+
+    public function weightRecords(): HasMany
+    {
+        return $this->hasMany(LivestockWeightRecord::class);
+    }
+
+    public function productionRecords(): HasMany
+    {
+        return $this->hasMany(LivestockProductionRecord::class);
     }
 }

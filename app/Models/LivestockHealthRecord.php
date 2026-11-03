@@ -12,10 +12,12 @@ class LivestockHealthRecord extends Model
         'condition',
         'treatment',
         'date_recorded',
+        'withdrawal_days',
     ];
 
     protected $casts = [
         'date_recorded' => 'date',
+        'withdrawal_days' => 'integer',
     ];
 
     public function livestock(): BelongsTo

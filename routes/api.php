@@ -48,6 +48,7 @@ use App\Http\Controllers\Api\StockMovementController;
 use App\Http\Controllers\Api\DispatchRecordController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\AlertRuleController;
+use App\Http\Controllers\Api\LivestockRecordController;
 use Illuminate\Support\Facades\Route;
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [PasswordResetController::class, 'send']);
@@ -145,4 +146,25 @@ Route::middleware(['auth:sanctum', 'farm.access'])->group(function () {
     Route::post('notifications/{notification}/mark-as-read', [NotificationController::class, 'markAsRead'])->middleware('module:notifications');
     Route::post('alert-rules/evaluate', [AlertRuleController::class, 'evaluate'])->middleware('module:notifications');
     Route::apiResource('alert-rules', AlertRuleController::class)->middleware('module:notifications');
+
+ // Livestock records: vaccinations, health, breeding, weight
+    Route::middleware('module:operations')->group(function () {
+        Route::post('livestock/{livestock}/vaccinations', [LivestockRecordController::class, 'storeVaccination']);
+        Route::delete('livestock-vaccinations/{vaccination}', [LivestockRecordController::class, 'destroyVaccination']);
+
+        Route::post('livestock/{livestock}/health-records', [LivestockRecordController::class, 'storeHealth']);
+        Route::delete('livestock-health-records/{healthRecord}', [LivestockRecordController::class, 'destroyHealth']);
+
+        Route::post('livestock/{livestock}/breeding-records', [LivestockRecordController::class, 'storeBreeding']);
+        Route::put('livestock-breeding-records/{breedingRecord}', [LivestockRecordController::class, 'updateBreeding']);
+        Route::delete('livestock-breeding-records/{breedingRecord}', [LivestockRecordController::class, 'destroyBreeding']);
+
+        Route::post('livestock/{livestock}/weight-records', [LivestockRecordController::class, 'storeWeight']);
+        Route::delete('livestock-weight-records/{weightRecord}', [LivestockRecordController::class, 'destroyWeight']);
+    
+        Route::post('livestock/{livestock}/production-records', [LivestockRecordController::class, 'storeProduction']);
+        Route::delete('livestock-production-records/{productionRecord}', [LivestockRecordController::class, 'destroyProduction']);
+
+    });
+
 });
