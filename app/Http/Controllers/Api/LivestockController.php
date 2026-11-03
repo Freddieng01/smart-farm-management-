@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 
 class LivestockController extends Controller
 {
+    private const RELATIONS = ['vaccinations', 'healthRecords', 'breedingRecords', 'weightRecords', 'productionRecords'];
+
     /**
      * Display a listing of the resource.
      */
@@ -20,7 +22,7 @@ class LivestockController extends Controller
             $query->where('farm_id', $request->input('farm_id'));
         }
 
-        return response()->json($query->with(['vaccinations', 'healthRecords', 'breedingRecords'])->get());
+        return response()->json($query->with(self::RELATIONS)->get());
     }
 
     /**
@@ -38,6 +40,9 @@ class LivestockController extends Controller
             'death_date' => 'nullable|date',
             'status' => 'nullable|string|max:255',
             'current_weight_kg' => 'nullable|numeric',
+            'head_count' => 'sometimes|integer|min:1',
+            'sire_id' => 'nullable|exists:livestock,id',
+            'dam_id' => 'nullable|exists:livestock,id',
         ]);
 
         $livestock = Livestock::create($validated);
@@ -50,7 +55,7 @@ class LivestockController extends Controller
      */
     public function show(Livestock $livestock)
     {
-        return response()->json($livestock->load(['vaccinations', 'healthRecords', 'breedingRecords']));
+        return response()->json($livestock->load(self::RELATIONS));
     }
 
     /**
@@ -67,6 +72,9 @@ class LivestockController extends Controller
             'death_date' => 'nullable|date',
             'status' => 'sometimes|string|max:255',
             'current_weight_kg' => 'nullable|numeric',
+            'head_count' => 'sometimes|integer|min:1',
+            'sire_id' => 'nullable|exists:livestock,id',
+            'dam_id' => 'nullable|exists:livestock,id',
         ]);
 
         $livestock->update($validated);

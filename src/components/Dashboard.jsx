@@ -283,6 +283,35 @@ export default function Dashboard() {
         { label: 'Manage Users', path: '/users', roles: ['Admin'] },
     ].filter(action => action.roles.includes(user?.role));
 
+    // Where each summary card takes you. The first page the user is allowed to open wins.
+    const canOpen = (path) => actions.some((action) => action.path === (path.startsWith('/farms/') ? '/farms' : path));
+    const cardTargets = {
+        'Total farms': ['/farms'],
+        'Total fields': [farmId ? `/farms/${farmId}/fields` : '/farms'],
+        'Total acreage': ['/farms'],
+        'Active users': ['/users'],
+        'Total expenses': ['/expenses', '/finance'],
+        'Labour costs': ['/employees', '/expenses'],
+        'Total production': ['/production'],
+        'Yield records': ['/yield-records'],
+    };
+    const cardPath = (label) => (cardTargets[label] || []).find(canOpen);
+
+    // Clicking the weather panel opens the weather page (but not its own dropdowns or buttons).
+    const weatherLinkProps = canOpen('/weather')
+        ? {
+            role: 'link',
+            tabIndex: 0,
+            'aria-label': 'Open weather',
+            onClick: (event) => {
+                if (!event.target.closest('select, button, a, input, label')) navigate('/weather');
+            },
+            onKeyDown: (event) => {
+                if (event.key === 'Enter' && event.target === event.currentTarget) navigate('/weather');
+            },
+        }
+        : {};
+
     const knownPaths = new Set(groups.flatMap((group) => group.paths));
     const leftovers = actions.filter((action) => !knownPaths.has(action.path));
 
@@ -435,7 +464,10 @@ export default function Dashboard() {
                             <div className="space-y-6">
                                 <WeatherMatrix farms={farmsList} currentFarmId={farmId} onSelectFarm={(id) => setFarmId(id)} />
                                 {farmId && (
-                                    <div className="pt-6 border-t border-dashed border-slate-200">
+                                    <div
+                                        className={`pt-6 border-t border-dashed border-slate-200 ${canOpen('/weather') ? 'cursor-pointer' : ''}`}
+                                        {...weatherLinkProps}
+                                    >
                                         <WeatherWidget farmId={farmId} />
                                     </div>
                                 )}
@@ -445,8 +477,19 @@ export default function Dashboard() {
 
                     <div className="space-y-6 lg:col-span-2 lg:col-start-2 lg:row-span-2 lg:row-start-1">
                         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                            {cards.map((card) => (
-                                <div key={card.label} className={`rounded-2xl bg-white p-4 ${softShadow}`}>
+                            {cards.map((card) => {
+                                const target = cardPath(card.label);
+                                const Tag = target ? 'button' : 'div';
+                                return (
+                                <Tag
+                                    key={card.label}
+                                    {...(target ? { type: 'button', onClick: () => navigate(target), 'aria-label': `Open ${card.label}` } : {})}
+                                    className={`rounded-2xl bg-white p-4 text-left ${softShadow} ${
+                                        target
+                                            ? 'cursor-pointer transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-farm-500'
+                                            : ''
+                                    }`}
+                                >
                                     <span className={`grid h-10 w-10 place-items-center rounded-full ${card.tone}`}>
                                         <Icon name={card.icon} className="h-5 w-5" />
                                     </span>
@@ -454,8 +497,9 @@ export default function Dashboard() {
                                     <p className="mt-0.5 text-2xl font-semibold tracking-tight text-farm-900 tabular-nums">
                                         <AnimatedNumber value={card.value} loading={loading} prefix={card.prefix} />
                                     </p>
-                                </div>
-                            ))}
+                                </Tag>
+                                );
+                            })}
                         </div>
 
                         <Panel title={
