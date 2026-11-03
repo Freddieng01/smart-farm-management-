@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
+import { NotificationProvider } from './context/NotificationContext.jsx';
 
 import Dashboard from './components/Dashboard.jsx';
 import LoginPage from './pages/Login.jsx';
@@ -483,7 +484,9 @@ export default function App() {
     return (
         <Router>
             <AuthProvider>
-                <AppRoutes />
+                <NotificationProvider>
+                    <AppRoutes />
+                </NotificationProvider>
             </AuthProvider>
         </Router>
     );
