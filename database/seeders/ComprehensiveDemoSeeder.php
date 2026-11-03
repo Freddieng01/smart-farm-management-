@@ -13,7 +13,7 @@ use App\Models\Crop;
 use App\Models\Planting;
 use App\Models\YieldRecord;
 use App\Models\FarmExpense;
-use App,Models\Budget;
+use App\Models\Budget;
 use App\Models\Livestock;
 use App\Models\Equipment;
 use App\Models\Customer;
@@ -179,18 +179,19 @@ class ComprehensiveDemoSeeder extends Seeder
         }
         foreach ($customers as $cust) {
             $so = SalesOrder::create(['farm_id' => $farm->id, 'customer_id' => $cust->id, 'order_number' => 'SO-'.rand(1000,9999), 'order_date' => Carbon::now()->subDays(rand(1,30)), 'status' => 'Paid']);
-            L_OrderItem::create(['sales_order_id' => $so->id, 'crop_name' => $crops[0]->name, 'quantity' => rand(100,1000), 'unit_price' => 25]);
+            SalesOrderItem::create(['sales_order_id' => $so->id, 'crop_name' => $crops[0]->name, 'quantity' => rand(100,1000), 'unit_price' => 25]);
         }
 
-        // 11. NOTIFICATIONS (FIXED: Now populating actual data)
+        // 11. NOTIFICATIONS (Fix: Use DB table directly to avoid model issues)
         $notificationData = [
+            ['user_id' => $admin->id, 'farm_id' => $farm->id, 'type' => 'Alert', 'title' => 'System Alert', 'message' => 'System update completed successfully.', 'priority' => 'Low'],
             ['user_id' => $owner->id, 'farm_id' => $farm->id, 'type' => 'Alert', 'title' => 'Budget Warning', 'message' => 'Monthly expenditure has exceeded 80% of budget.', 'priority' => 'High'],
-            ['user_id' => $agronomist->id, 'farm_id' => $farm->id, 'type' => 'Pest', 'title' => 'Outbreak Detected', 'message' => 'Fall Armyworm detected in North Sector A.', 'priority' => 'Urgent'],
+            ['user_id' => $agronomist->id, 'farm_id, 'farm_id' => $farm->id, 'type' => 'Pest', 'title' => 'Outbreak Detected', 'message' => 'Fall Armyworm detected in North Sector A.', 'priority' => 'Urgent'],
             ['user_id' => $worker->id, 'farm_id' => $farm->id, 'type' => 'Task', 'title' => 'New Task', 'message' => 'Spraying schedule for North Sector A started.', 'priority' => 'Normal'],
             ['user_id' => $accountant->id, 'farm_id' => $farm->id, 'type' => 'Payment', 'title' => 'Payment Received', 'message' => 'Payment of ZMW 15,000 received from City Markets.', 'priority' => 'Normal'],
         ];
         foreach ($notificationData as $nd) {
-            Notification::create($nd);
+            DB::table('notifications')->insert($nd);
         }
     }
 }
