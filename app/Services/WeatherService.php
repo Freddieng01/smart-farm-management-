@@ -3,7 +3,8 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
-use RuntimeException;
+use Illuminate\Support\Facades\Log;
+use Exception;
 
 class WeatherService
 {
@@ -18,49 +19,76 @@ class WeatherService
 
     public function getCurrentWeather(float $latitude, float $longitude): array
     {
-        $response = Http::timeout(10)->get(
-            $this->baseUrl . '/weather',
-            [
-                'lat' => $latitude,
-                'lon' => $longitude,
-                'appid' => $this->apiKey,
-                'units' => 'metric',
-            ]
-        );
-
-        if ($response->failed()) {
-            throw new RuntimeException(
-                'Unable to retrieve current weather data.'
+        try {
+            $response = Http::timeout(10)->get(
+                $this->baseUrl . '/weather',
+                [
+                    'lat' => $latitude,
+                    'lon' => $longitude,
+                    'appid' => $this->apiKey,
+                    'units' => 'metric',
+                ]
             );
-        }
 
-        return $response->json();
+            if ($response->failed()) {
+                Log::error('Weather API failed: ' . $response->body());
+                return [
+                    'error' => true,
+                    'message' => 'Weather service is currently unavailable. Please check your connection.'
+                ];
+            }
+
+            return array_merge($response->json(), ['error' => false]);
+        } catch (Exception $e) {
+            Log::error('Weather Service Exception: ' . $e->getMessage());
+            return [
+                'error' => true,
+                'message' => 'Unable to connect to weather service. Please try again later.'
+            ];
+        }
     }
 
     public function getForecast(float $latitude, float $longitude): array
     {
-        $response = Http::timeout(10)->get(
-            $this->baseUrl . '/forecast',
-            [
-                'lat' => $latitude,
-                'lon' => $longitude,
-                'appid' => $this->apiKey,
-                'units' => 'metric',
-            ]
-        );
-
-        if ($response->failed()) {
-            throw new RuntimeException(
-                'Unable to retrieve weather forecast.'
+        try {
+            $response = Http::timeout(10)->get(
+                $this->baseUrl . '/forecast',
+                [
+                    'lat' => $latitude,
+                    'lon' => $longitude,
+                    'appid' => $this->apiKey,
+                    'units' => 'metric',
+                ]
             );
-        }
 
-        return $response->json();
+            if ($response->failed()) {
+                Log::error('Weather Forecast API failed: ' . $response->body());
+                return [
+                    'error' => true,
+                    'message' => 'Weather forecast is currently unavailable.'
+                ];
+            }
+
+            return array_merge($response->json(), ['error' => false]);
+        } catch (Exception $e) {
+            Log::error('Weather Forecast Exception: ' . $e->getMessage());
+            return [
+                'error' => true,
+                'message' => 'Unable to connect to forecast service.'
+            ];
+        }
     }
 
     public function getAlerts(float $latitude, float $longitude): array
     {
         $forecast = $this->getForecast($latitude, $longitude);
+
+        if (isset($forecast['error']) && $forecast['error']) {
+            return [
+                'error' => true,
+                'message' => $forecast['message']
+            ];
+        }
 
         $alerts = [];
 
@@ -102,6 +130,6 @@ class WeatherService
             }
         }
 
-        return $alerts;
+        return array_merge(['alerts' => $alerts], ['error' => false]);
     }
 }
