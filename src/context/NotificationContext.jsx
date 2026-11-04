@@ -177,6 +177,13 @@ export function NotificationProvider({ children }) {
     const openNotification = useCallback(
         async (notification) => {
             const page = targetFor(notification, user?.role);
+            let targetPath = page ? page.path : '/notifications';
+
+            // Special handling for tasks: if the notification has a related task ID,
+            // navigate to that specific task.
+            if (page?.path === '/tasks' && notification.task_id) {
+                targetPath = `/tasks/${notification.task_id}`;
+            }
 
             if (!notification.read_at) {
                 try {
@@ -187,7 +194,7 @@ export function NotificationProvider({ children }) {
             }
 
             dismiss(`n${notification.id}`);
-            navigate(page ? page.path : '/notifications');
+            navigate(targetPath);
             refresh();
         },
         [api, user?.role, dismiss, navigate, refresh]

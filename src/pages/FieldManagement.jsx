@@ -5,6 +5,7 @@ import ModuleLayout from '../components/ModuleLayout.jsx';
 
 export default function FieldManagement() {
     const { api } = useAuth();
+    const { user } = useAuth();
     const navigate = useNavigate();
     const { farmId } = useParams();
     const [farm, setFarm] = useState(null);
@@ -85,8 +86,10 @@ export default function FieldManagement() {
           title={<>{farm?.name || 'Loading...'} Fields</>}
           subtitle="Manage plots, soil types, and sizes for this farm."
           actions={<>
-<button type="button" onClick={() => navigate('/farms')} className="rounded-full bg-white/15 px-5 py-2 text-sm font-medium text-white ring-1 ring-white/30 transition hover:bg-white/25 disabled:opacity-60">Back to Farms</button>
-<button type="button" onClick={() => handleOpenModal()} className="rounded-full bg-harvest-400 px-5 py-2 text-sm font-medium text-farm-900 transition hover:bg-harvest-500 disabled:opacity-60">+ Add New Field</button>
+            <button type="button" onClick={() => navigate('/farms')} className="rounded-full bg-white/15 px-5 py-2 text-sm font-medium text-white ring-1 ring-white/30 transition hover:bg-white/25 disabled:opacity-60">Back to Farms</button>
+            {(user?.role === 'Farm-owner' || user?.role === 'Manager') && (
+                <button type="button" onClick={() => handleOpenModal()} className="rounded-full bg-harvest-400 px-5 py-2 text-sm font-medium text-farm-900 transition hover:bg-harvest-500 disabled:opacity-60">+ Add New Field</button>
+            )}
           </>}
         >
             <div className="mx-auto max-w-7xl">
@@ -115,18 +118,22 @@ export default function FieldManagement() {
                                         <td className="px-6 py-4 text-slate-500">{field.soil_type || 'Not specified'}</td>
                                         <td className="px-6 py-4 text-slate-500">{field.size_hectares} ha</td>
                                         <td className="px-6 py-4 text-right space-x-3">
-                                            <button
-                                                onClick={() => handleOpenModal(field)}
-                                                className="text-farm-700 hover:underline"
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(field.id)}
-                                                className="text-red-600 hover:underline"
-                                            >
-                                                Delete
-                                            </button>
+                                            {(user?.role === 'Farm-owner' || user?.role === 'Manager') && (
+                                                <>
+                                                    <button
+                                                        onClick={() => handleOpenModal(field)}
+                                                        className="text-farm-700 hover:underline"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(field.id)}
+                                                        className="text-red-600 hover:underline"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </>
+                                            )}
                                         </td>
                                     </tr>
                                 ))

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Farm;
 use App\Services\WeatherService;
+use App\Support\Authorization\FarmAccess;
 use Illuminate\Http\Request;
 use Throwable;
 
@@ -13,6 +14,17 @@ class WeatherController extends Controller
     public function __construct(
         private WeatherService $weatherService
     ) {
+    }
+
+    public function farms()
+    {
+        return response()->json([
+            'data' => Farm::query()
+                ->whereIn('id', FarmAccess::farmIds())
+                ->orderBy('name')
+                ->with(['fields:id,farm_id,name,size_hectares,boundary_polygon'])
+                ->get(['id', 'name', 'latitude', 'longitude', 'location_gps']),
+        ]);
     }
 
     public function current(Request $request)

@@ -107,11 +107,11 @@ Route::middleware(['auth:sanctum', 'farm.access'])->group(function () {
     Route::apiResource('invoices.payments', PaymentController::class)->shallow()->middleware('module:commercial');
 
     // Resource / Inventory module
-    Route::get('resources/low-stock', [ResourceController::class, 'lowStock'])->middleware('module:operations');
-    Route::get('resources/expiring', [ResourceController::class, 'expiring'])->middleware('module:operations');
-    Route::apiResource('resources', ResourceController::class)->middleware('module:operations');
-    Route::post('resources/{resource}/stock-in', [ResourceController::class, 'stockIn'])->middleware('module:operations');
-    Route::post('resources/{resource}/stock-out', [ResourceController::class, 'stockOut'])->middleware('module:operations');
+    Route::get('resources/low-stock', [ResourceController::class, 'lowStock'])->middleware('module:inventory');
+    Route::get('resources/expiring', [ResourceController::class, 'expiring'])->middleware('module:inventory');
+    Route::apiResource('resources', ResourceController::class)->middleware('module:inventory');
+    Route::post('resources/{resource}/stock-in', [ResourceController::class, 'stockIn'])->middleware('module:inventory');
+    Route::post('resources/{resource}/stock-out', [ResourceController::class, 'stockOut'])->middleware('module:inventory');
 
     // Finance module
     Route::apiResource('financial-transactions', FinancialTransactionController::class)->middleware('module:finance');
@@ -125,12 +125,13 @@ Route::middleware(['auth:sanctum', 'farm.access'])->group(function () {
 
 
     // Equipment & Machinery module
-    Route::get('equipment/due-service', [EquipmentController::class, 'dueForService']);
-    Route::apiResource('equipment', EquipmentController::class);
-    Route::post('equipment/{equipment}/maintenance', [EquipmentController::class, 'storeMaintenance']);
-    Route::post('equipment/{equipment}/fuel', [EquipmentController::class, 'storeFuel']);
+    Route::get('equipment/due-service', [EquipmentController::class, 'dueForService'])->middleware('module:equipment');
+    Route::apiResource('equipment', EquipmentController::class)->middleware('module:equipment');
+    Route::post('equipment/{equipment}/maintenance', [EquipmentController::class, 'storeMaintenance'])->middleware('module:equipment');
+    Route::post('equipment/{equipment}/fuel', [EquipmentController::class, 'storeFuel'])->middleware('module:equipment');
 
     // Weather & Environmental Monitoring
+    Route::get('weather/farms', [WeatherController::class, 'farms'])->middleware('module:weather');
     Route::get('weather/current', [WeatherController::class, 'current'])->middleware('module:weather');
     Route::get('weather/forecast', [WeatherController::class, 'forecast'])->middleware('module:weather');
     Route::get('weather/alerts', [WeatherController::class, 'alerts'])->middleware('module:weather');

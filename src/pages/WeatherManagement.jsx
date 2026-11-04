@@ -40,7 +40,7 @@ export default function WeatherManagement() {
         setError('');
 
         try {
-            const response = await api.get('/api/farms');
+            const response = await api.get('/api/weather/farms');
             const farmRows = getRows(response);
 
             setFarms(farmRows);

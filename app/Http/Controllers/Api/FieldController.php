@@ -44,7 +44,7 @@ class FieldController extends Controller
             ],
             'soil_type' => ['nullable', 'string', 'max:255'],
             'size_hectares' => ['required', 'numeric', 'min:0'],
-            'boundary_polygon' => ['nullable', 'string'],
+            'boundary_polygon' => ['nullable', 'json'],
         ]);
 
         $field = $farm->fields()->create($validated);
@@ -90,7 +90,7 @@ class FieldController extends Controller
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'soil_type' => ['sometimes', 'nullable', 'string', 'max:255'],
             'size_hectares' => ['sometimes', 'required', 'numeric', 'min:0'],
-            'boundary_polygon' => ['nullable', 'string'],
+            'boundary_polygon' => ['nullable', 'json'],
         ]);
 
         if (array_key_exists('name', $validated) || array_key_exists('farm_id', $validated)) {

@@ -73,13 +73,26 @@ function calculatePolygonArea(coordinates) {
     return Math.abs(area * earthRadius * earthRadius / 2);
 }
 
+function parseBoundary(boundary) {
+    if (Array.isArray(boundary)) return boundary;
+    if (typeof boundary !== 'string') return null;
+
+    try {
+        const coordinates = JSON.parse(boundary);
+        return Array.isArray(coordinates) ? coordinates : null;
+    } catch {
+        return null;
+    }
+}
+
 const MapWidget = ({ farmId }) => {
-    const { api } = useAuth();
+    const { api, user } = useAuth();
     const [farm, setFarm] = useState(null);
     const [fields, setFields] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isDrawing, setIsDrawing] = useState(false);
     const [tilesUnavailable, setTilesUnavailable] = useState(false);
+    const canEditMap = ['Farm-owner', 'Manager'].includes(user?.role);
 
     const fetchMapData = useCallback(async () => {
         if (!farmId) {
@@ -92,12 +105,12 @@ const MapWidget = ({ farmId }) => {
         setLoading(true);
         const fetchData = async () => {
             try {
-                const [farmResponse, fieldsResponse] = await Promise.all([
-                    api.get(`/api/farms/${farmId}`),
-                    api.get(`/api/farms/${farmId}/fields`),
-                ]);
-                setFarm(farmResponse.data.data);
-                setFields(fieldsResponse.data.data || []);
+                const response = await api.get('/api/weather/farms');
+                const farms = response.data.data || [];
+                const selectedFarm = farms.find((item) => Number(item.id) === Number(farmId));
+
+                setFarm(selectedFarm || null);
+                setFields(selectedFarm?.fields || []);
             } catch (err) {
                 console.error('Error loading map data', err);
                 setFarm(null);
@@ -152,14 +165,16 @@ const MapWidget = ({ farmId }) => {
 
     return (
         <div className="relative h-[500px] w-full rounded-xl overflow-hidden shadow-md border border-gray-200">
-            <div className="absolute top-4 right-4 z-[1000]">
-                <button
-                    onClick={() => setIsDrawing(!isDrawing)}
-                    className={`px-4 py-2 rounded-md text-sm font-bold transition ${isDrawing ? 'bg-red-500 text-white' : 'bg-white text-gray-800 shadow-sm border'}`}
-                >
-                    {isDrawing ? 'Cancel Drawing' : 'Plot New Field'}
-                </button>
-            </div>
+            {canEditMap && (
+                <div className="absolute top-4 right-4 z-[1000]">
+                    <button
+                        onClick={() => setIsDrawing(!isDrawing)}
+                        className={`px-4 py-2 rounded-md text-sm font-bold transition ${isDrawing ? 'bg-red-500 text-white' : 'bg-white text-gray-800 shadow-sm border'}`}
+                    >
+                        {isDrawing ? 'Cancel Drawing' : 'Plot New Field'}
+                    </button>
+                </div>
+            )}
             <MapContainer center={center} zoom={15} style={{ height: '100%', width: '100%' }}>
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -173,26 +188,23 @@ const MapWidget = ({ farmId }) => {
                     </Popup>
                 </Marker>
                 {fields.map((field) => {
-                    if (!field.boundary_polygon) return null;
-                    try {
-                        const coords = JSON.parse(field.boundary_polygon);
-                        return (
-                            <Polygon
-                                key={field.id}
-                                positions={coords}
-                                pathOptions={{ color: 'green', fillColor: 'green', fillOpacity: 0.4 }}
-                            >
-                                <Popup>
-                                    <strong className="text-green-700">{field.name}</strong> <br />
-                                    Size: {field.size_hectares} ha
-                                </Popup>
-                            </Polygon>
-                        );
-                    } catch (e) {
-                        return null;
-                    }
+                    const coords = parseBoundary(field.boundary_polygon);
+                    if (!coords) return null;
+
+                    return (
+                        <Polygon
+                            key={field.id}
+                            positions={coords}
+                            pathOptions={{ color: 'green', fillColor: 'green', fillOpacity: 0.4 }}
+                        >
+                            <Popup>
+                                <strong className="text-green-700">{field.name}</strong> <br />
+                                Size: {field.size_hectares} ha
+                            </Popup>
+                        </Polygon>
+                    );
                 })}
-                {isDrawing && <EditControl onPolygonCreated={handlePolygonCreated} farmId={farmId} />}
+                {canEditMap && isDrawing && <EditControl onPolygonCreated={handlePolygonCreated} farmId={farmId} />}
             </MapContainer>
             {tilesUnavailable && (
                 <p className="pointer-events-none absolute inset-x-4 bottom-4 z-[1000] rounded-md bg-white/95 px-3 py-2 text-center text-xs text-[#4d3323] shadow">

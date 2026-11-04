@@ -20,6 +20,8 @@ const actionIcons = {
     '/suppliers': 'truck',
     '/sales': 'cart',
     '/storage': 'warehouse',
+    '/water-sources': 'drop',
+    '/pump-monitoring': 'gauge',
     '/employees': 'briefcase',
     '/tasks': 'tasks',
     '/production': 'factory',
@@ -42,7 +44,7 @@ const actionIcons = {
 
 const groups = [
     { title: 'Farm and land', paths: ['/farms', '/crops', '/plantings', '/crop-monitoring', '/pest-disease', '/livestock'] },
-    { title: 'Water and weather', paths: ['/irrigation-schedules', '/weather'] },
+    { title: 'Water and weather', paths: ['/water-sources', '/irrigation-schedules', '/pump-monitoring', '/weather'] },
     { title: 'Harvest and storage', paths: ['/harvest', '/yield-records', '/post-harvest-handling', '/storage'] },
     { title: 'Operations', paths: ['/tasks', '/production', '/employees', '/equipment', '/inventory'] },
     { title: 'Supply and sales', paths: ['/suppliers', '/sales'] },
@@ -215,7 +217,7 @@ export default function Dashboard() {
                         production: { ...initialSummary.production, ...(data.production || {}) },
                     });
 
-                    const farmRes = await api.get('/api/farms');
+                    const farmRes = await api.get('/api/weather/farms');
                     const farms = farmRes.data.data || [];
                     setFarmsList(farms);
 
@@ -248,9 +250,9 @@ export default function Dashboard() {
     const moneyTone = 'bg-harvest-50 text-harvest-600';
 
     const cards = [
-        { label: 'Total farms', icon: 'farm', tone: farmTone, value: summary.infrastructure?.farms, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker', 'Farm-owner'] },
-        { label: 'Total fields', icon: 'field', tone: farmTone, value: summary.infrastructure?.fields, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker', 'Farm-owner'] },
-        { label: 'Total acreage', icon: 'area', tone: farmTone, value: summary.infrastructure?.total_acreage, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker', 'Farm-owner'] },
+        { label: 'Total farms', icon: 'farm', tone: farmTone, value: summary.infrastructure?.farms, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Farm-owner'] },
+        { label: 'Total fields', icon: 'field', tone: farmTone, value: summary.infrastructure?.fields, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Farm-owner'] },
+        { label: 'Total acreage', icon: 'area', tone: farmTone, value: summary.infrastructure?.total_acreage, roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Farm-owner'] },
         { label: 'Active users', icon: 'users', tone: farmTone, value: summary.infrastructure?.active_users, roles: ['Admin', 'Farm-owner', 'Manager', 'Accountant'] },
         { label: 'Total expenses', icon: 'wallet', prefix: 'K', tone: moneyTone, value: summary.financials?.total_expenses, roles: ['Farm-owner', 'Accountant'] },
         { label: 'Labour costs', icon: 'hardhat', prefix: 'K', tone: moneyTone, value: summary.financials?.total_labor_cost, roles: ['Farm-owner', 'Manager', 'Accountant'] },
@@ -259,28 +261,30 @@ export default function Dashboard() {
     ].filter(card => card.roles.includes(user?.role));
 
     const actions = [
-        { label: 'Manage Farms', path: '/farms', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
+        { label: 'Manage Farms', path: '/farms', roles: ['Admin', 'Farm-owner', 'Manager'] },
         { label: 'Livestock Management', path: '/livestock', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
         { label: 'Notifications', path: '/notifications', roles: ['Admin', 'Farm-owner', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
         { label: 'Suppliers & Procurement', path: '/suppliers', roles: ['Farm-owner', 'Manager', 'Accountant'] },
         { label: 'Market & Sales', path: '/sales', roles: ['Farm-owner', 'Manager', 'Accountant'] },
-        { label: 'Storage & Post-Harvest', path: '/storage', roles: ['Admin', 'Farm-owner', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
+        { label: 'Storage & Post-Harvest', path: '/storage', roles: ['Admin', 'Farm-owner', 'Manager', 'Accountant', 'Worker'] },
         { label: 'Manage Employees', path: '/employees', roles: ['Farm-owner', 'Manager'] },
         { label: 'Task Tracking', path: '/tasks', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
         { label: 'Production Logs', path: '/production', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
-        { label: 'Crop Management', path: '/crops', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Planting Management', path: '/plantings', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Crop Monitoring', path: '/crop-monitoring', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Irrigation Schedules', path: '/irrigation-schedules', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Pest & Disease', path: '/pest-disease', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Weather', path: '/weather', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Harvest Management', path: '/harvest', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Yield Records', path: '/yield-records', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Post-Harvest Handling', path: '/post-harvest-handling', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
+        { label: 'Water Sources', path: '/water-sources', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
+        { label: 'Crop Management', path: '/crops', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
+        { label: 'Planting Management', path: '/plantings', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
+        { label: 'Crop Monitoring', path: '/crop-monitoring', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
+        { label: 'Irrigation Schedules', path: '/irrigation-schedules', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
+        { label: 'Pump Monitoring', path: '/pump-monitoring', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
+        { label: 'Pest & Disease', path: '/pest-disease', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
+        { label: 'Weather', path: '/weather', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker', 'Accountant'] },
+        { label: 'Harvest Management', path: '/harvest', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
+        { label: 'Yield Records', path: '/yield-records', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
+        { label: 'Post-Harvest Handling', path: '/post-harvest-handling', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
         { label: 'Expense Tracking', path: '/expenses', roles: ['Farm-owner', 'Manager', 'Accountant'] },
-        { label: 'Inventory & Inputs', path: '/inventory', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Equipment & Machinery', path: '/equipment', roles: ['Admin', 'Farm-owner', 'Manager', 'Worker'] },
-        { label: 'Financial Management', path: '/finance', roles: ['Farm-owner', 'Accountant'] },
+        { label: 'Inventory & Inputs', path: '/inventory', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
+        { label: 'Equipment & Machinery', path: '/equipment', roles: ['Admin', 'Farm-owner', 'Manager'] },
+        { label: 'Financial Management', path: '/finance', roles: ['Farm-owner', 'Manager', 'Accountant'] },
         { label: 'Reports & Analytics', path: '/reports', roles: ['Farm-owner', 'Manager', 'Accountant'] },
         { label: 'Manage Users', path: '/users', roles: ['Admin'] },
     ].filter(action => action.roles.includes(user?.role));
@@ -344,12 +348,8 @@ export default function Dashboard() {
     const handleSelectFarm = async (id) => {
         setSelectedFarmForMap(id);
         setMapView('fields');
-        try {
-            const res = await api.get(`/api/farms/${id}/fields`);
-            setFieldsList(res.data.data || []);
-        } catch (err) {
-            console.error('Error fetching fields', err);
-        }
+        const farm = farmsList.find((item) => item.id === id);
+        setFieldsList(farm?.fields || []);
     };
 
     const handleSelectField = (field) => {

@@ -21,8 +21,8 @@ class DashboardController extends Controller
         $farmIds = FarmAccess::farmIds();
 
         // 1. Basic Infrastructure Counts
-        $farmsCount = Farm::count();
-        $fieldsCount = Field::count();
+        $farmsCount = Farm::whereIn('id', $farmIds)->count();
+        $fieldsCount = Field::whereIn('farm_id', $farmIds)->count();
         $activeUsersCount = User::whereHas('tokens')
             ->where(function ($query) use ($farmIds) {
                 $query->whereIn('id', function ($employees) use ($farmIds) {
@@ -37,10 +37,10 @@ class DashboardController extends Controller
                 });
             })
             ->count();
-        $totalAcreage = Farm::sum('total_acreage');
+        $totalAcreage = Farm::whereIn('id', $farmIds)->sum('total_acreage');
 
         // 2. Financials: Total Expenses
-        $totalExpenses = FarmExpense::sum('amount');
+        $totalExpenses = FarmExpense::whereIn('farm_id', $farmIds)->sum('amount');
 
         // 3. Labour: Total Labour Cost
         // Calculation: Sum of (hours_worked * hourly_rate)
@@ -50,7 +50,9 @@ class DashboardController extends Controller
             ->sum(DB::raw('daily_tasks.hours_worked * employees.hourly_rate'));
 
         // 4. Production: Total Quantity (Generic sum)
-        $totalProduction = CropProduction::sum('quantity');
+        $totalProduction = CropProduction::whereHas('field', function ($query) use ($farmIds) {
+            $query->whereIn('farm_id', $farmIds);
+        })->sum('quantity');
 
         // 5. Simplified Profit Estimate
         // Profit = (Estimated Production Value -’ Expenses - Labor)

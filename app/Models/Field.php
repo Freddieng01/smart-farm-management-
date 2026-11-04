@@ -22,6 +22,7 @@ class Field extends Model
     { 
         return [ 
             'size_hectares' => 'decimal:2', 
+            'boundary_polygon' => 'array',
         ]; 
     } 
  

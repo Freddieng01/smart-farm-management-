@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import ModuleLayout from '../components/ModuleLayout.jsx';
 
+
 export default function TaskTracking() {
-    const { api } = useAuth();
+    const { api, user } = useAuth();
+    const { taskId } = useParams();
     const [tasks, setTasks] = useState([]);
     const [employees, setEmployees] = useState([]);
     const [fields, setFields] = useState([]);
@@ -20,63 +23,42 @@ export default function TaskTracking() {
         date: new Date().toISOString().split('T')[0],
     });
 
-    useEffect(() => {
-        fetchAllData();
-    }, []);
-
     async function fetchAllData() {
         setLoading(true);
         try {
-            const [tasksRes, empRes, fieldRes] = await Promise.all([
-                api.get('/api/daily-tasks'),
-                api.get('/api/employees'),
-                api.get('/api/farms'), // We get farms and then their fields or just all fields if available
-            ]);
-            setTasks(tasksRes.data.data);
-            setEmployees(empRes.data.data);
-            // Note: we might need a separate /api/fields endpoint, but for now we'll use a simplified approach or fetch them.
-            // Since we don't have a global /api/fields, we might need to fetch farms and map their fields.
-            // For the sake of this UI, let's assume we can fetch a combined list or we'll implement a field fetcher.
+            const tasksRes = await api.get('/api/daily-tasks');
+            const tasks = tasksRes.data.data ?? [];
+            setTasks(tasks);
+
+            if (['Farm-owner', 'Manager'].includes(user?.role)) {
+                const [empRes, farmsRes] = await Promise.all([
+                    api.get('/api/employees'),
+                    api.get('/api/farms'),
+                ]);
+                const fieldResponses = await Promise.all(
+                    (farmsRes.data.data ?? []).map((farm) => api.get(`/api/farms/${farm.id}/fields`))
+                );
+                setEmployees(empRes.data.data ?? []);
+                setFields(fieldResponses.flatMap((response) => response.data.data ?? []));
+            } else {
+                setEmployees([]);
+                setFields([]);
+            }
+
+            if (taskId) {
+                const task = tasks.find((item) => String(item.id) === String(taskId));
+                if (task) handleOpenModal(task);
+            }
         } catch (err) {
-            setError('Failed to load task data.');
+            setError(err.response?.data?.message || 'Failed to load task data.');
         } finally {
             setLoading(false);
         }
     }
 
-    // Helper to fetch all fields from all farms
-    async function fetchAllFields() {
-        const farmsRes = await api.get('/api/farms');
-        const farms = farmsRes.data.data;
-        const allFields = [];
-        for (const farm of farms) {
-            const fieldRes = await api.get(`/api/farms/${farm.id}/fields`);
-            allFields.push(...fieldRes.data.data);
-        }
-        return allFields;
-    }
-
-    // Overriding fetchAllData to include fields
     useEffect(() => {
-        async function init() {
-            setLoading(true);
-            try {
-                const [tasksRes, empRes] = await Promise.all([
-                    api.get('/api/daily-tasks'),
-                    api.get('/api/employees'),
-                ]);
-                const fields = await fetchAllFields();
-                setTasks(tasksRes.data.data);
-                setEmployees(empRes.data.data);
-                setFields(fields);
-            } catch (err) {
-                setError('Failed to load data.');
-            } finally {
-                setLoading(false);
-            }
-        }
-        init();
-    }, []);
+        fetchAllData();
+    }, [api, taskId, user?.role]);
 
     function handleOpenModal(task = null) {
         if (task) {
@@ -133,7 +115,7 @@ export default function TaskTracking() {
         <ModuleLayout
           title="Daily Task Tracking"
           subtitle="Log work hours, track progress, and monitor field activities."
-          actions={<>
+          actions={['Farm-owner', 'Manager'].includes(user?.role) && <>
 <button
                         onClick={() => handleOpenModal()}
                         className="rounded-full bg-harvest-400 px-5 py-2 text-sm font-medium text-farm-900 transition hover:bg-harvest-500 disabled:opacity-60"
@@ -180,7 +162,7 @@ export default function TaskTracking() {
                                                 {task.status}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-right space-x-3">
+                                        {['Farm-owner', 'Manager'].includes(user?.role) && <td className="px-6 py-4 text-right space-x-3">
                                             <button
                                                 onClick={() => handleOpenModal(task)}
                                                 className="text-farm-700 hover:underline"
@@ -193,7 +175,7 @@ export default function TaskTracking() {
                                             >
                                                 Delete
                                             </button>
-                                        </td>
+                                        </td>}
                                     </tr>
                                 ))
                             )}
