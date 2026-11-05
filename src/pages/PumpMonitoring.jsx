@@ -394,7 +394,8 @@ export default function PumpMonitoring() {
         </section>
 
         {showForm && (
-          <section className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <section className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl bg-white p-5 shadow-xl">
             <div className="mb-5 flex items-center justify-between gap-3">
               <h2 className="text-lg font-bold text-farm-900">
                 {editingId ? 'Edit monitoring record' : 'New monitoring record'}
@@ -534,6 +535,7 @@ export default function PumpMonitoring() {
               </div>
             </form>
           </section>
+          </div>
         )}
 
         <section className="overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">

@@ -13,6 +13,7 @@ export default function CropManagement() {
     const [success, setSuccess] = useState('');
     const [search, setSearch] = useState('');
     const [editingCrop, setEditingCrop] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const emptyForm = {
         name: '',
@@ -85,6 +86,7 @@ export default function CropManagement() {
 
             setForm(emptyForm);
             setEditingCrop(null);
+            setIsModalOpen(false);
 
             await fetchCrops();
         } catch (err) {
@@ -116,6 +118,7 @@ export default function CropManagement() {
 
         setError('');
         setSuccess('');
+        setIsModalOpen(true);
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -126,6 +129,19 @@ export default function CropManagement() {
         setForm(emptyForm);
         setError('');
         setSuccess('');
+        setIsModalOpen(false);
+    };
+
+    const handleOpenModal = (crop = null) => {
+        if (crop) {
+            handleEdit(crop);
+        } else {
+            setEditingCrop(null);
+            setForm(emptyForm);
+            setError('');
+            setSuccess('');
+            setIsModalOpen(true);
+        }
     };
 
     // Delete a crop after confirmation.
@@ -138,6 +154,7 @@ export default function CropManagement() {
 
         setError('');
         setSuccess('');
+        setIsModalOpen(true);
 
         try {
             await api.delete(`/api/crops/${crop.id}`);
@@ -165,6 +182,15 @@ export default function CropManagement() {
         <ModuleLayout
           title="Crop Management"
           subtitle="Register crops, manage crop information, and track maturity periods."
+          actions={
+            <button
+                type="button"
+                onClick={() => handleOpenModal()}
+                className="rounded-full bg-harvest-400 px-5 py-2 text-sm font-medium text-farm-900 transition hover:bg-harvest-500"
+            >
+                + Add Crop
+            </button>
+          }
         >
           <div className="space-y-6">
 
@@ -188,10 +214,20 @@ export default function CropManagement() {
             )}
 
             {/* Crop registration and editing form */}
-            <section className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
-                <h2 className="mb-4 text-lg font-semibold text-farm-900">
-                    {editingCrop ? 'Edit Crop' : 'Register New Crop'}
-                </h2>
+            {isModalOpen && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+            <section className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-5 shadow-xl">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                    <h2 className="text-lg font-semibold text-farm-900">
+                        {editingCrop ? 'Edit Crop' : 'Register New Crop'}
+                    </h2>
+                    <button
+                        type="button"
+                        onClick={handleCancelEdit}
+                        className="rounded-full px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100"
+                    >
+                        Close
+                    </button>
+                </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -298,6 +334,7 @@ export default function CropManagement() {
                     </div>
                 </form>
             </section>
+            </div>}
 
             {/* Crop list */}
             <section className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">

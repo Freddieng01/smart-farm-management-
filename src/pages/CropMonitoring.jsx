@@ -24,6 +24,7 @@ export default function CropMonitoring() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   async function loadData() {
     setLoading(true);
@@ -75,6 +76,7 @@ export default function CropMonitoring() {
   function resetForm() {
     setForm(emptyForm);
     setEditingId(null);
+    setIsModalOpen(false);
   }
 
   async function handleSubmit(event) {
@@ -131,6 +133,7 @@ export default function CropMonitoring() {
 
     setError('');
     setSuccess('');
+    setIsModalOpen(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -184,6 +187,20 @@ export default function CropMonitoring() {
     <ModuleLayout
       title="Crop Monitoring"
       subtitle="Monitor crop growth, health, and estimated yield."
+      actions={
+        <button
+          type="button"
+          onClick={() => {
+            resetForm();
+            setError('');
+            setSuccess('');
+            setIsModalOpen(true);
+          }}
+          className="rounded-full bg-harvest-400 px-5 py-2 text-sm font-medium text-farm-900 transition hover:bg-harvest-500"
+        >
+          + Add monitoring record
+        </button>
+      }
     >
       <div className="space-y-6">
 
@@ -225,13 +242,17 @@ export default function CropMonitoring() {
         </div>
       </div>
 
+      {isModalOpen && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
       <form
         onSubmit={handleSubmit}
-        className="space-y-4 rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]"
+        className="max-h-[90vh] w-full max-w-3xl overflow-y-auto space-y-4 rounded-3xl bg-white p-5 shadow-xl"
       >
-        <h2 className="text-lg font-semibold text-farm-900">
-          {editingId ? 'Edit Monitoring Record' : 'Add Monitoring Record'}
-        </h2>
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold text-farm-900">
+            {editingId ? 'Edit Monitoring Record' : 'Add Monitoring Record'}
+          </h2>
+          <button type="button" onClick={resetForm} className="rounded-full px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100">Close</button>
+        </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
@@ -381,6 +402,7 @@ export default function CropMonitoring() {
           )}
         </div>
       </form>
+      </div>}
 
       <div className="overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
         <div className="border-b p-5">
@@ -393,8 +415,7 @@ export default function CropMonitoring() {
           <p className="p-6 text-slate-500">Loading monitoring records...</p>
         ) : records.length === 0 ? (
           <p className="p-6 text-slate-500">
-            No monitoring records yet. Use the form above to add your first
-            record.
+            No monitoring records yet. Click "Add monitoring record" to add your first record.
           </p>
         ) : (
           <div className="overflow-x-auto">

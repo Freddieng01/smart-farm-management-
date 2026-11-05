@@ -312,9 +312,10 @@ export default function YieldRecords() {
         </div>
 
         {showForm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
           <form
             onSubmit={submitForm}
-            className="mb-6 rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]"
+            className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl bg-white p-5 shadow-xl"
           >
             <h2 className="mb-4 text-xl font-semibold text-farm-900">
               {editingId ? 'Edit Yield Record' : 'New Yield Record'}
@@ -504,6 +505,7 @@ export default function YieldRecords() {
               </button>
             </div>
           </form>
+          </div>
         )}
 
         <div className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">

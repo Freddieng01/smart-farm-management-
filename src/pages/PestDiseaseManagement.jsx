@@ -79,6 +79,7 @@ function PestDiseaseManagement() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [search, setSearch] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const loadRecords = async () => {
     setLoading(true);
@@ -202,6 +203,7 @@ function PestDiseaseManagement() {
     setEditingId(record.id);
     setError('');
     setSuccess('');
+    setIsModalOpen(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -209,6 +211,7 @@ function PestDiseaseManagement() {
     setForm({ ...emptyForms[activeTab] });
     setEditingId(null);
     setError('');
+    setIsModalOpen(false);
   };
 
   const saveRecord = async (event) => {
@@ -466,6 +469,21 @@ function PestDiseaseManagement() {
     <ModuleLayout
       title="Pest & Disease Management"
       subtitle="Monitor crop health, plan treatments, and manage outbreak alerts."
+      actions={
+        <button
+          type="button"
+          onClick={() => {
+            setEditingId(null);
+            setForm({ ...emptyForms[activeTab] });
+            setError('');
+            setSuccess('');
+            setIsModalOpen(true);
+          }}
+          className="rounded-full bg-harvest-400 px-5 py-2 text-sm font-medium text-farm-900 transition hover:bg-harvest-500"
+        >
+          + Add record
+        </button>
+      }
     >
       <div className="space-y-6">
 
@@ -507,10 +525,16 @@ function PestDiseaseManagement() {
         </div>
       )}
 
-      <section className="rounded-3xl bg-white p-4 shadow-[0_2px_16px_rgba(15,60,35,0.07)] md:p-6">
-        <h2 className="mb-4 text-lg font-semibold text-farm-900">
-          {editingId ? 'Edit record' : `Add ${sections.find((s) => s.id === activeTab)?.label}`}
-        </h2>
+      {isModalOpen && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+      <section className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl bg-white p-4 shadow-xl md:p-6">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold text-farm-900">
+            {editingId ? 'Edit record' : `Add ${sections.find((s) => s.id === activeTab)?.label}`}
+          </h2>
+          <button type="button" onClick={cancelEditing} className="rounded-full px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100">
+            Close
+          </button>
+        </div>
 
         <form onSubmit={saveRecord} className="space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -549,6 +573,7 @@ function PestDiseaseManagement() {
           )}
         </form>
       </section>
+      </div>}
 
       <section className="rounded-3xl bg-white p-4 shadow-[0_2px_16px_rgba(15,60,35,0.07)] md:p-6">
         <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
@@ -569,7 +594,7 @@ function PestDiseaseManagement() {
           <p className="py-8 text-center text-slate-500">Loading records...</p>
         ) : filteredRecords.length === 0 ? (
           <p className="py-8 text-center text-slate-500">
-            No records found. Add your first record using the form above.
+            No records found. Click "Add record" to create the first one.
           </p>
         ) : (
           <div className="overflow-x-auto">

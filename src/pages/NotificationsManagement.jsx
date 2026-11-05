@@ -28,6 +28,39 @@ const priorityStyles = {
     Low: 'bg-slate-100 text-slate-700',
 };
 
+const roleGuidance = {
+    Admin: {
+        title: 'What you may receive',
+        text: 'You can review alerts across the organisation. Farm owners and managers create the rules that monitor each farm.',
+        alerts: ['Farm-wide weather risks', 'Important operational issues', 'System and access notices'],
+    },
+    'Farm-owner': {
+        title: 'Keep your farms ahead',
+        text: 'Create rules for each farm and use the notifications list to decide what needs attention first.',
+        alerts: ['Low stock and equipment maintenance', 'Overdue tasks and upcoming harvests', 'Weather risks and livestock care'],
+    },
+    Manager: {
+        title: 'Keep the team moving',
+        text: 'Use alerts to spot work that needs assigning, follow up on risks, and keep farm operations on schedule.',
+        alerts: ['Overdue tasks and maintenance', 'Weather and irrigation risks', 'Stock, harvest, and livestock reminders'],
+    },
+    Agronomist: {
+        title: 'Protect crop performance',
+        text: 'Notifications highlight field conditions and crop work that may need your review.',
+        alerts: ['Weather and irrigation conditions', 'Crop, pest, and disease activity', 'Harvest and field-work reminders'],
+    },
+    Worker: {
+        title: 'Your work priorities',
+        text: 'Check notifications for assignments and farm conditions that affect today’s work.',
+        alerts: ['Task updates and overdue work', 'Weather and equipment warnings', 'Stock and harvest reminders'],
+    },
+    Accountant: {
+        title: 'Stay on top of costs',
+        text: 'Use notifications to follow up on financial, purchasing, and stock activity relevant to your farms.',
+        alerts: ['Budget and expense reminders', 'Purchase and sales activity', 'Stock and payment-related notices'],
+    },
+};
+
 export default function NotificationsManagement() {
     const { api, user } = useAuth();
     const { openNotification, targetFor } = useNotifications();
@@ -194,13 +227,21 @@ export default function NotificationsManagement() {
 
     const visibleNotifications = unreadOnly ? notifications.filter((n) => !n.read_at) : notifications;
     const unreadCount = notifications.filter((n) => !n.read_at).length;
+    const canManageAlerts = ['Farm-owner', 'Manager'].includes(user?.role);
+    const guidance = roleGuidance[user?.role] || roleGuidance.Worker;
+
+    useEffect(() => {
+        if (!canManageAlerts && tab === 'rules') {
+            setTab('notifications');
+        }
+    }, [canManageAlerts, tab]);
 
     return (
         <ModuleLayout
           title="Notifications and alerts"
           subtitle="See what needs attention, and set the rules that trigger alerts for each farm."
           actions={<>
-                    {tab === 'rules' && (
+                    {canManageAlerts && tab === 'rules' && (
                         <button
                             onClick={handleCheckNow}
                             disabled={checking}
@@ -209,12 +250,12 @@ export default function NotificationsManagement() {
                             {checking ? 'Checking...' : 'Check rules now'}
                         </button>
                     )}
-<button
+                    {canManageAlerts && <button
                         onClick={() => (tab === 'notifications' ? setNotificationModal(true) : setRuleModal(true))}
                         className="rounded-full bg-harvest-400 px-5 py-2 text-sm font-medium text-farm-900 transition hover:bg-harvest-500 disabled:opacity-60"
                     >
                         {tab === 'notifications' ? '+ Add notification' : '+ Add alert rule'}
-                    </button>
+                    </button>}
           </>}
         >
             <div className="mx-auto max-w-7xl">
@@ -235,22 +276,35 @@ export default function NotificationsManagement() {
                     >
                         My notifications{unreadCount > 0 ? ` (${unreadCount} unread)` : ''}
                     </button>
-                    <button
-                        onClick={() => setTab('rules')}
-                        className={`px-4 py-2 text-sm font-medium transition ${
-                            tab === 'rules'
-                                ? 'border-b-2 border-farm-700 text-farm-900'
-                                : 'text-slate-500 hover:text-farm-900'
-                        }`}
-                    >
-                        Alert rules
-                    </button>
+                    {canManageAlerts && (
+                        <button
+                            onClick={() => setTab('rules')}
+                            className={`px-4 py-2 text-sm font-medium transition ${
+                                tab === 'rules'
+                                    ? 'border-b-2 border-farm-700 text-farm-900'
+                                    : 'text-slate-500 hover:text-farm-900'
+                            }`}
+                        >
+                            Alert rules
+                        </button>
+                    )}
                 </div>
 
                 {error && <p className="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
 
                 {tab === 'notifications' && (
                     <>
+                        <div className="mb-5 rounded-3xl border border-farm-100 bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+                            <h2 className="text-base font-semibold text-farm-900">{guidance.title}</h2>
+                            <p className="mt-1 text-sm text-slate-600">{guidance.text}</p>
+                            <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                                {guidance.alerts.map((alert) => (
+                                    <div key={alert} className="rounded-2xl bg-farm-50 px-3 py-2 text-sm text-farm-900">
+                                        {alert}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                         <label className="mb-3 flex items-center gap-2 text-sm text-slate-500">
                             <input
                                 type="checkbox"
@@ -282,7 +336,7 @@ export default function NotificationsManagement() {
                                             <td colSpan="5" className="px-6 py-10 text-center text-slate-500">
                                                 {unreadOnly
                                                     ? 'No unread notifications.'
-                                                    : 'No notifications yet. They appear here automatically when one of your alert rules triggers.'}
+                                                    : 'You are all caught up. New alerts will appear here when something needs your attention.'}
                                             </td>
                                         </tr>
                                     ) : (
@@ -340,12 +394,19 @@ export default function NotificationsManagement() {
                     </>
                 )}
 
-                {tab === 'rules' && (
-                    <p className="mb-3 rounded-2xl bg-farm-50 px-4 py-3 text-sm text-farm-900">
-                        Extreme weather (heat, frost, strong wind, heavy rain, thunderstorms) is checked every hour for
-                        every farm with a location, and warns the farm owner and managers automatically. You only need a
-                        weather rule if you also want milder warnings, such as rain.
-                    </p>
+                {canManageAlerts && tab === 'rules' && (
+                    <div className="mb-3 rounded-3xl border border-farm-100 bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+                        <h2 className="text-base font-semibold text-farm-900">Set up useful reminders</h2>
+                        <p className="mt-1 text-sm text-slate-600">
+                            Choose a farm, select what to watch, and set how important the alert is. Weather risks are
+                            monitored automatically when a farm has coordinates; add a weather rule when you want
+                            additional reminders, such as rain or changing conditions.
+                        </p>
+                        <p className="mt-3 text-sm text-slate-600">
+                            Good starting rules include low stock, overdue tasks, equipment maintenance, livestock
+                            vaccinations, and harvest dates.
+                        </p>
+                    </div>
                 )}
 
                 {tab === 'rules' && (

@@ -50,6 +50,7 @@ export default function PlantingManagement() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   async function loadData() {
     setLoading(true);
@@ -112,6 +113,7 @@ export default function PlantingManagement() {
     setEditingId(null);
     setError('');
     setSuccess('');
+    setIsModalOpen(false);
   }
 
   function handleEdit(planting) {
@@ -132,6 +134,7 @@ export default function PlantingManagement() {
 
     setError('');
     setSuccess('');
+    setIsModalOpen(true);
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -176,6 +179,7 @@ export default function PlantingManagement() {
 
       setForm(emptyForm);
       setEditingId(null);
+      setIsModalOpen(false);
       await loadData();
     } catch (err) {
       setError(getErrorMessage(err));
@@ -241,6 +245,18 @@ export default function PlantingManagement() {
     <ModuleLayout
       title="Planting Management"
       subtitle="Schedule plantings and monitor their progress from planting to harvest."
+      actions={
+        <button
+          type="button"
+          onClick={() => {
+            resetForm();
+            setIsModalOpen(true);
+          }}
+          className="rounded-full bg-harvest-400 px-5 py-2 text-sm font-medium text-farm-900 transition hover:bg-harvest-500"
+        >
+          + Add planting
+        </button>
+      }
     >
       <div className="mx-auto max-w-7xl space-y-6">
 
@@ -281,10 +297,14 @@ export default function PlantingManagement() {
           ))}
         </section>
 
-        <section className="rounded-3xl bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)] sm:p-6">
-          <h2 className="text-xl font-semibold text-farm-900">
-            {editingId ? 'Edit planting schedule' : 'Register a planting'}
-          </h2>
+        {isModalOpen && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+        <section className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl bg-white p-5 shadow-xl sm:p-6">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-xl font-semibold text-farm-900">
+              {editingId ? 'Edit planting schedule' : 'Register a planting'}
+            </h2>
+            <button type="button" onClick={resetForm} className="rounded-full px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100">Close</button>
+          </div>
 
           <p className="mt-1 text-sm text-slate-500">
             Select a crop and field already registered in the system.
@@ -496,6 +516,7 @@ export default function PlantingManagement() {
             )}
           </form>
         </section>
+        </div>}
 
         <section className="overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
           <div className="flex flex-col gap-3 border-b border-farm-100 p-5 sm:flex-row sm:items-center sm:justify-between">
