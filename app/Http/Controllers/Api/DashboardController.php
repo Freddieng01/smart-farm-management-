@@ -10,15 +10,18 @@ use App\Models\FarmExpense;
 use App\Models\DailyTask;
 use App\Models\Employee;
 use App\Models\CropProduction;
+use App\Models\YieldRecord;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Support\Authorization\FarmAccess;
 
 class DashboardController extends Controller
 {
-    public function summary(): JsonResponse
+    public function summary(Request $request): JsonResponse
     {
         $farmIds = FarmAccess::farmIds();
+        $role = $request->user()->role;
 
         // 1. Basic Infrastructure Counts
         $farmsCount = Farm::whereIn('id', $farmIds)->count();
@@ -53,13 +56,16 @@ class DashboardController extends Controller
         $totalProduction = CropProduction::whereHas('field', function ($query) use ($farmIds) {
             $query->whereIn('farm_id', $farmIds);
         })->sum('quantity');
+        $yieldRecords = YieldRecord::whereHas('field', function ($query) use ($farmIds) {
+            $query->whereIn('farm_id', $farmIds);
+        })->count();
 
         // 5. Simplified Profit Estimate
         // Profit = (Estimated Production Value -’ Expenses - Labor)
         // Since we don't have a "Market Price" integrated into the summary yet,
         // we provide the raw cost vs production metrics.
 
-        return response()->json([
+        $response = [
             'data' => [
                 'infrastructure' => [
                     'farms' => $farmsCount,
@@ -74,8 +80,15 @@ class DashboardController extends Controller
                 ],
                 'production' => [
                     'total_quantity' => (float) $totalProduction,
+                    'yield_records' => $yieldRecords,
                 ],
             ],
-        ]);
+        ];
+
+        if (! in_array($role, ['Farm-owner', 'Manager', 'Accountant'], true)) {
+            unset($response['data']['financials']);
+        }
+
+        return response()->json($response);
     }
 }

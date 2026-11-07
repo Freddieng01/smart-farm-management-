@@ -28,39 +28,6 @@ const priorityStyles = {
     Low: 'bg-slate-100 text-slate-700',
 };
 
-const roleGuidance = {
-    Admin: {
-        title: 'What you may receive',
-        text: 'You can review alerts across the organisation. Farm owners and managers create the rules that monitor each farm.',
-        alerts: ['Farm-wide weather risks', 'Important operational issues', 'System and access notices'],
-    },
-    'Farm-owner': {
-        title: 'Keep your farms ahead',
-        text: 'Create rules for each farm and use the notifications list to decide what needs attention first.',
-        alerts: ['Low stock and equipment maintenance', 'Overdue tasks and upcoming harvests', 'Weather risks and livestock care'],
-    },
-    Manager: {
-        title: 'Keep the team moving',
-        text: 'Use alerts to spot work that needs assigning, follow up on risks, and keep farm operations on schedule.',
-        alerts: ['Overdue tasks and maintenance', 'Weather and irrigation risks', 'Stock, harvest, and livestock reminders'],
-    },
-    Agronomist: {
-        title: 'Protect crop performance',
-        text: 'Notifications highlight field conditions and crop work that may need your review.',
-        alerts: ['Weather and irrigation conditions', 'Crop, pest, and disease activity', 'Harvest and field-work reminders'],
-    },
-    Worker: {
-        title: 'Your work priorities',
-        text: 'Check notifications for assignments and farm conditions that affect today’s work.',
-        alerts: ['Task updates and overdue work', 'Weather and equipment warnings', 'Stock and harvest reminders'],
-    },
-    Accountant: {
-        title: 'Stay on top of costs',
-        text: 'Use notifications to follow up on financial, purchasing, and stock activity relevant to your farms.',
-        alerts: ['Budget and expense reminders', 'Purchase and sales activity', 'Stock and payment-related notices'],
-    },
-};
-
 export default function NotificationsManagement() {
     const { api, user } = useAuth();
     const { openNotification, targetFor } = useNotifications();
@@ -128,7 +95,7 @@ export default function NotificationsManagement() {
             setRules(rulesRes.data.data ?? rulesRes.data);
             window.dispatchEvent(new Event('notifications:changed'));
         } catch (err) {
-            setError('Could not load notifications and alert rules. Check that the API is running and you are logged in.');
+            setError('Could not load notifications and alert rules. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -228,7 +195,6 @@ export default function NotificationsManagement() {
     const visibleNotifications = unreadOnly ? notifications.filter((n) => !n.read_at) : notifications;
     const unreadCount = notifications.filter((n) => !n.read_at).length;
     const canManageAlerts = ['Farm-owner', 'Manager'].includes(user?.role);
-    const guidance = roleGuidance[user?.role] || roleGuidance.Worker;
 
     useEffect(() => {
         if (!canManageAlerts && tab === 'rules') {
@@ -239,7 +205,7 @@ export default function NotificationsManagement() {
     return (
         <ModuleLayout
           title="Notifications and alerts"
-          subtitle="See what needs attention, and set the rules that trigger alerts for each farm."
+          subtitle="Review notifications and alerts for your farms."
           actions={<>
                     {canManageAlerts && tab === 'rules' && (
                         <button
@@ -294,17 +260,6 @@ export default function NotificationsManagement() {
 
                 {tab === 'notifications' && (
                     <>
-                        <div className="mb-5 rounded-3xl border border-farm-100 bg-white p-5 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
-                            <h2 className="text-base font-semibold text-farm-900">{guidance.title}</h2>
-                            <p className="mt-1 text-sm text-slate-600">{guidance.text}</p>
-                            <div className="mt-4 grid gap-2 sm:grid-cols-3">
-                                {guidance.alerts.map((alert) => (
-                                    <div key={alert} className="rounded-2xl bg-farm-50 px-3 py-2 text-sm text-farm-900">
-                                        {alert}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
                         <label className="mb-3 flex items-center gap-2 text-sm text-slate-500">
                             <input
                                 type="checkbox"

@@ -53,7 +53,7 @@ export default function WaterSourceManagement() {
         } catch (err) {
             setError(
                 err.response?.data?.message ||
-                'Unable to load water sources or farms. Check your API connection.'
+                'Unable to load water sources or farms. Please try again.'
             );
         } finally {
             setLoading(false);

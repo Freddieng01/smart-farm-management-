@@ -130,11 +130,6 @@ export default function ModuleLayout({ title, subtitle, actions, children }) {
             </header>
 
             <section className={`relative z-10 mx-auto -mt-4 max-w-7xl px-6 pb-14 ${viewOnly ? '[&_td_button]:hidden' : ''}`}>
-                {viewOnly && (
-                    <p role="status" className="mb-6 rounded-2xl bg-white px-4 py-3 text-sm text-farm-800 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
-                        View only. Admins can look at farm records but only the farm owner and their team can change them.
-                    </p>
-                )}
                 {children}
             </section>
         </main>

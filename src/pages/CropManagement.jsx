@@ -37,7 +37,7 @@ export default function CropManagement() {
         } catch (err) {
             setError(
                 err.response?.data?.message ||
-                'Failed to load crops. Check that the backend is running.'
+                'Failed to load crops. Please try again.'
             );
         } finally {
             setLoading(false);

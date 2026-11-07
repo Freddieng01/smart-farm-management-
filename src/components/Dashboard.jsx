@@ -6,6 +6,7 @@ import WeatherWidget from './WeatherWidget.jsx';
 import MapWidget from './MapWidget.jsx';
 import FarmScene from './FarmScene.jsx';
 import Icon from './Icon.jsx';
+import { MODULE_ROLES } from '../config/permissions.js';
 
 const initialSummary = {
     infrastructure: { farms: 0, fields: 0, active_users: 0, total_acreage: 0 },
@@ -206,9 +207,13 @@ export default function Dashboard() {
             setError(null);
 
             try {
-                const response = await api.get('/api/dashboard/summary');
-                if (!ignore) {
-                    const data = response.data.data || {};
+                const [summaryResult, farmsResult] = await Promise.allSettled([
+                    api.get('/api/dashboard/summary'),
+                    api.get('/api/weather/farms'),
+                ]);
+
+                if (!ignore && summaryResult.status === 'fulfilled') {
+                    const data = summaryResult.value.data.data || {};
                     setSummary({
                         ...initialSummary,
                         ...data,
@@ -216,18 +221,25 @@ export default function Dashboard() {
                         financials: { ...initialSummary.financials, ...(data.financials || {}) },
                         production: { ...initialSummary.production, ...(data.production || {}) },
                     });
+                }
 
-                    const farmRes = await api.get('/api/weather/farms');
-                    const farms = farmRes.data.data || [];
+                if (!ignore && farmsResult.status === 'fulfilled') {
+                    const farms = farmsResult.value.data.data || [];
                     setFarmsList(farms);
 
                     if (farms.length > 0) {
                         setFarmId(farms[0].id);
                     }
                 }
-            } catch {
-                if (!ignore) {
+
+                if (!ignore && summaryResult.status === 'rejected') {
                     setError('Dashboard summary could not be loaded.');
+                } else if (!ignore && farmsResult.status === 'rejected') {
+                    setError('Weather data is temporarily unavailable. Farm metrics are still available.');
+                }
+            } catch (loadError) {
+                if (!ignore) {
+                    setError(loadError?.message || 'Dashboard data could not be loaded.');
                 }
             } finally {
                 if (!ignore) {
@@ -257,37 +269,40 @@ export default function Dashboard() {
         { label: 'Total expenses', icon: 'wallet', prefix: 'K', tone: moneyTone, value: summary.financials?.total_expenses, roles: ['Farm-owner', 'Accountant'] },
         { label: 'Labour costs', icon: 'hardhat', prefix: 'K', tone: moneyTone, value: summary.financials?.total_labor_cost, roles: ['Farm-owner', 'Manager', 'Accountant'] },
         { label: 'Total production', icon: 'wheat', tone: farmTone, value: summary.production?.total_quantity, roles: ['Admin', 'Manager', 'Agronomist', 'Worker', 'Farm-owner'] },
-        { label: 'Yield records', icon: 'trend', tone: farmTone, value: summary.production?.yield_records, roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
+        { label: 'Yield records', icon: 'trend', tone: farmTone, value: summary.production?.yield_records, roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
     ].filter(card => card.roles.includes(user?.role));
 
     const actions = [
-        { label: 'Manage Farms', path: '/farms', roles: ['Admin', 'Farm-owner', 'Manager'] },
-        { label: 'Livestock Management', path: '/livestock', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Notifications', path: '/notifications', roles: ['Admin', 'Farm-owner', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
-        { label: 'Suppliers & Procurement', path: '/suppliers', roles: ['Farm-owner', 'Manager', 'Accountant'] },
-        { label: 'Market & Sales', path: '/sales', roles: ['Farm-owner', 'Manager', 'Accountant'] },
-        { label: 'Storage & Post-Harvest', path: '/storage', roles: ['Admin', 'Farm-owner', 'Manager', 'Accountant', 'Worker'] },
-        { label: 'Manage Employees', path: '/employees', roles: ['Farm-owner', 'Manager'] },
-        { label: 'Task Tracking', path: '/tasks', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Production Logs', path: '/production', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
-        { label: 'Water Sources', path: '/water-sources', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Crop Management', path: '/crops', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
-        { label: 'Planting Management', path: '/plantings', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
-        { label: 'Crop Monitoring', path: '/crop-monitoring', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
-        { label: 'Irrigation Schedules', path: '/irrigation-schedules', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
-        { label: 'Pump Monitoring', path: '/pump-monitoring', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Pest & Disease', path: '/pest-disease', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
-        { label: 'Weather', path: '/weather', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker', 'Accountant'] },
-        { label: 'Harvest Management', path: '/harvest', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
-        { label: 'Yield Records', path: '/yield-records', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
-        { label: 'Post-Harvest Handling', path: '/post-harvest-handling', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
-        { label: 'Expense Tracking', path: '/expenses', roles: ['Farm-owner', 'Manager', 'Accountant'] },
-        { label: 'Inventory & Inputs', path: '/inventory', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
-        { label: 'Equipment & Machinery', path: '/equipment', roles: ['Admin', 'Farm-owner', 'Manager'] },
-        { label: 'Financial Management', path: '/finance', roles: ['Farm-owner', 'Manager', 'Accountant'] },
-        { label: 'Reports & Analytics', path: '/reports', roles: ['Farm-owner', 'Manager', 'Accountant'] },
-        { label: 'Manage Users', path: '/users', roles: ['Admin'] },
-    ].filter(action => action.roles.includes(user?.role));
+        { label: 'Manage Farms', path: '/farms' },
+        { label: 'Livestock Management', path: '/livestock' },
+        { label: 'Notifications', path: '/notifications' },
+        { label: 'Suppliers & Procurement', path: '/suppliers' },
+        { label: 'Market & Sales', path: '/sales' },
+        { label: 'Storage & Post-Harvest', path: '/storage' },
+        { label: 'Manage Employees', path: '/employees' },
+        { label: 'Task Tracking', path: '/tasks' },
+        { label: 'Production Logs', path: '/production' },
+        { label: 'Water Sources', path: '/water-sources' },
+        { label: 'Crop Management', path: '/crops' },
+        { label: 'Planting Management', path: '/plantings' },
+        { label: 'Crop Monitoring', path: '/crop-monitoring' },
+        { label: 'Irrigation Schedules', path: '/irrigation-schedules' },
+        { label: 'Pump Monitoring', path: '/pump-monitoring' },
+        { label: 'Pest & Disease', path: '/pest-disease' },
+        { label: 'Weather', path: '/weather' },
+        { label: 'Harvest Management', path: '/harvest' },
+        { label: 'Yield Records', path: '/yield-records' },
+        { label: 'Post-Harvest Handling', path: '/post-harvest-handling' },
+        { label: 'Expense Tracking', path: '/expenses' },
+        { label: 'Inventory & Inputs', path: '/inventory' },
+        { label: 'Equipment & Machinery', path: '/equipment' },
+        { label: 'Financial Management', path: '/finance' },
+        { label: 'Reports & Analytics', path: '/reports' },
+        { label: 'Manage Users', path: '/users' },
+    ].map((action) => ({
+        ...action,
+        roles: MODULE_ROLES[action.path] || [],
+    })).filter(action => action.roles.includes(user?.role));
 
     // Where each summary card takes you. The first page the user is allowed to open wins.
     const canOpen = (path) => actions.some((action) => action.path === (path.startsWith('/farms/') ? '/farms' : path));

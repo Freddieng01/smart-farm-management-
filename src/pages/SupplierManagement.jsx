@@ -61,7 +61,7 @@ export default function SupplierManagement() {
             setSuppliers(suppliersRes.data.data ?? suppliersRes.data);
             setOrders(ordersRes.data.data ?? ordersRes.data);
         } catch (err) {
-            setError('Could not load suppliers and purchase orders. Check that the API is running and you are logged in.');
+            setError('Could not load suppliers and purchase orders. Please try again.');
         } finally {
             setLoading(false);
         }

@@ -179,7 +179,6 @@ function AppRoutes() {
                 element={
                     <ProtectedRoute
                         allowedRoles={[
-                            'Admin',
                             'Farm-owner',
                             'Manager',
                         ]}

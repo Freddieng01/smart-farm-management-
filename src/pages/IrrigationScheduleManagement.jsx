@@ -375,8 +375,8 @@ export default function IrrigationScheduleManagement() {
 
             {fields.length === 0 && (
               <p className="mb-4 rounded-2xl bg-amber-50 p-3 text-sm text-amber-800">
-                No fields are available. Check the field API and ensure a farm
-                has at least one registered field.
+                No fields are available. Ensure that a farm has at least one
+                registered field.
               </p>
             )}
 
@@ -569,9 +569,6 @@ export default function IrrigationScheduleManagement() {
             <h2 className="font-bold text-farm-900">
               All irrigation schedules
             </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Showing the schedules returned by the API, up to 25 records.
-            </p>
           </div>
 
           {loading ? (

@@ -132,7 +132,7 @@ function PestDiseaseManagement() {
       } catch (err) {
         if (active) {
           setError(
-            `${getError(err)} Check that the API routes and field endpoint exist.`
+            getError(err)
           );
         }
       } finally {
@@ -567,8 +567,7 @@ function PestDiseaseManagement() {
 
           {fields.length === 0 && (
             <p className="text-sm text-amber-700">
-              No fields are available. Check the fields API endpoint and create
-              a field before adding records.
+              No fields are available. Create a field before adding records.
             </p>
           )}
         </form>
@@ -651,9 +650,6 @@ function PestDiseaseManagement() {
           </div>
         )}
 
-        <p className="mt-3 text-xs text-slate-500">
-          The API currently returns up to 25 records per category.
-        </p>
       </section>
       </div>
     </ModuleLayout>

@@ -127,7 +127,7 @@ export default function PumpMonitoring() {
       setError(
         getErrorMessage(
           err,
-          'Unable to load pump monitoring records. Check your API connection and try again.'
+          'Unable to load pump monitoring records. Please try again.'
         )
       );
     } finally {
@@ -365,7 +365,7 @@ export default function PumpMonitoring() {
           <StatCard
             label="Records loaded"
             value={records.length}
-            description="Monitoring history returned by the API"
+            description="Monitoring history"
           />
 
           <StatCard
@@ -413,7 +413,7 @@ export default function PumpMonitoring() {
             {waterSources.length === 0 && (
               <p className="mb-4 rounded-2xl bg-amber-50 p-3 text-sm text-amber-800">
                 No water sources were loaded. Create a water source first and
-                check that the water-sources API is available.
+                register a water source first.
               </p>
             )}
 

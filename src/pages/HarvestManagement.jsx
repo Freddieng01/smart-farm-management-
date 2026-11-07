@@ -82,7 +82,7 @@ export default function HarvestManagement() {
     } catch (err) {
       setError(
         err?.message ||
-          'Unable to load harvest data. Check that the backend is running.'
+          'Unable to load harvest data. Please try again.'
       );
     } finally {
       setLoading(false);

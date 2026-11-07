@@ -68,33 +68,30 @@ export default function YieldRecords() {
     setError('');
 
     try {
-      const [recordData, farmData] = await Promise.all([
+      const [recordData, fieldData] = await Promise.all([
         api('/api/yield-records'),
-        api('/api/farms'),
+        api('/api/fields'),
       ]);
 
       const recordList = Array.isArray(recordData)
         ? recordData
         : recordData.data || [];
 
-      const farmList = Array.isArray(farmData)
-        ? farmData
-        : farmData.data || [];
+      const fieldList = Array.isArray(fieldData)
+        ? fieldData
+        : fieldData.data || [];
 
       setRecords(recordList);
+      setFields(fieldList);
+
+      const farmList = Array.from(
+        new Map(
+          fieldList
+            .filter((field) => field.farm)
+            .map((field) => [field.farm.id, field.farm])
+        ).values()
+      );
       setFarms(farmList);
-
-      const fieldResponses = await Promise.all(
-        farmList.map((farm) =>
-          api(`/api/farms/${farm.id}/fields`).catch(() => [])
-        )
-      );
-
-      setFields(
-        fieldResponses.flatMap((result) =>
-          Array.isArray(result) ? result : result.data || []
-        )
-      );
     } catch (err) {
       setError(err.message || 'Unable to load yield records.');
     } finally {

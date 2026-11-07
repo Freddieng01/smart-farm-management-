@@ -1,29 +1,28 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext.jsx';
+import { MODULE_ROLES } from '../config/permissions.js';
 
 const POLL_MS = 30000; // how often to look for new notifications
 const TOAST_MS = 9000; // how long a pop-up stays on screen
 const MAX_TOASTS = 3; // pop-ups shown at once; extras are folded into one summary
 
-const ALL = ['Admin', 'Farm-owner', 'Manager', 'Accountant', 'Agronomist', 'Worker'];
-
 // The page each kind of notification belongs to, and who is allowed to open it
 // (same rules as the module list on the dashboard).
 const PAGES = {
-    storage: { path: '/storage', label: 'Open storage', roles: ALL },
-    equipment: { path: '/equipment', label: 'Open equipment', roles: ['Admin', 'Farm-owner', 'Manager', 'Worker'] },
-    livestock: { path: '/livestock', label: 'Open livestock', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
-    harvest: { path: '/harvest', label: 'Open harvests', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
-    tasks: { path: '/tasks', label: 'Open tasks', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
-    weather: { path: '/weather', label: 'Open weather', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
-    irrigation: { path: '/irrigation-schedules', label: 'Open irrigation', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
-    pests: { path: '/pest-disease', label: 'Open pest & disease', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
-    inventory: { path: '/inventory', label: 'Open inventory', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
-    sales: { path: '/sales', label: 'Open sales', roles: ['Farm-owner', 'Manager', 'Accountant'] },
-    finance: { path: '/finance', label: 'Open finance', roles: ['Farm-owner', 'Accountant'] },
-    reports: { path: '/reports', label: 'Open reports', roles: ['Farm-owner', 'Manager', 'Accountant'] },
-    employees: { path: '/employees', label: 'Open employees', roles: ['Farm-owner', 'Manager'] },
+    storage: { path: '/storage', label: 'Open storage', roles: MODULE_ROLES['/storage'] },
+    equipment: { path: '/equipment', label: 'Open equipment', roles: MODULE_ROLES['/equipment'] },
+    livestock: { path: '/livestock', label: 'Open livestock', roles: MODULE_ROLES['/livestock'] },
+    harvest: { path: '/harvest', label: 'Open harvests', roles: MODULE_ROLES['/harvest'] },
+    tasks: { path: '/tasks', label: 'Open tasks', roles: MODULE_ROLES['/tasks'] },
+    weather: { path: '/weather', label: 'Open weather', roles: MODULE_ROLES['/weather'] },
+    irrigation: { path: '/irrigation-schedules', label: 'Open irrigation', roles: MODULE_ROLES['/irrigation-schedules'] },
+    pests: { path: '/pest-disease', label: 'Open pest & disease', roles: MODULE_ROLES['/pest-disease'] },
+    inventory: { path: '/inventory', label: 'Open inventory', roles: MODULE_ROLES['/inventory'] },
+    sales: { path: '/sales', label: 'Open sales', roles: MODULE_ROLES['/sales'] },
+    finance: { path: '/finance', label: 'Open finance', roles: MODULE_ROLES['/finance'] },
+    reports: { path: '/reports', label: 'Open reports', roles: MODULE_ROLES['/reports'] },
+    employees: { path: '/employees', label: 'Open employees', roles: MODULE_ROLES['/employees'] },
 };
 
 // Types created by alert rules map exactly; anything else is matched by keyword.

@@ -53,7 +53,7 @@ export default function CropMonitoring() {
     } catch (err) {
       setError(
         err.response?.data?.message ||
-          'Failed to load crop monitoring records. Please check your API routes and connection.'
+          'Failed to load crop monitoring records. Please try again.'
       );
     } finally {
       setLoading(false);

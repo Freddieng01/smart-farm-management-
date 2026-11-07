@@ -7,31 +7,12 @@ use Illuminate\Http\Request;
 
 class RoleAccess
 {
-    /**
-     * STRICT ROLE DEFINITIONS
-     * Only roles explicitly listed here can access the module.
-     */
-    private const ROLES = [
-        'farms'       => ['Admin', 'Farm-owner', 'Manager'],
-        'fields'      => ['Admin', 'Farm-owner', 'Manager', 'Agronomist'],
-        'employees'    => ['Farm-owner', 'Manager'],
-        'tasks'       => ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'],
-        'agronomy'    => ['Admin', 'Farm-owner', 'Manager', 'Agronomist'],
-        'operations'   => ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'],
-        'inventory'   => ['Admin', 'Farm-owner', 'Manager', 'Agronomist'],
-        'equipment'   => ['Admin', 'Farm-owner', 'Manager'],
-        'finance'     => ['Farm-owner', 'Manager', 'Accountant'],
-        'commercial'   => ['Farm-owner', 'Manager', 'Accountant'],
-        'storage'     => ['Admin', 'Farm-owner', 'Manager', 'Accountant', 'Worker'],
-        'weather'     => ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker', 'Accountant'],
-        'notifications' => ['Admin', 'Farm-owner', 'Manager', 'Accountant', 'Agronomist', 'Worker'],
-    ];
-
     public function handle(Request $request, Closure $next, string $module)
     {
         $user = $request->user();
+        $roles = config("permissions.modules.{$module}", []);
 
-        if (! $user || ! in_array($user->role, self::ROLES[$module] ?? [], true)) {
+        if (! $user || ! in_array($user->role, $roles, true)) {
             return response()->json(['message' => 'Module unavailable.'], 403);
         }
 
@@ -45,7 +26,8 @@ class RoleAccess
                 return $next($request);
             }
 
-            if (! in_array($user->role, ['Farm-owner', 'Manager'], true)) {
+            $writeRoles = config("permissions.write_roles.{$module}", []);
+            if (! in_array($user->role, $writeRoles, true)) {
                 return response()->json([
                     'message' => 'Unauthorized Action: You may only view this data. Please contact the Farm Owner to make changes.'
                 ], 403);

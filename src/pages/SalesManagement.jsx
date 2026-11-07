@@ -157,7 +157,7 @@ export default function SalesManagement() {
             setInvoices(i.data.data ?? i.data);
             setPrices(p.data.data ?? p.data);
         } catch (err) {
-            setError('Could not load sales data. Check that the API is running and you are logged in.');
+            setError('Could not load sales data. Please try again.');
         } finally {
             setLoading(false);
         }

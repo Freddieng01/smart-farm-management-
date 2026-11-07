@@ -144,7 +144,7 @@ export default function StorageManagement() {
             setFacilities(f.data.data ?? f.data);
             setProduce(p.data.data ?? p.data);
         } catch (err) {
-            setError('Could not load storage data. Check that the API is running and you are logged in.');
+            setError('Could not load storage data. Please try again.');
         } finally {
             setLoading(false);
         }

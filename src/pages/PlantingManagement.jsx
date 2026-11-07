@@ -616,10 +616,6 @@ export default function PlantingManagement() {
             </div>
           )}
 
-          <div className="border-t border-farm-100 px-5 py-3 text-xs text-slate-500">
-            The list currently displays the records returned by the first API
-            page (up to 25). Pagination controls can be added if needed.
-          </div>
         </section>
       </div>
     </ModuleLayout>
