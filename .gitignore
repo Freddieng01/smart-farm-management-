@@ -21,3 +21,5 @@ composer-setup.sig
 /storage/app/public/
 
 /database/*.sqlite
+
+.copilot-azure/

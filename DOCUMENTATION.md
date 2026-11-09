@@ -116,7 +116,7 @@ The farm owner is interested in the state of the business, not the daily farm wo
     - Install dependencies: `npm install`
     - Start development server: `npm run dev`
 
-Run both servers during local development: Laravel on `127.0.0.1:8000` and Vite on `localhost:5173`. Vite proxies `/api/*` requests to the Laravel API.
+Open the application at `http://localhost:8000`. Laravel serves the application page and API; Vite on `localhost:5173` is only used to rebuild frontend assets during development.
 
 ### Email invitations
 
