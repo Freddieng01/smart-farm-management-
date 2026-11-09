@@ -11,7 +11,6 @@ use App\Models\DailyTask;
 use App\Models\DispatchRecord;
 use App\Models\Employee;
 use App\Models\Farm;
-use App\Models\FarmExpense;
 use App\Models\Field;
 use App\Models\FinancialTransaction;
 use App\Models\HarvestSchedule;
@@ -64,7 +63,6 @@ class AppServiceProvider extends ServiceProvider
             Budget::class,
             Customer::class,
             FinancialTransaction::class,
-            FarmExpense::class,
             MarketPrice::class,
             Notification::class,
             Resource::class,

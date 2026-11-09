@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import TaskClock, { clockState, CLOCK_LABEL } from '../components/TaskClock.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import ModuleLayout from '../components/ModuleLayout.jsx';
 
 
 export default function TaskTracking() {
     const { api, user } = useAuth();
-    const { taskId } = useParams();
+    const navigate = useNavigate();
     const [tasks, setTasks] = useState([]);
     const [employees, setEmployees] = useState([]);
     const [fields, setFields] = useState([]);
@@ -44,11 +45,6 @@ export default function TaskTracking() {
                 setEmployees([]);
                 setFields([]);
             }
-
-            if (taskId) {
-                const task = tasks.find((item) => String(item.id) === String(taskId));
-                if (task) handleOpenModal(task);
-            }
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to load task data.');
         } finally {
@@ -58,7 +54,7 @@ export default function TaskTracking() {
 
     useEffect(() => {
         fetchAllData();
-    }, [api, taskId, user?.role]);
+    }, [api, user?.role]);
 
     function handleOpenModal(task = null) {
         if (task) {
@@ -91,7 +87,8 @@ export default function TaskTracking() {
             if (editingTask) {
                 await api.put(`/api/daily-tasks/${editingTask.id}`, form);
             } else {
-                await api.post('/api/daily-tasks', form);
+                // a new job is assigned unstarted; the employee's clock fills in the hours
+                await api.post('/api/daily-tasks', { ...form, hours_worked: 0, status: 'pending' });
             }
             setIsModalOpen(false);
             fetchAllData();
@@ -114,7 +111,7 @@ export default function TaskTracking() {
     return (
         <ModuleLayout
           title="Daily Task Tracking"
-          subtitle="Log work hours, track progress, and monitor field activities."
+          subtitle="Log work hours and track progress. Select a task to open it."
           actions={['Farm-owner', 'Manager'].includes(user?.role) && <>
 <button
                         onClick={() => handleOpenModal()}
@@ -128,7 +125,7 @@ export default function TaskTracking() {
 
                 {error && <p className="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
 
-                <div className="overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+                <div className="overflow-x-auto rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
                     <table className="w-full text-left text-sm">
                         <thead className="bg-farm-50 text-farm-700 text-xs">
                             <tr>
@@ -138,31 +135,48 @@ export default function TaskTracking() {
                                 <th className="px-6 py-3 font-semibold">Description</th>
                                 <th className="px-6 py-3 font-semibold">Hours</th>
                                 <th className="px-6 py-3 font-semibold">Status</th>
+                                <th className="px-6 py-3 font-semibold">Clock</th>
                                 <th className="px-6 py-3 font-semibold text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-farm-100">
                             {loading ? (
-                                <tr><td colSpan="7" className="px-6 py-10 text-center text-slate-500">Loading tasks...</td></tr>
+                                <tr><td colSpan="8" className="px-6 py-10 text-center text-slate-500">Loading tasks...</td></tr>
                             ) : tasks.length === 0 ? (
-                                <tr><td colSpan="7" className="px-6 py-10 text-center text-slate-500">No tasks logged yet.</td></tr>
+                                <tr><td colSpan="8" className="px-6 py-10 text-center text-slate-500">No tasks logged yet.</td></tr>
                             ) : (
                                 tasks.map((task) => (
-                                    <tr key={task.id} className="hover:bg-farm-50 transition">
+                                    <tr
+                                        key={task.id}
+                                        onClick={() => navigate(`/tasks/${task.id}`)}
+                                        className="cursor-pointer transition hover:bg-farm-50"
+                                    >
                                         <td className="px-6 py-4 text-slate-500">{task.date}</td>
                                         <td className="px-6 py-4 font-medium text-farm-900">{task.employee?.user?.name}</td>
                                         <td className="px-6 py-4 text-slate-500">{task.field?.name || 'General'}</td>
-                                        <td className="px-6 py-4 text-slate-500">{task.task_description}</td>
-                                        <td className="px-6 py-4 text-slate-500">{task.hours_worked}h</td>
+                                        <td className="px-6 py-4 font-medium">
+                                            <Link
+                                                to={`/tasks/${task.id}`}
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="text-farm-900 hover:text-farm-700 hover:underline"
+                                            >
+                                                {task.task_description}
+                                            </Link>
+                                        </td>
+                                        <td className="px-6 py-4 text-slate-500">{Number(task.hours_worked).toFixed(2)}h</td>
                                         <td className="px-6 py-4">
-                                            <span className={`rounded-full px-2 py-1 text-xs font-medium ${
-                                                task.status === 'completed' ? 'bg-farm-100 text-farm-700' :
-                                                task.status === 'in_progress' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'
-                                            }`}>
-                                                {task.status}
+                                            <span className={`rounded-full px-3 py-1 text-xs font-medium ${CLOCK_LABEL[clockState(task)].tone}`}>
+                                                {CLOCK_LABEL[clockState(task)].text}
                                             </span>
                                         </td>
-                                        {['Farm-owner', 'Manager'].includes(user?.role) && <td className="px-6 py-4 text-right space-x-3">
+                                        <td className="px-6 py-4">
+                                            <TaskClock
+                                                compact
+                                                task={task}
+                                                onChange={(updated) => setTasks((rows) => rows.map((row) => (row.id === updated.id ? updated : row)))}
+                                            />
+                                        </td>
+                                        {['Farm-owner', 'Manager'].includes(user?.role) && <td className="px-6 py-4 text-right space-x-3" onClick={(e) => e.stopPropagation()}>
                                             <button
                                                 onClick={() => handleOpenModal(task)}
                                                 className="text-farm-700 hover:underline"
@@ -239,6 +253,11 @@ export default function TaskTracking() {
                                         required
                                     />
                                 </div>
+                                {editingTask ? (
+                                    <>
+                                        <p className="rounded-2xl bg-farm-50 px-3 py-2 text-xs text-slate-600">
+                                            Hours normally come from the employee's Start and Finish clock. Change them here only to correct a mistake.
+                                        </p>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-farm-900">Hours Worked</label>
@@ -265,6 +284,12 @@ export default function TaskTracking() {
                                         </select>
                                     </div>
                                 </div>
+                                    </>
+                                ) : (
+                                    <p className="rounded-2xl bg-farm-50 px-3 py-2 text-xs text-slate-600">
+                                        The employee presses Start when they begin. The job then shows as in progress and the hours are timed for pay.
+                                    </p>
+                                )}
                                 <div className="mt-6 flex justify-end gap-3">
                                     <button
                                         type="button"
@@ -277,7 +302,7 @@ export default function TaskTracking() {
                                         type="submit"
                                         className="rounded-full bg-farm-700 px-5 py-2 text-sm font-medium text-white transition hover:bg-farm-800"
                                     >
-                                        {editingTask ? 'Update Task' : 'Log Task'}
+                                        {editingTask ? 'Update Task' : 'Assign Task'}
                                     </button>
                                 </div>
                             </form>

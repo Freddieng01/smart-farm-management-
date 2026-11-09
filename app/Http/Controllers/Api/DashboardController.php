@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Farm;
 use App\Models\Field;
 use App\Models\User;
-use App\Models\FarmExpense;
+use App\Models\FinancialTransaction;
 use App\Models\DailyTask;
 use App\Models\Employee;
 use App\Models\CropProduction;
@@ -43,7 +43,10 @@ class DashboardController extends Controller
         $totalAcreage = Farm::whereIn('id', $farmIds)->sum('total_acreage');
 
         // 2. Financials: Total Expenses
-        $totalExpenses = FarmExpense::whereIn('farm_id', $farmIds)->sum('amount');
+        // Same ledger as Financial Management, so the two always agree.
+        $totalExpenses = FinancialTransaction::whereIn('farm_id', $farmIds)
+            ->where('type', 'expense')
+            ->sum('amount');
 
         // 3. Labour: Total Labour Cost
         // Calculation: Sum of (hours_worked * hourly_rate)

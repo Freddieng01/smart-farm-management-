@@ -159,7 +159,6 @@ class FarmAccess
             \App\Models\Budget::class,
             \App\Models\Customer::class,
             \App\Models\FinancialTransaction::class,
-            \App\Models\FarmExpense::class,
             \App\Models\MarketPrice::class,
             \App\Models\Notification::class,
             \App\Models\Resource::class,

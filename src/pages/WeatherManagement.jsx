@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
+import { Link } from 'react-router-dom';
 import ModuleLayout from '../components/ModuleLayout.jsx';
 
 export default function WeatherManagement() {
@@ -283,7 +284,8 @@ export default function WeatherManagement() {
                                     </h2>
 
                                     <p className="text-sm text-slate-500">
-                                        Conditions identified from the forecast
+                                        Found automatically in the forecast. Serious ones are also sent to{' '}
+                                        <Link to="/notifications" className="font-medium text-farm-700 hover:underline">Notifications</Link>.
                                     </p>
                                 </div>
 
@@ -310,19 +312,22 @@ export default function WeatherManagement() {
                                         >
                                             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                                                 <div>
-                                                    <p className="font-semibold text-farm-900">
+                                                    {alert.title && (
+                                                        <p className="font-semibold text-farm-900">{alert.title}</p>
+                                                    )}
+                                                    <p className={alert.title ? 'text-sm text-slate-700' : 'font-semibold text-farm-900'}>
                                                         {alert.message}
                                                     </p>
 
-                                                    <p className="text-sm text-slate-600 mt-1">
-                                                        {formatDateTime(
-                                                            alert.date_time
-                                                        )}
-                                                    </p>
+                                                    {alert.date_time && (
+                                                        <p className="text-sm text-slate-600 mt-1">
+                                                            Around {formatDateTime(alert.date_time)}
+                                                        </p>
+                                                    )}
                                                 </div>
 
-                                                <span className="text-xs font-bold">
-                                                    {alert.severity}
+                                                <span className="text-xs font-bold uppercase">
+                                                    {alert.severity === 'high' ? 'Serious' : alert.severity}
                                                 </span>
                                             </div>
                                         </div>

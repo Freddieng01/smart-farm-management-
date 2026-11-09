@@ -268,7 +268,7 @@ export default function NotificationsManagement() {
                             />
                             Show unread only
                         </label>
-                        <div className="overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+                        <div className="overflow-x-auto rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
                             <table className="w-full text-left text-sm">
                                 <thead className="bg-farm-50 text-slate-500">
                                     <tr>
@@ -301,7 +301,7 @@ export default function NotificationsManagement() {
                                                     <p className={`text-farm-900 ${n.read_at ? '' : 'font-semibold'}`}>
                                                         {n.title}
                                                     </p>
-                                                    <p className="mt-0.5 text-xs text-slate-500">{n.message}</p>
+                                                    <p className="mt-0.5 whitespace-pre-line text-xs text-slate-500">{n.message}</p>
                                                 </td>
                                                 <td className="px-6 py-4 text-slate-500">{n.type}</td>
                                                 <td className="px-6 py-4">
@@ -365,7 +365,7 @@ export default function NotificationsManagement() {
                 )}
 
                 {tab === 'rules' && (
-                    <div className="overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+                    <div className="overflow-x-auto rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
                         <table className="w-full text-left text-sm">
                             <thead className="bg-farm-50 text-slate-500">
                                 <tr>

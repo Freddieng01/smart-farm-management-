@@ -59,7 +59,7 @@ function Field({ label, children }) {
 
 function DataTable({ headers, loading, isEmpty, emptyText, children }) {
     return (
-        <div className="overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+        <div className="overflow-x-auto rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
             <table className="w-full text-left text-sm">
                 <thead className="bg-farm-50 text-slate-500">
                     <tr>

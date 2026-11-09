@@ -17,7 +17,8 @@ const PAGES = {
     tasks: { path: '/tasks', label: 'Open tasks', roles: MODULE_ROLES['/tasks'] },
     weather: { path: '/weather', label: 'Open weather', roles: MODULE_ROLES['/weather'] },
     irrigation: { path: '/irrigation-schedules', label: 'Open irrigation', roles: MODULE_ROLES['/irrigation-schedules'] },
-    pests: { path: '/pest-disease', label: 'Open pest & disease', roles: MODULE_ROLES['/pest-disease'] },
+    crops: { path: '/crops', label: 'Open crops', roles: MODULE_ROLES['/crops'] },
+    pests: { path: '/crops', label: 'Open crops', roles: MODULE_ROLES['/pest-disease'] },
     inventory: { path: '/inventory', label: 'Open inventory', roles: MODULE_ROLES['/inventory'] },
     sales: { path: '/sales', label: 'Open sales', roles: MODULE_ROLES['/sales'] },
     finance: { path: '/finance', label: 'Open finance', roles: MODULE_ROLES['/finance'] },
@@ -33,6 +34,7 @@ const BY_TYPE = {
     harvest_due: 'harvest',
     task_overdue: 'tasks',
     weather: 'weather',
+    crop_stage: 'crops',
 };
 
 const BY_KEYWORD = [
@@ -233,7 +235,7 @@ export function NotificationProvider({ children }) {
                             {n ? (
                                 <>
                                     <p className="text-sm font-semibold text-farm-900">{n.title}</p>
-                                    <p className="mt-1 line-clamp-2 text-xs text-slate-500">{n.message}</p>
+                                    <p className="mt-1 line-clamp-2 whitespace-pre-line text-xs text-slate-500">{n.message}</p>
                                 </>
                             ) : (
                                 <p className="text-sm font-semibold text-farm-900">{toast.summary}</p>

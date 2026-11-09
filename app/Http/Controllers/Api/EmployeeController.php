@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\DailyTask;
 use App\Models\Employee;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -54,10 +55,33 @@ class EmployeeController extends Controller
         ], 201);
     }
 
+    /**
+     * One employee's profile: who they are, what they are assigned to, and what
+     * they have worked (hours come from the Start/Finish clock; pay = hours x hourly rate).
+     */
     public function show(Employee $employee): JsonResponse
     {
+        $employee->load(['user:id,name,email,role', 'farm:id,name']);
+
+        $tasks = DailyTask::where('employee_id', $employee->id);
+        $monthStart = now()->startOfMonth()->toDateString();
+        $rate = (float) $employee->hourly_rate;
+
+        $hoursTotal = (float) (clone $tasks)->sum('hours_worked');
+        $hoursMonth = (float) (clone $tasks)->where('date', '>=', $monthStart)->sum('hours_worked');
+
         return response()->json([
-            'data' => $employee->load(['user:id,name,email,role', 'farm:id,name']),
+            'data' => $employee,
+            'stats' => [
+                'tasks_total' => (clone $tasks)->count(),
+                'tasks_open' => (clone $tasks)->where('status', '!=', 'completed')->count(),
+                'tasks_completed' => (clone $tasks)->where('status', 'completed')->count(),
+                'hours_total' => round($hoursTotal, 2),
+                'hours_this_month' => round($hoursMonth, 2),
+                'earned_total' => round($hoursTotal * $rate, 2),
+                'earned_this_month' => round($hoursMonth * $rate, 2),
+            ],
+            'tasks' => (clone $tasks)->with('field:id,farm_id,name')->latest('date')->latest('id')->limit(15)->get(),
         ]);
     }
 

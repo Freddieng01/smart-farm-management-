@@ -151,7 +151,6 @@ export default function Dashboard() {
             setError(null);
 
             try {
-<<<<<<< HEAD
                 const [summaryResult, farmsResult] = await Promise.allSettled([
                     api.get('/api/dashboard/summary'),
                     api.get('/api/weather/farms'),
@@ -159,13 +158,6 @@ export default function Dashboard() {
 
                 if (!ignore && summaryResult.status === 'fulfilled') {
                     const data = summaryResult.value.data.data || {};
-=======
-                const response = await api.get('/api/dashboard/summary');
-
-                if (!ignore) {
-                    const data = response.data.data || {};
-
->>>>>>> 212bc98 (Owner overview, reports in kwacha, invitation and dashboard updates)
                     setSummary({
                         ...initialSummary,
                         ...data,
@@ -175,18 +167,10 @@ export default function Dashboard() {
                     });
                 }
 
-<<<<<<< HEAD
                 if (!ignore && farmsResult.status === 'fulfilled') {
                     const farms = farmsResult.value.data.data || [];
-                    setFarmsList(farms);
-
                     if (farms.length > 0) {
                         setFarmId(farms[0].id);
-=======
-                    if (data.infrastructure?.farms > 0) {
-                        const farmRes = await api.get('/api/farms');
-                        setFarmId(farmRes.data.data?.[0]?.id || null);
->>>>>>> 212bc98 (Owner overview, reports in kwacha, invitation and dashboard updates)
                     }
                 }
 
@@ -235,7 +219,6 @@ export default function Dashboard() {
         { label: 'Total expenses', icon: 'wallet', prefix: 'K', tone: moneyTone, value: summary.financials?.total_expenses, roles: ['Farm-owner', 'Accountant'] },
         { label: 'Labour costs', icon: 'hardhat', prefix: 'K', tone: moneyTone, value: summary.financials?.total_labor_cost, roles: ['Farm-owner', 'Manager', 'Accountant'] },
         { label: 'Total production', icon: 'wheat', tone: farmTone, value: summary.production?.total_quantity, roles: ['Admin', 'Manager', 'Agronomist', 'Worker', 'Farm-owner'] },
-<<<<<<< HEAD
         { label: 'Yield records', icon: 'trend', tone: farmTone, value: summary.production?.yield_records, roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
     ].filter(card => card.roles.includes(user?.role));
 
@@ -270,37 +253,6 @@ export default function Dashboard() {
         ...action,
         roles: MODULE_ROLES[action.path] || [],
     })).filter(action => action.roles.includes(user?.role));
-=======
-        { label: 'Yield records', icon: 'trend', tone: farmTone, value: summary.production?.yield_records, roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-    ].filter(card => card.roles.includes(user?.role));
-
-    const actions = [
-        { label: 'Manage Farms', path: '/farms', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
-        { label: 'Livestock Management', path: '/livestock', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Notifications', path: '/notifications', roles: ['Admin', 'Farm-owner', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
-        { label: 'Suppliers & Procurement', path: '/suppliers', roles: ['Farm-owner', 'Manager', 'Accountant'] },
-        { label: 'Market & Sales', path: '/sales', roles: ['Farm-owner', 'Manager', 'Accountant'] },
-        { label: 'Storage & Post-Harvest', path: '/storage', roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
-        { label: 'Manage Employees', path: '/employees', roles: ['Farm-owner', 'Manager'] },
-        { label: 'Task Tracking', path: '/tasks', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Production Logs', path: '/production', roles: ['Admin', 'Manager', 'Agronomist'] },
-        { label: 'Crop Management', path: '/crops', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Planting Management', path: '/plantings', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Crop Monitoring', path: '/crop-monitoring', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Irrigation Schedules', path: '/irrigation-schedules', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Pest & Disease', path: '/pest-disease', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Weather', path: '/weather', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Harvest Management', path: '/harvest', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Yield Records', path: '/yield-records', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Post-Harvest Handling', path: '/post-harvest-handling', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Expense Tracking', path: '/expenses', roles: ['Farm-owner', 'Manager', 'Accountant'] },
-        { label: 'Inventory & Inputs', path: '/inventory', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Equipment & Machinery', path: '/equipment', roles: ['Admin', 'Manager', 'Worker'] },
-        { label: 'Financial Management', path: '/finance', roles: ['Farm-owner', 'Accountant'] },
-        { label: 'Reports & Analytics', path: '/reports', roles: ['Farm-owner', 'Manager', 'Accountant'] },
-        { label: 'Manage Users', path: '/users', roles: ['Admin'] },
-    ].filter(action => action.roles.includes(user?.role));
->>>>>>> 212bc98 (Owner overview, reports in kwacha, invitation and dashboard updates)
 
     // Where each summary card takes you. The first page the user is allowed to open wins.
     const canOpen = (path) => actions.some((action) => action.path === (path.startsWith('/farms/') ? '/farms' : path));
@@ -358,25 +310,6 @@ export default function Dashboard() {
 
     const canSeeNotifications = actions.some((action) => action.path === '/notifications');
 
-<<<<<<< HEAD
-    const handleSelectFarm = async (id) => {
-        setSelectedFarmForMap(id);
-        setMapView('fields');
-        const farm = farmsList.find((item) => item.id === id);
-        setFieldsList(farm?.fields || []);
-    };
-
-    const handleSelectField = (field) => {
-        setMapView('map');
-    };
-
-    const goBackMap = () => {
-        if (mapView === 'map') setMapView('fields');
-        else if (mapView === 'fields') setMapView('farms');
-    };
-
-=======
->>>>>>> 212bc98 (Owner overview, reports in kwacha, invitation and dashboard updates)
     return (
         <main className="min-h-screen bg-farm-50 text-slate-800">
             <header className={`relative bg-gradient-to-b ${sky.gradient} text-white`}>

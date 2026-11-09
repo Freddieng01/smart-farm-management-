@@ -35,6 +35,8 @@ class FinancialTransaction extends Model
         'employee_id',
         'livestock_id',
         'resource_transaction_id',
+        'payment_id',
+        'purchase_payment_id',
         'type',
         'category',
         'description',
@@ -74,6 +76,12 @@ class FinancialTransaction extends Model
     public function resourceTransaction()
     {
         return $this->belongsTo(ResourceTransaction::class);
+    }
+
+    /** Written by a customer or supplier payment; such rows are changed from that payment, not here. */
+    public function isLinkedToPayment(): bool
+    {
+        return $this->payment_id !== null || $this->purchase_payment_id !== null;
     }
 
     public function recordedBy()

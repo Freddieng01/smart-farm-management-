@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import ModuleLayout from '../components/ModuleLayout.jsx';
 import { money } from '../utils/currency.js';
 
 export default function EmployeeManagement() {
+    const navigate = useNavigate();
     const { api, user } = useAuth();
     const isOwner = user?.role === 'Farm-owner';
     const [inviteOpen, setInviteOpen] = useState(false);
@@ -133,7 +135,7 @@ export default function EmployeeManagement() {
 
                 {error && <p className="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
 
-                <div className="overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+                <div className="overflow-x-auto rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
                     <table className="w-full text-left text-sm">
                         <thead className="bg-farm-50 text-farm-700 text-xs">
                             <tr>
@@ -151,15 +153,25 @@ export default function EmployeeManagement() {
                                 <tr><td colSpan="5" className="px-6 py-10 text-center text-slate-500">No employees assigned yet.</td></tr>
                             ) : (
                                 employees.map((emp) => (
-                                    <tr key={emp.id} className="hover:bg-farm-50 transition">
-                                        <td className="px-6 py-4 font-medium text-farm-900">
-                                            {emp.user?.name}
+                                    <tr
+                                        key={emp.id}
+                                        onClick={() => navigate(`/employees/${emp.id}`)}
+                                        className="cursor-pointer transition hover:bg-farm-50"
+                                    >
+                                        <td className="px-6 py-4 font-medium">
+                                            <Link
+                                                to={`/employees/${emp.id}`}
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="text-farm-900 hover:text-farm-700 hover:underline"
+                                            >
+                                                {emp.user?.name}
+                                            </Link>
                                             <span className="ml-2 text-xs font-normal text-slate-500">({emp.user?.role})</span>
                                         </td>
                                         <td className="px-6 py-4 text-slate-500">{emp.farm?.name}</td>
                                         <td className="px-6 py-4 text-slate-500">{emp.task_assignment || 'Not assigned'}</td>
                                         <td className="px-6 py-4 text-slate-500">{money(emp.hourly_rate)}/hr</td>
-                                        <td className="px-6 py-4 text-right space-x-3">
+                                        <td className="px-6 py-4 text-right space-x-3" onClick={(e) => e.stopPropagation()}>
                                             <button
                                                 onClick={() => handleOpenModal(emp)}
                                                 className="text-farm-700 hover:underline"

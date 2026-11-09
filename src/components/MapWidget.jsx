@@ -85,7 +85,7 @@ function parseBoundary(boundary) {
     }
 }
 
-const MapWidget = ({ farmId }) => {
+const MapWidget = ({ farmId, onFieldsChanged }) => {
     const { api, user } = useAuth();
     const [farm, setFarm] = useState(null);
     const [fields, setFields] = useState([]);
@@ -142,11 +142,12 @@ const MapWidget = ({ farmId }) => {
             alert('Field plotted successfully!');
             setIsDrawing(false);
             fetchMapData();
+            onFieldsChanged?.();
         } catch (err) {
             console.error('Error saving field', err);
             alert(err.response?.data?.message || 'Failed to save field.');
         }
-    }, [api, farmId, fetchMapData]);
+    }, [api, farmId, fetchMapData, onFieldsChanged]);
 
     if (loading) return <div className="p-4 text-center">Loading map...</div>;
     if (!farmId) return <div className="p-4 text-center text-[#647260]">Register a farm and place it on the map to view its location.</div>;

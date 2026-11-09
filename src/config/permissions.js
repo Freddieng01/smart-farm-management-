@@ -30,9 +30,48 @@ export const MODULE_ROLES = {
     '/users': ['Admin'],
 };
 
+// Related modules are shown together on one page (tabs). Each hub is opened
+// from its own path and lists the modules (paths above) that live inside it.
+export const HUB_MODULES = {
+    '/crops': ['/crops', '/plantings'],
+    '/water': ['/water-sources', '/irrigation-schedules', '/pump-monitoring'],
+    '/harvest': ['/harvest', '/yield-records', '/post-harvest-handling', '/storage'],
+    '/tasks': ['/tasks', '/production', '/employees'],
+    '/inventory': ['/inventory', '/equipment', '/suppliers'],
+    '/finance': ['/finance'],
+};
+
+// Old page addresses still work: they open the right tab of the hub.
+export const LEGACY_REDIRECTS = {
+    '/plantings': '/crops?tab=plantings',
+    '/crop-monitoring': '/crops',
+    '/pest-disease': '/crops',
+    '/water-sources': '/water?tab=sources',
+    '/irrigation-schedules': '/water?tab=irrigation',
+    '/pump-monitoring': '/water?tab=pumps',
+    '/yield-records': '/harvest?tab=yield',
+    '/post-harvest-handling': '/harvest?tab=post-harvest',
+    '/storage': '/harvest?tab=storage',
+    '/production': '/tasks?tab=production',
+    '/employees': '/tasks?tab=employees',
+    '/equipment': '/inventory?tab=equipment',
+    '/suppliers': '/inventory?tab=suppliers',
+    '/expenses': '/finance?tab=expenses',
+};
+
+// Roles of one module, exactly as listed in MODULE_ROLES (used to decide which tabs show).
+export function canAccessModule(role, path) {
+    return (MODULE_ROLES[path] || []).includes(role);
+}
+
+// Roles that may open a page. A hub is open to anyone who can use at least one of its modules.
 export function rolesForPath(path) {
     if (path.startsWith('/farms/') && path.endsWith('/fields')) {
         return MODULE_ROLES['/farms/:farmId/fields'];
+    }
+
+    if (HUB_MODULES[path]) {
+        return [...new Set(HUB_MODULES[path].flatMap((module) => MODULE_ROLES[module] || []))];
     }
 
     return MODULE_ROLES[path] || [];

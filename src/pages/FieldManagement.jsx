@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import ModuleLayout from '../components/ModuleLayout.jsx';
 
 export default function FieldManagement() {
     const { api } = useAuth();
     const { user } = useAuth();
-    const navigate = useNavigate();
     const { farmId } = useParams();
     const [farm, setFarm] = useState(null);
     const [fields, setFields] = useState([]);
@@ -86,7 +85,6 @@ export default function FieldManagement() {
           title={<>{farm?.name || 'Loading...'} Fields</>}
           subtitle="Manage plots, soil types, and sizes for this farm."
           actions={<>
-            <button type="button" onClick={() => navigate('/farms')} className="rounded-full bg-white/15 px-5 py-2 text-sm font-medium text-white ring-1 ring-white/30 transition hover:bg-white/25 disabled:opacity-60">Back to Farms</button>
             {(user?.role === 'Farm-owner' || user?.role === 'Manager') && (
                 <button type="button" onClick={() => handleOpenModal()} className="rounded-full bg-harvest-400 px-5 py-2 text-sm font-medium text-farm-900 transition hover:bg-harvest-500 disabled:opacity-60">+ Add New Field</button>
             )}
@@ -96,7 +94,7 @@ export default function FieldManagement() {
 
                 {error && <p className="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
 
-                <div className="overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+                <div className="overflow-x-auto rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
                     <table className="w-full text-left text-sm">
                         <thead className="bg-farm-50 text-farm-700 text-xs">
                             <tr>

@@ -9,6 +9,7 @@ class SprayingSchedule extends Model
 {
     protected $fillable = [
         'field_id',
+        'planting_id',
         'pest_disease_name',
         'treatment',
         'spraying_date',
@@ -25,5 +26,10 @@ class SprayingSchedule extends Model
     public function field(): BelongsTo
     {
         return $this->belongsTo(Field::class);
+    }
+
+    public function planting(): BelongsTo
+    {
+        return $this->belongsTo(Planting::class);
     }
 }

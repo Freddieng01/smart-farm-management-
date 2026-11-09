@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ModuleLayout from '../components/ModuleLayout.jsx';
 
@@ -39,6 +40,7 @@ function getErrorMessage(error) {
 
 export default function PlantingManagement() {
   const { api } = useAuth();
+  const navigate = useNavigate();
 
   const [plantings, setPlantings] = useState([]);
   const [crops, setCrops] = useState([]);
@@ -169,11 +171,14 @@ export default function PlantingManagement() {
     setSaving(true);
 
     try {
+      let createdId = null;
+
       if (editingId) {
         await api.put(`/api/plantings/${editingId}`, payload);
         setSuccess('Planting schedule updated successfully.');
       } else {
-        await api.post('/api/plantings', payload);
+        const created = await api.post('/api/plantings', payload);
+        createdId = created.data?.data?.id ?? null;
         setSuccess('Planting schedule created successfully.');
       }
 
@@ -181,6 +186,11 @@ export default function PlantingManagement() {
       setEditingId(null);
       setIsModalOpen(false);
       await loadData();
+
+      // a new planting opens its own profile, ready for monitoring and pest records
+      if (createdId) {
+        navigate(`/plantings/${createdId}`);
+      }
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
@@ -518,7 +528,7 @@ export default function PlantingManagement() {
         </section>
         </div>}
 
-        <section className="overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+        <section className="overflow-x-auto rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
           <div className="flex flex-col gap-3 border-b border-farm-100 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-xl font-semibold text-farm-900">
@@ -564,7 +574,12 @@ export default function PlantingManagement() {
                   {filteredPlantings.map((planting) => (
                     <tr key={planting.id} className="hover:bg-farm-50">
                       <td className="whitespace-nowrap px-4 py-3 font-medium text-farm-900">
-                        {planting.crop?.name || 'Unknown crop'}
+                        <Link
+                          to={`/plantings/${planting.id}`}
+                          className="hover:text-farm-700 hover:underline"
+                        >
+                          {planting.crop?.name || 'Unknown crop'}
+                        </Link>
                       </td>
 
                       <td className="whitespace-nowrap px-4 py-3 text-slate-600">
@@ -592,6 +607,13 @@ export default function PlantingManagement() {
 
                       <td className="whitespace-nowrap px-4 py-3">
                         <div className="flex gap-3">
+                          <Link
+                            to={`/plantings/${planting.id}`}
+                            className="font-semibold text-farm-700 hover:text-farm-900"
+                          >
+                            Monitor &amp; pests
+                          </Link>
+
                           <button
                             type="button"
                             onClick={() => handleEdit(planting)}
