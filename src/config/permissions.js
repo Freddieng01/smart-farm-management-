@@ -33,19 +33,24 @@ export const MODULE_ROLES = {
 // Related modules are shown together on one page (tabs). Each hub is opened
 // from its own path and lists the modules (paths above) that live inside it.
 export const HUB_MODULES = {
-    '/crops': ['/crops', '/plantings'],
+    '/farms': ['/farms', '/weather'],
+    '/crops': ['/crops', '/plantings', '/crop-monitoring', '/pest-disease', '/livestock'],
     '/water': ['/water-sources', '/irrigation-schedules', '/pump-monitoring'],
     '/harvest': ['/harvest', '/yield-records', '/post-harvest-handling', '/storage'],
     '/tasks': ['/tasks', '/production', '/employees'],
     '/inventory': ['/inventory', '/equipment', '/suppliers'],
-    '/finance': ['/finance'],
+    '/finance': ['/finance', '/sales', '/reports'],
 };
 
 // Old page addresses still work: they open the right tab of the hub.
 export const LEGACY_REDIRECTS = {
     '/plantings': '/crops?tab=plantings',
-    '/crop-monitoring': '/crops',
-    '/pest-disease': '/crops',
+    '/crop-monitoring': '/crops?tab=monitoring',
+    '/pest-disease': '/crops?tab=pests',
+    '/livestock': '/crops?tab=livestock',
+    '/weather': '/farms?tab=weather',
+    '/sales': '/finance?tab=sales',
+    '/reports': '/finance?tab=reports',
     '/water-sources': '/water?tab=sources',
     '/irrigation-schedules': '/water?tab=irrigation',
     '/pump-monitoring': '/water?tab=pumps',

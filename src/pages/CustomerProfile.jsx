@@ -80,7 +80,7 @@ export default function CustomerProfile() {
             subtitle="Buying habits, payment record and order history for this customer."
         >
             <div className="mx-auto max-w-7xl space-y-6">
-                <Link to="/sales" className="inline-flex text-sm font-medium text-farm-700 hover:underline">
+                <Link to="/finance?tab=sales" className="inline-flex text-sm font-medium text-farm-700 hover:underline">
                     Back to market and sales
                 </Link>
 

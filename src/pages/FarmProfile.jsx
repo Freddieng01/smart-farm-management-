@@ -143,7 +143,7 @@ function FarmLivestock({ farmId }) {
             <div className={`${card} overflow-x-auto`}>
                 <div className="flex items-center justify-between px-6 pt-5">
                     <h2 className="text-base font-semibold text-farm-900">Animals on this farm</h2>
-                    <Link to="/livestock" className="text-sm font-medium text-farm-700 hover:underline">Open Livestock</Link>
+                    <Link to="/crops?tab=livestock" className="text-sm font-medium text-farm-700 hover:underline">Open Livestock</Link>
                 </div>
                 <table className="mt-3 w-full text-left text-sm">
                     <thead className="bg-farm-50 text-xs text-farm-700">

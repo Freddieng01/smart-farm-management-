@@ -5,7 +5,8 @@ import WeatherWidget from './WeatherWidget.jsx';
 import MapWidget from './MapWidget.jsx';
 import FarmScene from './FarmScene.jsx';
 import Icon from './Icon.jsx';
-import { MODULE_ROLES } from '../config/permissions.js';
+import TodayPanel from './TodayPanel.jsx';
+import { canAccessModule, rolesForPath } from '../config/permissions.js';
 
 const initialSummary = {
     infrastructure: { farms: 0, fields: 0, active_users: 0, total_acreage: 0 },
@@ -15,42 +16,28 @@ const initialSummary = {
 
 const actionIcons = {
     '/farms': 'farm',
-    '/livestock': 'paw',
-    '/notifications': 'bell',
-    '/suppliers': 'truck',
-    '/sales': 'cart',
-    '/storage': 'warehouse',
-    '/water-sources': 'drop',
-    '/pump-monitoring': 'gauge',
-    '/employees': 'briefcase',
-    '/tasks': 'tasks',
-    '/production': 'factory',
-    '/expenses': 'receipt',
-    '/users': 'shield',
     '/crops': 'wheat',
-    '/plantings': 'seedling',
-    '/crop-monitoring': 'eye',
-    '/irrigation-schedules': 'drop',
-    '/pest-disease': 'bug',
-    '/weather': 'cloudsun',
+    '/water': 'drop',
     '/harvest': 'basket',
-    '/yield-records': 'trend',
-    '/post-harvest-handling': 'package',
+    '/livestock': 'paw',
+    '/weather': 'cloudsun',
+    '/tasks': 'tasks',
     '/inventory': 'boxes',
-    '/equipment': 'wrench',
+    '/sales': 'cart',
     '/finance': 'banknote',
     '/reports': 'chart',
+    '/notifications': 'bell',
+    '/users': 'shield',
 };
 
-// How the modules are grouped into tabs. Any page that is not listed here
-// still shows up, under "More", so new modules never disappear.
+// How the modules are grouped into tabs, in the order a season runs:
+// run the farm, grow, harvest and sell, then the money. Related modules live
+// together on one page (as tabs inside it), so each card opens a whole area.
+// Any page that is not listed here still shows up, under "More".
 const groups = [
-    { title: 'Farm and land', paths: ['/farms', '/crops', '/plantings', '/crop-monitoring', '/pest-disease', '/livestock'] },
-    { title: 'Water and weather', paths: ['/water-sources', '/irrigation-schedules', '/pump-monitoring', '/weather'] },
-    { title: 'Harvest and storage', paths: ['/harvest', '/yield-records', '/post-harvest-handling', '/storage'] },
-    { title: 'Operations', paths: ['/tasks', '/production', '/employees', '/equipment', '/inventory'] },
-    { title: 'Supply and sales', paths: ['/suppliers', '/sales'] },
-    { title: 'Finance and reports', paths: ['/expenses', '/finance', '/reports'] },
+    { title: 'Run the farm', paths: ['/farms', '/tasks', '/inventory'] },
+    { title: 'Grow and harvest', paths: ['/crops', '/water', '/harvest'] },
+    { title: 'Money', paths: ['/finance'] },
     { title: 'Administration', paths: ['/notifications', '/users'] },
 ];
 
@@ -222,43 +209,31 @@ export default function Dashboard() {
         { label: 'Yield records', icon: 'trend', tone: farmTone, value: summary.production?.yield_records, roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
     ].filter(card => card.roles.includes(user?.role));
 
+    // `keywords` let the search box find a module by the names it used to have.
     const actions = [
-        { label: 'Manage Farms', path: '/farms' },
-        { label: 'Livestock Management', path: '/livestock' },
-        { label: 'Notifications', path: '/notifications' },
-        { label: 'Suppliers & Procurement', path: '/suppliers' },
-        { label: 'Market & Sales', path: '/sales' },
-        { label: 'Storage & Post-Harvest', path: '/storage' },
-        { label: 'Manage Employees', path: '/employees' },
-        { label: 'Task Tracking', path: '/tasks' },
-        { label: 'Production Logs', path: '/production' },
-        { label: 'Water Sources', path: '/water-sources' },
-        { label: 'Crop Management', path: '/crops' },
-        { label: 'Planting Management', path: '/plantings' },
-        { label: 'Crop Monitoring', path: '/crop-monitoring' },
-        { label: 'Irrigation Schedules', path: '/irrigation-schedules' },
-        { label: 'Pump Monitoring', path: '/pump-monitoring' },
-        { label: 'Pest & Disease', path: '/pest-disease' },
-        { label: 'Weather', path: '/weather' },
-        { label: 'Harvest Management', path: '/harvest' },
-        { label: 'Yield Records', path: '/yield-records' },
-        { label: 'Post-Harvest Handling', path: '/post-harvest-handling' },
-        { label: 'Expense Tracking', path: '/expenses' },
-        { label: 'Inventory & Inputs', path: '/inventory' },
-        { label: 'Equipment & Machinery', path: '/equipment' },
-        { label: 'Financial Management', path: '/finance' },
-        { label: 'Reports & Analytics', path: '/reports' },
-        { label: 'Manage Users', path: '/users' },
-    ].map((action) => ({
-        ...action,
-        roles: MODULE_ROLES[action.path] || [],
-    })).filter(action => action.roles.includes(user?.role));
+        { label: 'Farms & Weather', path: '/farms', keywords: 'farm fields profile weather forecast rain' },
+        { label: 'Crops & Livestock', path: '/crops', keywords: 'crop plantings monitoring pest disease livestock animals vaccination breeding' },
+        { label: 'Water & Irrigation', path: '/water', keywords: 'water sources irrigation schedules pump' },
+        { label: 'Harvest & Storage', path: '/harvest', keywords: 'harvest yield post-harvest storage' },
+        { label: 'Tasks & Workforce', path: '/tasks', keywords: 'task employees production logs staff' },
+        { label: 'Inventory & Equipment', path: '/inventory', keywords: 'inputs equipment machinery suppliers procurement' },
+        { label: 'Sales, Finance & Reports', path: '/finance', keywords: 'sales market customers invoices orders expenses income budgets transactions reports analytics' },
+        { label: 'Notifications', path: '/notifications', keywords: 'alerts' },
+        { label: 'Manage Users', path: '/users', keywords: 'users invite' },
+    ].map((action) => {
+        // A role that only gets one tab of a combined page sees that tab's name.
+        let label = action.label;
+        if (action.path === '/crops' && !canAccessModule(user?.role, '/crops')) label = 'Livestock';
+        if (action.path === '/farms' && !canAccessModule(user?.role, '/farms')) label = 'Weather';
+        return { ...action, label, roles: rolesForPath(action.path) };
+    }).filter(action => action.roles.includes(user?.role));
 
     // Where each summary card takes you. The first page the user is allowed to open wins.
-    const canOpen = (path) => actions.some((action) => action.path === (path.startsWith('/farms/') ? '/farms' : path));
+    // Old addresses are fine here: they open the matching tab (see LEGACY_REDIRECTS).
+    const canOpen = (path) => (path.startsWith('/farms/') ? canAccessModule(user?.role, '/farms') : canAccessModule(user?.role, path));
     const cardTargets = {
         'Total farms': ['/farms'],
-        'Total fields': [farmId ? `/farms/${farmId}/fields` : '/farms'],
+        'Total fields': [farmId ? `/farms/${farmId}?tab=fields` : '/farms'],
         'Total acreage': ['/farms'],
         'Active users': ['/users'],
         'Total expenses': ['/expenses', '/finance'],
@@ -266,7 +241,7 @@ export default function Dashboard() {
         'Total production': ['/production'],
         'Yield records': ['/yield-records'],
     };
-    const cardPath = (label) => (cardTargets[label] || []).find(canOpen);
+    const cardPath = (label) => (cardTargets[label] || []).find((path) => canOpen(path.split('?')[0]));
 
     // Clicking the weather panel opens the weather page (but not its own dropdowns or buttons).
     const weatherLinkProps = canOpen('/weather')
@@ -275,10 +250,10 @@ export default function Dashboard() {
             tabIndex: 0,
             'aria-label': 'Open weather',
             onClick: (event) => {
-                if (!event.target.closest('select, button, a, input, label')) navigate('/weather');
+                if (!event.target.closest('select, button, a, input, label')) navigate('/farms?tab=weather');
             },
             onKeyDown: (event) => {
-                if (event.key === 'Enter' && event.target === event.currentTarget) navigate('/weather');
+                if (event.key === 'Enter' && event.target === event.currentTarget) navigate('/farms?tab=weather');
             },
         }
         : {};
@@ -299,7 +274,7 @@ export default function Dashboard() {
     const shownItems = tabGroup ? tabGroup.items : allItems;
 
     const results = query.trim()
-        ? actions.filter((action) => action.label.toLowerCase().includes(query.trim().toLowerCase())).slice(0, 6)
+        ? actions.filter((action) => `${action.label} ${action.keywords || ''}`.toLowerCase().includes(query.trim().toLowerCase())).slice(0, 6)
         : [];
 
     const goTo = (path) => {
@@ -408,6 +383,8 @@ export default function Dashboard() {
 
             <section className="relative z-10 mx-auto -mt-24 max-w-7xl px-6 pb-14">
                 {error && <p className="mb-6 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
+
+                <TodayPanel />
 
                 <div className="grid items-start gap-6 lg:grid-cols-3 lg:grid-rows-[auto_1fr]">
                     <div
