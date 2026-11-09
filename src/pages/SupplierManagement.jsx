@@ -194,7 +194,7 @@ export default function SupplierManagement() {
                 {error && <p className="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
 
                 {tab === 'suppliers' && (
-                    <div className="overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+                    <div className="overflow-x-auto rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
                         <table className="w-full text-left text-sm">
                             <thead className="bg-farm-50 text-slate-500">
                                 <tr>
@@ -253,7 +253,7 @@ export default function SupplierManagement() {
                 )}
 
                 {tab === 'orders' && (
-                    <div className="overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+                    <div className="overflow-x-auto rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
                         <table className="w-full text-left text-sm">
                             <thead className="bg-farm-50 text-slate-500">
                                 <tr>

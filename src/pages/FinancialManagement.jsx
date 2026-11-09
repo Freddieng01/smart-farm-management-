@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import ModuleLayout from '../components/ModuleLayout.jsx';
+import ModuleHub from '../components/ModuleHub.jsx';
 import { money } from '../utils/currency.js';
 
 const EXPENSE_CATEGORIES = ['input_cost', 'labour_cost', 'fuel_cost', 'equipment_cost', 'vet_cost', 'loan_repayment', 'other_expense'];
@@ -18,9 +19,23 @@ function errorText(err, fallback) {
     return err.response?.data?.message || fallback;
 }
 
-export default function FinanceManagement() {
+const VIEW_TEXT = {
+    transactions: { subtitle: 'Every kwacha in and out, income and expenses together.', add: '+ Record Transaction' },
+    expenses: { subtitle: 'Costs for seeds, fertiliser, labour, fuel and machinery. These feed straight into the finance ledger.', add: '+ Record Expense' },
+    budgets: { subtitle: 'Plan spending per farm and category.', add: '+ Add Budget' },
+};
+
+/**
+ * One list over the finance ledger.
+ *  transactions  income and expenses
+ *  expenses      the same ledger, expenses only (this replaces the old
+ *                separate Expense Tracking page, so the numbers always match)
+ *  budgets       planned spending
+ */
+function LedgerView({ view }) {
     const { api } = useAuth();
-    const [tab, setTab] = useState('transactions');
+    const tab = view === 'budgets' ? 'budgets' : 'transactions';
+    const expensesOnly = view === 'expenses';
     const [farms, setFarms] = useState([]);
     const [farmFilter, setFarmFilter] = useState('');
     const [typeFilter, setTypeFilter] = useState('');
@@ -45,7 +60,8 @@ export default function FinanceManagement() {
             const farmRes = await api.get('/api/farms');
             setFarms(farmRes.data.data);
             if (tab === 'transactions') {
-                if (typeFilter) params.type = typeFilter;
+                if (expensesOnly) params.type = 'expense';
+                else if (typeFilter) params.type = typeFilter;
                 const res = await api.get('/api/financial-transactions', { params });
                 setRows(res.data.data);
             } else {
@@ -57,7 +73,7 @@ export default function FinanceManagement() {
         } finally {
             setLoading(false);
         }
-    }, [api, tab, farmFilter, typeFilter]);
+    }, [api, tab, expensesOnly, farmFilter, typeFilter]);
 
     useEffect(() => { load(); }, [load]);
 
@@ -69,7 +85,7 @@ export default function FinanceManagement() {
                 farm_id: item.farm_id, type: item.type, category: item.category,
                 description: item.description || '', amount: item.amount,
                 transaction_date: item.transaction_date.slice(0, 10),
-            } : { ...blankTx, farm_id: farmFilter });
+            } : { ...blankTx, type: 'expense', farm_id: farmFilter });
         } else {
             setForm(item ? {
                 farm_id: item.farm_id, category: item.category,
@@ -116,30 +132,21 @@ export default function FinanceManagement() {
     return (
         <ModuleLayout
           title="Financial Management"
-          subtitle="Record income and expenses, and plan budgets per farm."
+          subtitle={VIEW_TEXT[view].subtitle}
           actions={<>
 <button className="rounded-full bg-harvest-400 px-5 py-2 text-sm font-medium text-farm-900 transition hover:bg-harvest-500 disabled:opacity-60" onClick={() => openModal()}>
-                        {tab === 'transactions' ? '+ Record Transaction' : '+ Add Budget'}
+                        {VIEW_TEXT[view].add}
                     </button>
           </>}
         >
             <div className="mx-auto max-w-7xl">
-
-                <div className="mb-4 flex gap-2 border-b border-farm-100">
-                    {['transactions', 'budgets'].map((t) => (
-                        <button key={t} onClick={() => setTab(t)}
-                            className={`px-4 py-2 text-sm font-medium capitalize ${tab === t ? 'border-b-2 border-farm-700 text-farm-700' : 'text-slate-500'}`}>
-                            {t}
-                        </button>
-                    ))}
-                </div>
 
                 <div className="mb-4 flex flex-wrap gap-3">
                     <select className={input + ' !mt-0 !w-auto'} value={farmFilter} onChange={(e) => setFarmFilter(e.target.value)}>
                         <option value="">All farms</option>
                         {farms.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
                     </select>
-                    {tab === 'transactions' && (
+                    {tab === 'transactions' && !expensesOnly && (
                         <select className={input + ' !mt-0 !w-auto'} value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
                             <option value="">Income &amp; expenses</option>
                             <option value="income">Income</option>
@@ -156,7 +163,7 @@ export default function FinanceManagement() {
                             <thead className="bg-farm-50 text-farm-700 text-xs"><tr>
                                 <th className="px-4 py-3 font-medium">Date</th>
                                 <th className="px-4 py-3 font-medium">Farm</th>
-                                <th className="px-4 py-3 font-medium">Type</th>
+                                {!expensesOnly && <th className="px-4 py-3 font-medium">Type</th>}
                                 <th className="px-4 py-3 font-medium">Category</th>
                                 <th className="px-4 py-3 font-medium">Description</th>
                                 <th className="px-4 py-3 font-medium">Amount</th>
@@ -164,18 +171,27 @@ export default function FinanceManagement() {
                             </tr></thead>
                             <tbody className="divide-y divide-farm-100">
                                 {loading ? <tr><td colSpan="7" className="px-4 py-10 text-center text-slate-500">Loading...</td></tr>
-                                : rows.length === 0 ? <tr><td colSpan="7" className="px-4 py-10 text-center text-slate-500">No transactions yet.</td></tr>
+                                : rows.length === 0 ? <tr><td colSpan="7" className="px-4 py-10 text-center text-slate-500">{expensesOnly ? 'No expenses recorded yet.' : 'No transactions yet.'}</td></tr>
                                 : rows.map((t) => (
                                     <tr key={t.id} className="hover:bg-farm-50">
                                         <td className="px-4 py-3 text-slate-500">{t.transaction_date.slice(0, 10)}</td>
                                         <td className="px-4 py-3 font-medium text-farm-900">{t.farm?.name}</td>
-                                        <td className={`px-4 py-3 capitalize ${t.type === 'income' ? 'text-farm-700' : 'text-red-700'}`}>{t.type}</td>
+                                        {!expensesOnly && <td className={`px-4 py-3 capitalize ${t.type === 'income' ? 'text-farm-700' : 'text-red-700'}`}>{t.type}</td>}
                                         <td className="px-4 py-3 capitalize text-slate-500">{label(t.category)}</td>
                                         <td className="px-4 py-3 text-slate-500">{t.description || '—'}</td>
                                         <td className="px-4 py-3 font-medium text-farm-900">{money(t.amount)}</td>
                                         <td className="space-x-3 px-4 py-3 text-right">
-                                            <button className="text-farm-700 hover:underline" onClick={() => openModal(t)}>Edit</button>
-                                            <button className="text-red-600 hover:underline" onClick={() => remove(t)}>Delete</button>
+                                            {t.payment_id || t.purchase_payment_id ? (
+                                                // written by a recorded payment: change it where it was recorded
+                                                <span className="text-xs text-slate-400" title="Recorded automatically from a payment. Change the payment itself to change this entry.">
+                                                    Automatic, from {t.payment_id ? 'Sales' : 'Suppliers'}
+                                                </span>
+                                            ) : (
+                                                <>
+                                                    <button className="text-farm-700 hover:underline" onClick={() => openModal(t)}>Edit</button>
+                                                    <button className="text-red-600 hover:underline" onClick={() => remove(t)}>Delete</button>
+                                                </>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}
@@ -214,7 +230,7 @@ export default function FinanceManagement() {
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
                         <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-6 shadow-xl">
                             <h2 className="mb-4 text-xl font-semibold text-farm-900">
-                                {editing ? 'Edit' : 'New'} {tab === 'transactions' ? 'transaction' : 'budget'}
+                                {editing ? 'Edit' : 'New'} {view === 'budgets' ? 'budget' : expensesOnly ? 'expense' : 'transaction'}
                             </h2>
                             {formError && <p className="mb-4 rounded-2xl bg-red-50 px-3 py-2 text-sm text-red-800">{formError}</p>}
                             <form onSubmit={save} className="space-y-4">
@@ -225,7 +241,7 @@ export default function FinanceManagement() {
                                         {farms.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
                                     </select>
                                 </div>
-                                {tab === 'transactions' && (
+                                {tab === 'transactions' && !expensesOnly && (
                                     <div>
                                         <label className="block text-sm font-medium text-farm-900">Type</label>
                                         <select className={input} value={form.type} onChange={(e) => changeType(e.target.value)}>
@@ -288,5 +304,19 @@ export default function FinanceManagement() {
                 )}
             </div>
         </ModuleLayout>
+    );
+}
+
+export default function FinanceManagement() {
+    return (
+        <ModuleHub
+            title="Financial Management"
+            subtitle="Income, expenses and budgets, all from one ledger."
+            tabs={[
+                { key: 'transactions', label: 'All transactions', path: '/finance', element: <LedgerView view="transactions" /> },
+                { key: 'expenses', label: 'Expenses', path: '/finance', element: <LedgerView view="expenses" /> },
+                { key: 'budgets', label: 'Budgets', path: '/finance', element: <LedgerView view="budgets" /> },
+            ]}
+        />
     );
 }

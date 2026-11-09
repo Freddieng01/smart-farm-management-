@@ -67,7 +67,7 @@ The "Command Center" that aggregates data from all other modules into a single v
 
 - **Infrastructure Metrics**: Real-time counts of total farms, fields, and active users.
 - **Financial Intelligence**: 
-    - **Total Expenses**: Sum of all recorded farm costs.
+    - **Total Expenses**: Sum of all expense transactions in the finance ledger (the same figure Financial Management shows).
     - **Labour Costs**: Dynamic calculation of total wages paid based on hours worked.
 - **Production Metrics**: Aggregated totals of crop quantities harvested.
 - **Dynamic Navigation**: A "Quick Actions" menu that changes based on the logged-in user's role.
@@ -88,7 +88,7 @@ The "Command Center" that aggregates data from all other modules into a single v
 | `/api/employees` | `GET/POST/PUT/DEL` | Admin/Mgr | Assign users to farms and set pay rates. |
 | `/api/daily-tasks` | `GET/POST/PUT/DEL` | All | Log daily work hours and status. |
 | `/api/crop-productions` | `GET/POST/PUT/DEL` | All | Record harvest quantities and quality. |
-| `/api/farm-expenses` | `GET/POST/PUT/DEL` | Admin/Acc | Log costs for seeds, labour, and tools. |
+| `/api/financial-transactions` | `GET/POST/PUT/DEL` | Owner/Mgr/Acc | The single finance ledger. Expenses (`type=expense`) and income both live here; the Expenses tab of Financial Management is a filtered view of it. |
 | `/api/dashboard/summary` | `GET` | All | Aggregated metrics for the main dashboard. |
 | `/api/owner/overview` | `GET` | Farm-owner | Accumulated business figures for the owner: profit or loss, income, expenses, monthly trend, per-farm results, amounts owed, budget. Accepts `year` and `farm_id`. |
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import FarmLocationPicker from '../components/FarmLocationPicker.jsx';
 import ModuleLayout from '../components/ModuleLayout.jsx';
 
@@ -104,7 +104,7 @@ export default function FarmManagement() {
     return (
         <ModuleLayout
           title="Farm Management"
-          subtitle="Register and manage your farm locations and profiles."
+          subtitle="Register your farms. Select a farm to open its profile."
           actions={<>
 {['Admin', 'Farm-owner'].includes(user?.role) && (
                         <button
@@ -120,7 +120,7 @@ export default function FarmManagement() {
 
                 {error && <p className="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
 
-                <div className="overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+                <div className="overflow-x-auto rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
                     <table className="w-full text-left text-sm">
                         <thead className="bg-farm-50 text-farm-700 text-xs">
                             <tr>
@@ -138,17 +138,29 @@ export default function FarmManagement() {
                                 <tr><td colSpan="5" className="px-6 py-10 text-center text-slate-500">No farms registered yet.</td></tr>
                             ) : (
                                 farms.map((farm) => (
-                                    <tr key={farm.id} className="hover:bg-farm-50 transition">
-                                        <td className="px-6 py-4 font-medium text-farm-900">{farm.name}</td>
+                                    <tr
+                                        key={farm.id}
+                                        onClick={() => navigate(`/farms/${farm.id}`)}
+                                        className="cursor-pointer transition hover:bg-farm-50"
+                                    >
+                                        <td className="px-6 py-4 font-medium">
+                                            <Link
+                                                to={`/farms/${farm.id}`}
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="text-farm-900 hover:text-farm-700 hover:underline"
+                                            >
+                                                {farm.name}
+                                            </Link>
+                                        </td>
                                         <td className="px-6 py-4 text-slate-500">{farm.owner?.name || 'Not assigned'}</td>
                                         <td className="px-6 py-4 text-slate-500">{hasFarmLocation(farm) ? 'Mapped' : 'Not mapped'}</td>
                                         <td className="px-6 py-4 text-slate-500">{farm.total_acreage} ac</td>
-                                        <td className="px-6 py-4 text-right space-x-3">
+                                        <td className="px-6 py-4 text-right space-x-3" onClick={(e) => e.stopPropagation()}>
                                             <button
-                                                onClick={() => navigate(`/farms/${farm.id}/fields`)}
+                                                onClick={() => navigate(`/farms/${farm.id}`)}
                                                 className="text-farm-700 hover:underline"
                                             >
-                                                Manage Fields
+                                                View profile
                                             </button>
                                             {['Admin', 'Farm-owner', 'Manager'].includes(user?.role) && (
                                                 <button

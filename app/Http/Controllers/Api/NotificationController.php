@@ -3,13 +3,26 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Farm;
 use App\Models\Notification;
+use App\Services\AlertRuleEvaluator;
+use App\Support\Authorization\FarmAccess;
 use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
+    public function __construct(private AlertRuleEvaluator $alertEvaluator)
+    {
+    }
+
     public function index(Request $request)
     {
+        // Pick up current weather warnings so they are here even if nobody opened
+        // the Weather page and the scheduler is not running.
+        foreach (Farm::whereIn('id', FarmAccess::farmIds())->whereNotNull('latitude')->whereNotNull('longitude')->get() as $farm) {
+            $this->alertEvaluator->syncFarmWeather($farm);
+        }
+
         $query = Notification::query();
 
         // Default to the logged-in user's own notifications

@@ -5,6 +5,7 @@ import { useNotifications } from '../context/NotificationContext.jsx';
 import FarmScene from './FarmScene.jsx';
 import Icon from './Icon.jsx';
 import { getSky } from './sky.js';
+import { useHub } from './HubContext.js';
 
 // Pages an Admin may look at but not change (matches ADMIN_VIEW_ONLY in RoleAccess.php).
 const ADMIN_VIEW_ONLY = [
@@ -27,12 +28,13 @@ function isAdminViewOnly(user, pathname) {
  *   ...page content...
  * </ModuleLayout>
  */
-export default function ModuleLayout({ title, subtitle, actions, children }) {
+export default function ModuleLayout({ title, subtitle, actions, backTo, children }) {
     const { user, logout } = useAuth();
     const { unreadCount } = useNotifications();
     const navigate = useNavigate();
     const { pathname } = useLocation();
-    const viewOnly = isAdminViewOnly(user, pathname);
+    const hub = useHub();
+    const viewOnly = hub ? hub.adminViewOnly : isAdminViewOnly(user, pathname);
     const [now, setNow] = useState(() => new Date());
 
     // keep the sky in step with the clock
@@ -49,6 +51,23 @@ export default function ModuleLayout({ title, subtitle, actions, children }) {
             .slice(0, 2)
             .map((word) => word[0].toUpperCase())
             .join('') || '?';
+
+    // Inside a hub the hub already draws the header, so only the page's own
+    // buttons and content are shown here.
+    if (hub) {
+        const showToolbar = Boolean(subtitle) || (actions && !viewOnly);
+        return (
+            <div>
+                {showToolbar && (
+                    <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <p className="text-sm text-slate-500">{subtitle}</p>
+                        {actions && !viewOnly && <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>}
+                    </div>
+                )}
+                {children}
+            </div>
+        );
+    }
 
     return (
         <main className="min-h-screen bg-farm-50 text-slate-800">
@@ -104,7 +123,7 @@ export default function ModuleLayout({ title, subtitle, actions, children }) {
                     <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                         <div className="min-w-0">
                             <Link
-                                to="/dashboard"
+                                to={backTo?.to || '/dashboard'}
                                 className="inline-flex items-center gap-1 text-sm text-white/75 transition hover:text-white"
                             >
                                 <svg
@@ -119,7 +138,7 @@ export default function ModuleLayout({ title, subtitle, actions, children }) {
                                 >
                                     <path d="M15 18l-6-6 6-6" />
                                 </svg>
-                                Dashboard
+                                {backTo?.label || 'Dashboard'}
                             </Link>
                             <h1 className="mt-1 text-3xl font-semibold tracking-tight sm:text-4xl">{title}</h1>
                             {subtitle && <p className="mt-2 max-w-xl text-sm text-white/80">{subtitle}</p>}

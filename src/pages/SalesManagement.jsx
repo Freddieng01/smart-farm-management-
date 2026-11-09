@@ -64,7 +64,7 @@ function Field({ label, children }) {
 
 function DataTable({ headers, loading, isEmpty, emptyText, children }) {
     return (
-        <div className="overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+        <div className="overflow-x-auto rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
             <table className="w-full text-left text-sm">
                 <thead className="bg-farm-50 text-slate-500">
                     <tr>
@@ -630,8 +630,9 @@ export default function SalesManagement() {
                                 <p className="rounded-2xl bg-farm-50 px-3 py-2 text-sm text-farm-900">
                                     Balance due: <strong>{money(Number(modal.record.total_amount) - paidAmount(modal.record))}</strong>
                                 </p>
+                                <p className="text-xs text-slate-500">This payment is added to Finance as income automatically.</p>
                                 <Field label="Amount paid">
-                                    <input type="number" step="0.01" className={inputClass} value={form.amount_paid} onChange={(e) => setForm({ ...form, amount_paid: e.target.value })} required />
+                                    <input type="number" step="0.01" min="0.01" className={inputClass} value={form.amount_paid} onChange={(e) => setForm({ ...form, amount_paid: e.target.value })} required />
                                 </Field>
                                 <Field label="Payment date">
                                     <input type="date" className={inputClass} value={form.payment_date} onChange={(e) => setForm({ ...form, payment_date: e.target.value })} required />

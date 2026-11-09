@@ -141,23 +141,51 @@ class ResourceController extends Controller
             'unit_cost' => ['nullable', ...self::COST_RULES],
             'reason' => ['nullable', 'string', 'max:255'],
             'livestock_id' => ['nullable', 'integer', 'exists:livestock,id'],
+            // a cash purchase of stock: also record the spend in the finance ledger
+            'record_expense' => ['sometimes', 'boolean'],
         ]);
 
         $this->assertLivestockBelongsToFarm($validated['livestock_id'] ?? null, $resource->farm_id);
 
-        $transaction = DB::transaction(function () use ($validated, $resource, $request) {
+        $recordExpense = (bool) ($validated['record_expense'] ?? false);
+        $unitCost = $validated['unit_cost'] ?? $resource->unit_cost;
+        $totalCost = round((float) $validated['quantity'] * (float) $unitCost, 2);
+
+        if ($recordExpense && $totalCost < 0.01) {
+            throw ValidationException::withMessages([
+                'unit_cost' => ['Enter a unit cost above 0 to record this purchase as an expense.'],
+            ]);
+        }
+
+        $transaction = DB::transaction(function () use ($validated, $resource, $request, $recordExpense, $totalCost, $unitCost) {
             // Atomic "quantity = quantity + X" in SQL (never read-then-write in PHP).
             $extra = isset($validated['unit_cost']) ? ['unit_cost' => $validated['unit_cost']] : [];
             Resource::whereKey($resource->id)->increment('quantity', $validated['quantity'], $extra);
 
-            return $resource->transactions()->create([
+            $movement = $resource->transactions()->create([
                 'livestock_id' => $validated['livestock_id'] ?? null,
                 'type' => 'stock_in',
                 'quantity' => $validated['quantity'],
-                'unit_cost' => $validated['unit_cost'] ?? $resource->unit_cost,
+                'unit_cost' => $unitCost,
                 'reason' => $validated['reason'] ?? null,
                 'recorded_by' => $request->user()->id,
             ]);
+
+            if ($recordExpense) {
+                \App\Models\FinancialTransaction::create([
+                    'farm_id' => $resource->farm_id,
+                    'resource_transaction_id' => $movement->id,
+                    'livestock_id' => $validated['livestock_id'] ?? null,
+                    'type' => 'expense',
+                    'category' => 'input_cost',
+                    'description' => mb_substr("Purchase of {$validated['quantity']} {$resource->unit} {$resource->name}", 0, 255),
+                    'amount' => $totalCost,
+                    'transaction_date' => now()->toDateString(),
+                    'recorded_by' => $request->user()->id,
+                ]);
+            }
+
+            return $movement;
         });
 
         return response()->json([

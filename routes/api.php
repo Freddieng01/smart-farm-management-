@@ -12,7 +12,6 @@ use App\Http\Controllers\Api\FarmController;
 use App\Http\Controllers\Api\FieldController;
 use App\Http\Controllers\Api\DailyTaskController;
 use App\Http\Controllers\Api\CropProductionController;
-use App\Http\Controllers\Api\FarmExpenseController;
 use App\Http\Controllers\Api\LivestockController;
 use App\Http\Controllers\Api\SupplierController;
 use App\Http\Controllers\Api\SupplierQuotationController;
@@ -65,6 +64,9 @@ Route::middleware(['auth:sanctum', 'farm.access'])->group(function () {
     Route::get('/dashboard/summary', [DashboardController::class, 'summary']);
     Route::get('/owner/overview', [OwnerOverviewController::class, 'index'])->middleware('role:Farm-owner');
 
+    Route::post('daily-tasks/{dailyTask}/start', [DailyTaskController::class, 'start'])->middleware('module:tasks');
+    Route::post('daily-tasks/{dailyTask}/pause', [DailyTaskController::class, 'pause'])->middleware('module:tasks');
+    Route::post('daily-tasks/{dailyTask}/finish', [DailyTaskController::class, 'finish'])->middleware('module:tasks');
     Route::apiResource('daily-tasks', DailyTaskController::class)->middleware('module:tasks');
     Route::apiResource('crop-productions', CropProductionController::class)->middleware('module:agronomy');
     Route::apiResource('crops', CropController::class)->middleware('module:agronomy');
@@ -81,7 +83,6 @@ Route::middleware(['auth:sanctum', 'farm.access'])->group(function () {
     Route::apiResource('post-harvest-handlings', PostHarvestHandlingController::class)->middleware('module:agronomy');
 
 
-    Route::apiResource('farm-expenses', FarmExpenseController::class)->middleware('module:finance');
 
     // Farm Management
     Route::apiResource('farms', FarmController::class)->middleware('module:farms');

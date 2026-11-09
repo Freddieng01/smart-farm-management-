@@ -1,456 +1,94 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { NotificationProvider } from './context/NotificationContext.jsx';
+import { LEGACY_REDIRECTS } from './config/permissions.js';
 
 import Dashboard from './components/Dashboard.jsx';
-import LoginPage from './pages/Login.jsx';
-import UserManagement from './pages/UserManagement.jsx';
-import FarmManagement from './pages/FarmManagement.jsx';
-import FieldManagement from './pages/FieldManagement.jsx';
-import EmployeeManagement from './pages/EmployeeManagement.jsx';
-import TaskTracking from './pages/TaskTracking.jsx';
-import ProductionLogging from './pages/ProductionLogging.jsx';
-import ExpenseTracking from './pages/ExpenseTracking.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
-
-import HarvestManagement from './pages/HarvestManagement.jsx';
-import YieldRecords from './pages/YieldRecords.jsx';
-import PostHarvestHandling from './pages/PostHarvestHandling.jsx';
-import CropManagement from './pages/CropManagement.jsx';
-import PlantingManagement from './pages/PlantingManagement.jsx';
-import CropMonitoring from './pages/CropMonitoring.jsx';
-import WaterSourceManagement from './pages/WaterSourceManagement.jsx';
-import IrrigationScheduleManagement from './pages/IrrigationScheduleManagement.jsx';
-import PumpMonitoring from './pages/PumpMonitoring.jsx';
-import PestDiseaseManagement from './pages/PestDiseaseManagement.jsx';
-import WeatherManagement from './pages/WeatherManagement.jsx';
-
-import LivestockManagement from './pages/LivestockManagement.jsx';
+import LoginPage from './pages/Login.jsx';
 import AcceptInvitation from './pages/AcceptInvitation.jsx';
-import NotificationsManagement from './pages/NotificationsManagement.jsx';
-import SupplierManagement from './pages/SupplierManagement.jsx';
-import SalesManagement from './pages/SalesManagement.jsx';
-import StorageManagement from './pages/StorageManagement.jsx';
 import ForgotPassword from './pages/ForgotPassword.jsx';
 import ResetPassword from './pages/ResetPassword.jsx';
-import InventoryManagement from './pages/InventoryManagement.jsx';
-import EquipmentManagement from './pages/EquipmentManagement.jsx';
+
+import UserManagement from './pages/UserManagement.jsx';
+import FarmManagement from './pages/FarmManagement.jsx';
+import FarmProfile from './pages/FarmProfile.jsx';
+import TaskDetail from './pages/TaskDetail.jsx';
+import PlantingProfile from './pages/PlantingProfile.jsx';
+import CropProfile from './pages/CropProfile.jsx';
+import EmployeeProfile from './pages/EmployeeProfile.jsx';
+import LivestockManagement from './pages/LivestockManagement.jsx';
+import WeatherManagement from './pages/WeatherManagement.jsx';
+import NotificationsManagement from './pages/NotificationsManagement.jsx';
+import SalesManagement from './pages/SalesManagement.jsx';
 import FinancialManagement from './pages/FinancialManagement.jsx';
 import ReportsAnalytics from './pages/ReportsAnalytics.jsx';
+import { CropsHub, WaterHub, HarvestHub, OperationsHub, ResourcesHub } from './pages/Hubs.jsx';
+
+const ALL_ROLES = ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker', 'Accountant'];
+
+// Old address of a farm's fields page -> the Fields tab of the farm's profile.
+function FarmFieldsRedirect() {
+    const { farmId } = useParams();
+    return <Navigate to={`/farms/${farmId}?tab=fields`} replace />;
+}
 
 function AppRoutes() {
     const { user } = useAuth();
 
+    // `roles` is only a fallback: the real list for each page comes from
+    // config/permissions.js (ProtectedRoute reads it from the address).
+    const page = (roles, element) => <ProtectedRoute allowedRoles={roles}>{element}</ProtectedRoute>;
+
     return (
         <Routes>
-            <Route
-                path="/login"
-                element={
-                    !user
-                        ? <LoginPage />
-                        : <Navigate to="/dashboard" replace />
-                }
-            />
+            <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/dashboard" replace />} />
+            <Route path="/accept-invite" element={<AcceptInvitation />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
-            <Route
-                path="/accept-invite"
-                element={<AcceptInvitation />}
-            />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
 
-            <Route
-                path="/forgot-password"
-                element={<ForgotPassword />}
-            />
+            {/* Farms: the list, then each farm's own profile (overview, fields, tasks, finance) */}
+            <Route path="/farms" element={page(['Admin', 'Farm-owner', 'Manager'], <FarmManagement />)} />
+            <Route path="/farms/:farmId" element={page(['Admin', 'Farm-owner', 'Manager'], <FarmProfile />)} />
+            <Route path="/farms/:farmId/fields" element={page(['Admin', 'Farm-owner', 'Manager', 'Agronomist'], <FarmFieldsRedirect />)} />
 
-            <Route
-                path="/reset-password"
-                element={<ResetPassword />}
-            />
+            {/* Pages that group related modules as tabs */}
+            <Route path="/crops" element={page(['Admin', 'Farm-owner', 'Manager', 'Agronomist'], <CropsHub />)} />
+            <Route path="/water" element={page(['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'], <WaterHub />)} />
+            <Route path="/harvest" element={page(['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Accountant', 'Worker'], <HarvestHub />)} />
+            <Route path="/tasks" element={page(['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'], <OperationsHub />)} />
+            <Route path="/inventory" element={page(['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Accountant'], <ResourcesHub />)} />
+            <Route path="/finance" element={page(['Farm-owner', 'Manager', 'Accountant'], <FinancialManagement />)} />
 
-            <Route
-                path="/dashboard"
-                element={
-                    <ProtectedRoute>
-                        <Dashboard />
-                    </ProtectedRoute>
-                }
-            />
+            {/* One employee's profile */}
+            <Route path="/employees/:employeeId" element={page(['Farm-owner', 'Manager'], <EmployeeProfile />)} />
 
-            <Route
-                path="/farms"
-                element={
-                    <ProtectedRoute
-                        allowedRoles={[
-                            'Admin',
-                            'Farm-owner',
-                            'Manager',
-                        ]}
-                    >
-                        <FarmManagement />
-                    </ProtectedRoute>
-                }
-            />
+            {/* One registered crop's profile: where it is planted, monitoring, pests and diseases */}
+            <Route path="/crops/:cropId" element={page(['Admin', 'Farm-owner', 'Manager', 'Agronomist'], <CropProfile />)} />
 
-            <Route
-                path="/livestock"
-                element={
-                    <ProtectedRoute
-                        allowedRoles={[
-                            'Admin',
-                            'Farm-owner',
-                            'Manager',
-                            'Agronomist',
-                            'Worker',
-                        ]}
-                    >
-                        <LivestockManagement />
-                    </ProtectedRoute>
-                }
-            />
+            {/* One planted crop's profile: monitoring, pests and diseases */}
+            <Route path="/plantings/:plantingId" element={page(['Admin', 'Farm-owner', 'Manager', 'Agronomist'], <PlantingProfile />)} />
 
-            <Route
-                path="/notifications"
-                element={
-                    <ProtectedRoute
-                        allowedRoles={[
-                            'Admin',
-                            'Farm-owner',
-                            'Manager',
-                            'Accountant',
-                            'Agronomist',
-                            'Worker',
-                        ]}
-                    >
-                        <NotificationsManagement />
-                    </ProtectedRoute>
-                }
-            />
+            {/* One task's own page */}
+            <Route path="/tasks/:taskId" element={page(['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'], <TaskDetail />)} />
 
-            <Route
-                path="/suppliers"
-                element={
-                    <ProtectedRoute
-                        allowedRoles={[
-                            'Admin',
-                            'Farm-owner',
-                            'Manager',
-                            'Accountant',
-                        ]}
-                    >
-                        <SupplierManagement />
-                    </ProtectedRoute>
-                }
-            />
+            {/* Stand-alone modules */}
+            <Route path="/livestock" element={page(['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'], <LivestockManagement />)} />
+            <Route path="/weather" element={page(ALL_ROLES, <WeatherManagement />)} />
+            <Route path="/sales" element={page(['Admin', 'Farm-owner', 'Manager', 'Accountant'], <SalesManagement />)} />
+            <Route path="/reports" element={page(['Farm-owner', 'Manager', 'Accountant'], <ReportsAnalytics />)} />
+            <Route path="/notifications" element={page(ALL_ROLES, <NotificationsManagement />)} />
+            <Route path="/users" element={page(['Admin'], <UserManagement />)} />
 
-            <Route
-                path="/sales"
-                element={
-                    <ProtectedRoute
-                        allowedRoles={[
-                            'Admin',
-                            'Farm-owner',
-                            'Manager',
-                            'Accountant',
-                        ]}
-                    >
-                        <SalesManagement />
-                    </ProtectedRoute>
-                }
-            />
+            {/* Old addresses (bookmarks, notification links) open the matching tab */}
+            {Object.entries(LEGACY_REDIRECTS).map(([from, to]) => (
+                <Route key={from} path={from} element={<Navigate to={to} replace />} />
+            ))}
 
-            <Route
-                path="/farms/:farmId/fields"
-                element={
-                    <ProtectedRoute
-                        allowedRoles={[
-                            'Admin',
-                            'Farm-owner',
-                            'Manager',
-                            'Agronomist',
-                        ]}
-                    >
-                        <FieldManagement />
-                    </ProtectedRoute>
-                }
-            />
-
-            <Route
-                path="/employees"
-                element={
-                    <ProtectedRoute
-                        allowedRoles={[
-                            'Farm-owner',
-                            'Manager',
-                        ]}
-                    >
-                        <EmployeeManagement />
-                    </ProtectedRoute>
-                }
-            />
-
-            <Route
-                path="/tasks"
-                element={
-                    <ProtectedRoute
-                        allowedRoles={[
-                            'Admin',
-                            'Farm-owner',
-                            'Manager',
-                            'Agronomist',
-                            'Worker',
-                        ]}
-                    >
-                        <TaskTracking />
-                    </ProtectedRoute>
-                }
-            />
-            <Route
-                path="/tasks/:taskId"
-                element={
-                    <ProtectedRoute
-                        allowedRoles={[
-                            'Admin',
-                            'Farm-owner',
-                            'Manager',
-                            'Agronomist',
-                            'Worker',
-                        ]}
-                    >
-                        <TaskTracking />
-                    </ProtectedRoute>
-                }
-            />
-
-            <Route
-                path="/production"
-                element={
-                    <ProtectedRoute
-                        allowedRoles={[
-                            'Admin',
-                            'Farm-owner',
-                            'Manager',
-                            'Agronomist',
-                        ]}
-                    >
-                        <ProductionLogging />
-                    </ProtectedRoute>
-                }
-            />
-
-            <Route
-                path="/storage"
-                element={
-                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Accountant', 'Worker']}>
-                        <StorageManagement />
-                    </ProtectedRoute>
-                }
-            />
-
-            {/* Crop Management */}
-            <Route
-                path="/crops"
-                element={
-                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Agronomist']}>
-                        <CropManagement />
-                    </ProtectedRoute>
-                }
-            />
-
-            <Route
-                path="/plantings"
-                element={
-                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Agronomist']}>
-                        <PlantingManagement />
-                    </ProtectedRoute>
-                }
-            />
-
-            <Route
-                path="/crop-monitoring"
-                element={
-                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Agronomist']}>
-                        <CropMonitoring />
-                    </ProtectedRoute>
-                }
-            />
-
-            {/* Irrigation and Water Management */}
-            <Route
-                path="/water-sources"
-                element={
-                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker']}>
-                        <WaterSourceManagement />
-                    </ProtectedRoute>
-                }
-            />
-
-            <Route
-                path="/irrigation-schedules"
-                element={
-                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Agronomist']}>
-                        <IrrigationScheduleManagement />
-                    </ProtectedRoute>
-                }
-            />
-
-            <Route
-                path="/pump-monitoring"
-                element={
-                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker']}>
-                        <PumpMonitoring />
-                    </ProtectedRoute>
-                }
-            />
-
-            {/* Pest and Disease Management */}
-            <Route
-                path="/pest-disease"
-                element={
-                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Agronomist']}>
-                        <PestDiseaseManagement />
-                    </ProtectedRoute>
-                }
-            />
-
-            {/* Weather Management */}
-            <Route
-                path="/weather"
-                element={
-                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker', 'Accountant']}>
-                        <WeatherManagement />
-                    </ProtectedRoute>
-                }
-            />
-
-            {/* Harvest Management */}
-            <Route
-                path="/harvest"
-                element={
-                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Agronomist']}>
-                        <HarvestManagement />
-                    </ProtectedRoute>
-                }
-            />
-
-            <Route
-                path="/yield-records"
-                element={
-                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Agronomist']}>
-                        <YieldRecords />
-                    </ProtectedRoute>
-                }
-            />
-
-            {/* Post-Harvest Handling */}
-            <Route
-                path="/post-harvest-handling"
-                element={
-                    <ProtectedRoute allowedRoles={['Admin', 'Farm-owner', 'Manager', 'Agronomist']}>
-                        <PostHarvestHandling />
-                    </ProtectedRoute>
-                }
-            />
-
-            {/* Expenses */}
-            <Route
-                path="/expenses"
-                element={
-                    <ProtectedRoute
-                        allowedRoles={[
-                            'Farm-owner',
-                            'Manager',
-                            'Accountant',
-                        ]}
-                    >
-                        <ExpenseTracking />
-                    </ProtectedRoute>
-                }
-            />
-
-            {/* User Management */}
-            <Route
-                path="/users"
-                element={
-                    <ProtectedRoute allowedRoles={['Admin']}>
-                        <UserManagement />
-                    </ProtectedRoute>
-                }
-            />
-
-            {/* Inventory */}
-            <Route
-                path="/inventory"
-                element={
-                    <ProtectedRoute
-                        allowedRoles={[
-                            'Admin',
-                            'Farm-owner',
-                            'Manager',
-                            'Agronomist',
-                        ]}
-                    >
-                        <InventoryManagement />
-                    </ProtectedRoute>
-                }
-            />
-
-            {/* Equipment */}
-            <Route
-                path="/equipment"
-                element={
-                    <ProtectedRoute
-                        allowedRoles={[
-                            'Admin',
-                            'Farm-owner',
-                            'Manager',
-                        ]}
-                    >
-                        <EquipmentManagement />
-                    </ProtectedRoute>
-                }
-            />
-
-            {/* Financial Management */}
-            <Route
-                path="/finance"
-                element={
-                    <ProtectedRoute
-                        allowedRoles={[
-                            'Farm-owner',
-                            'Manager',
-                            'Accountant',
-                        ]}
-                    >
-                        <FinancialManagement />
-                    </ProtectedRoute>
-                }
-            />
-
-            {/* Reports and Analytics */}
-            <Route
-                path="/reports"
-                element={
-                    <ProtectedRoute
-                        allowedRoles={[
-                            'Farm-owner',
-                            'Manager',
-                            'Accountant',
-                        ]}
-                    >
-                        <ReportsAnalytics />
-                    </ProtectedRoute>
-                }
-            />
-
-            <Route
-                path="/"
-                element={<Navigate to="/dashboard" replace />}
-            />
-
-            <Route
-                path="*"
-                element={<Navigate to="/dashboard" replace />}
-            />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
     );
 }

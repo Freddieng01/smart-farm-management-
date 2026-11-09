@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Farm;
+use App\Services\AlertRuleEvaluator;
 use App\Services\WeatherService;
 use App\Support\Authorization\FarmAccess;
 use Illuminate\Http\Request;
@@ -12,7 +13,8 @@ use Throwable;
 class WeatherController extends Controller
 {
     public function __construct(
-        private WeatherService $weatherService
+        private WeatherService $weatherService,
+        private AlertRuleEvaluator $alertEvaluator
     ) {
     }
 
@@ -102,9 +104,19 @@ class WeatherController extends Controller
                 $longitude
             );
 
+            if (empty($alerts['error'])) {
+                // The same alerts also go to Notifications (owner, managers, admins).
+                try {
+                    $this->alertEvaluator->notifyHazards($farm, $alerts['alerts'] ?? []);
+                } catch (Throwable $e) {
+                    report($e);
+                }
+            }
+
             return response()->json([
                 'farm' => $farm->name,
-                'alerts' => $alerts,
+                'alerts' => $alerts['alerts'] ?? [],
+                'message' => $alerts['message'] ?? null,
             ]);
         } catch (Throwable $e) {
             return response()->json([

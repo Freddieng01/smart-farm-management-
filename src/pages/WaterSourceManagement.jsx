@@ -402,7 +402,7 @@ export default function WaterSourceManagement() {
             </form>
             </div>}
 
-            <div className="overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+            <div className="overflow-x-auto rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
                 <div className="border-b p-5">
                     <h2 className="text-lg font-semibold text-farm-900">
                         Registered Water Sources

@@ -35,7 +35,7 @@ export default function InventoryManagement() {
     const [editing, setEditing] = useState(null);
     const [form, setForm] = useState(emptyForm);
     const [stockTarget, setStockTarget] = useState(null);
-    const [stock, setStock] = useState({ direction: 'in', quantity: '', unit_cost: '', reason: '' });
+    const [stock, setStock] = useState({ direction: 'in', quantity: '', unit_cost: '', reason: '', record_expense: null });
     const [history, setHistory] = useState([]);
 
     const load = useCallback(async () => {
@@ -125,9 +125,12 @@ export default function InventoryManagement() {
     function openStock(r, direction) {
         setFormError(null);
         setStockTarget(r);
-        setStock({ direction, quantity: '', unit_cost: '', reason: '' });
+        setStock({ direction, quantity: '', unit_cost: '', reason: '', record_expense: null });
         setModal('stock');
     }
+
+    // ticked by itself once a cost is typed; the person can untick it (e.g. stock from a supplier order, or a gift)
+    const recordsExpense = stock.record_expense ?? Number(stock.unit_cost) > 0;
 
     async function saveStock(e) {
         e.preventDefault();
@@ -135,6 +138,7 @@ export default function InventoryManagement() {
         try {
             const body = { quantity: stock.quantity, reason: stock.reason || null };
             if (stock.direction === 'in' && stock.unit_cost !== '') body.unit_cost = stock.unit_cost;
+            if (stock.direction === 'in') body.record_expense = recordsExpense;
             await api.post(`/api/resources/${stockTarget.id}/stock-${stock.direction}`, body);
             setModal(null);
             load();
@@ -326,6 +330,16 @@ export default function InventoryManagement() {
                                         <label className="block text-sm font-medium text-farm-900">Unit cost (optional)</label>
                                         <input type="number" step="0.01" min="0" className={input} value={stock.unit_cost}
                                             onChange={(e) => setStock({ ...stock, unit_cost: e.target.value })} />
+                                        <label className="mt-3 flex items-start gap-2 text-sm text-slate-700">
+                                            <input type="checkbox" className="mt-0.5" checked={recordsExpense}
+                                                onChange={(e) => setStock({ ...stock, record_expense: e.target.checked })} />
+                                            <span>
+                                                Record this purchase as an expense in Finance
+                                                <span className="block text-xs text-slate-500">
+                                                    Untick if it came from a supplier order (that payment is already recorded) or was free.
+                                                </span>
+                                            </span>
+                                        </label>
                                     </div>
                                 )}
                                 <div>

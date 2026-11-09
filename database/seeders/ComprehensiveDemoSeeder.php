@@ -12,7 +12,6 @@ use App\Models\Employee;
 use App\Models\Crop;
 use App\Models\Planting;
 use App\Models\YieldRecord;
-use App\Models\FarmExpense;
 use App\Models\Budget;
 use App\Models\Livestock;
 use App\Models\Equipment;
@@ -35,14 +34,14 @@ class ComprehensiveDemoSeeder extends Seeder
             'payments', 'invoices', 'sales_order_items', 'sales_orders', 'market_prices',
             'resource_transactions', 'resources',
             'purchase_payments', 'purchase_order_items', 'purchase_orders', 'supplier_quotations',
-            'farm_expenses', 'financial_transactions', 'budgets', 'dispatch_records', 'stock_movements',
+            'financial_transactions', 'budgets', 'dispatch_records', 'stock_movements',
             'stored_produce', 'storage_facilities', 'alert_rules', 'notifications',
             'equipment_fuel_logs', 'equipment_maintenance_records', 'equipment',
             'livestock_production_records', 'livestock_weight_records', 'livestock_breeding_records',
             'livestock_health_records', 'livestock_vaccinations', 'yield_records', 'harvest_schedules',
             'post_harvest_handlings', 'outbreak_alerts', 'spraying_schedules', 'scouting_records',
             'irrigation_schedules', 'pump_monitorings', 'water_sources', 'crop_monitorings',
-            'crop_productions', 'daily_tasks', 'farm_expenses', 'plantings', 'crops', 'livestock',
+            'crop_productions', 'daily_tasks', 'plantings', 'crops', 'livestock',
             'customers', 'suppliers', 'employees', 'fields', 'farms', 'user_invitations',
             'audit_logs', 'notifications', 'users'
         ];
@@ -403,13 +402,6 @@ class ComprehensiveDemoSeeder extends Seeder
                 'date' => Carbon::now()->subDays($index)->toDateString(), 'created_at' => now(), 'updated_at' => now(),
             ]);
         }
-        foreach (['Seeds', 'Fertilizer', 'Fuel', 'Labour', 'Maintenance'] as $category) {
-            DB::table('farm_expenses')->insert([
-                'farm_id' => $farm->id, 'category' => $category, 'amount' => rand(1200, 18000),
-                'description' => "Demo {$category} expense", 'expense_date' => Carbon::now()->subDays(rand(1, 45))->toDateString(),
-                'created_at' => now(), 'updated_at' => now(),
-            ]);
-        }
 
         // 12. Notifications and alert rules
         $notificationData = [
@@ -426,7 +418,7 @@ class ComprehensiveDemoSeeder extends Seeder
             [$owner->id, 'farm.viewed', 'GET', '/api/farms', 200],
             [$manager->id, 'task.created', 'POST', '/api/daily-tasks', 201],
             [$agronomist->id, 'crop.monitoring.created', 'POST', '/api/crop-monitoring', 201],
-            [$accountant->id, 'expense.viewed', 'GET', '/api/farm-expenses', 200],
+            [$accountant->id, 'expense.viewed', 'GET', '/api/financial-transactions', 200],
         ] as [$userId, $eventType, $method, $route, $statusCode]) {
             DB::table('audit_logs')->insert([
                 'user_id' => $userId, 'event_type' => $eventType, 'route' => $route,

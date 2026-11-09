@@ -62,6 +62,8 @@ class FinancialTransactionController extends Controller
 
     public function update(Request $request, FinancialTransaction $financialTransaction): JsonResponse
     {
+        $this->abortIfFromPayment($financialTransaction, 'edited');
+
         $validated = $this->validatedPayload($request, $financialTransaction, sometimes: true);
 
         $financialTransaction->update($validated);
@@ -74,11 +76,24 @@ class FinancialTransactionController extends Controller
 
     public function destroy(FinancialTransaction $financialTransaction): JsonResponse
     {
+        $this->abortIfFromPayment($financialTransaction, 'deleted');
+
         $financialTransaction->delete();
 
         return response()->json([
             'message' => 'Financial transaction deleted successfully.',
         ]);
+    }
+
+    /**
+     * Rows written by a customer or supplier payment mirror that payment, so
+     * they are changed there (Sales or Suppliers), never straight in the ledger.
+     */
+    private function abortIfFromPayment(FinancialTransaction $transaction, string $verb): void
+    {
+        if ($transaction->isLinkedToPayment()) {
+            abort(422, "This entry comes from a recorded payment, so it cannot be {$verb} here. Change the payment itself instead.");
+        }
     }
 
     private function validatedPayload(Request $request, ?FinancialTransaction $existing = null, bool $sometimes = false): array

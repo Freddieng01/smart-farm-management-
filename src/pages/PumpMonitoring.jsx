@@ -538,7 +538,7 @@ export default function PumpMonitoring() {
           </div>
         )}
 
-        <section className="overflow-hidden rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
+        <section className="overflow-x-auto rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
           <div className="flex flex-col gap-3 border-b border-farm-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="font-bold text-farm-900">Monitoring history</h2>

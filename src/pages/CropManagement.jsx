@@ -1,10 +1,12 @@
 
 import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ModuleLayout from '../components/ModuleLayout.jsx';
 
 export default function CropManagement() {
     const { api } = useAuth();
+    const navigate = useNavigate();
 
     const [crops, setCrops] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -408,10 +410,22 @@ export default function CropManagement() {
                                 {filteredCrops.map((crop) => (
                                     <tr
                                         key={crop.id}
-                                        className="hover:bg-farm-50"
+                                        onClick={() => navigate(`/crops/${crop.id}`)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') navigate(`/crops/${crop.id}`);
+                                        }}
+                                        tabIndex={0}
+                                        title="Open this crop's profile"
+                                        className="cursor-pointer hover:bg-farm-50 focus:bg-farm-50 focus:outline-none"
                                     >
                                         <td className="px-4 py-3 font-medium text-farm-900">
-                                            {crop.name}
+                                            <Link
+                                                to={`/crops/${crop.id}`}
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="hover:text-farm-700 hover:underline"
+                                            >
+                                                {crop.name}
+                                            </Link>
                                         </td>
                                         <td className="px-4 py-3 text-slate-600">
                                             {crop.category || '—'}
@@ -428,9 +442,10 @@ export default function CropManagement() {
                                             <div className="flex gap-3">
                                                 <button
                                                     type="button"
-                                                    onClick={() =>
-                                                        handleEdit(crop)
-                                                    }
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleEdit(crop);
+                                                    }}
                                                     className="font-medium text-blue-700 hover:underline"
                                                 >
                                                     Edit
@@ -438,9 +453,10 @@ export default function CropManagement() {
 
                                                 <button
                                                     type="button"
-                                                    onClick={() =>
-                                                        handleDelete(crop)
-                                                    }
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDelete(crop);
+                                                    }}
                                                     className="font-medium text-red-700 hover:underline"
                                                 >
                                                     Delete

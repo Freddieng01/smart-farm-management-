@@ -137,12 +137,6 @@ class AlertRuleEvaluator
 
     // ---- Automatic extreme-weather alerts (no rule needed) ----
 
-    /** Forecast values at or beyond these count as extreme. */
-    private const HEAT_C = 35;      // temperature at or above
-    private const COLD_C = 3;       // temperature at or below (frost risk)
-    private const WIND_MS = 15;     // wind speed in m/s at or above
-    private const HEAVY_RAIN_MM = 20; // rain in a 3-hour slot at or above
-
     /**
      * Check the forecast of every farm that has coordinates and warn about extreme weather.
      * Farms with their own active "weather" rule are skipped; that rule already covers them.
@@ -176,15 +170,27 @@ class AlertRuleEvaluator
                 continue;
             }
 
-            if ($hazards === []) {
-                continue;
-            }
+            $created += $this->notifyHazards($farm, $hazards);
+        }
 
-            foreach ($this->weatherRecipients($farm) as $userId) {
-                foreach ($hazards as $hazard) {
-                    if ($this->notify($userId, $farm, 'weather', $hazard['title'], $hazard['message'], 'Urgent')) {
-                        $created++;
-                    }
+        return $created;
+    }
+
+    /**
+     * Turn the serious ("high") weather alerts of a farm into notifications for
+     * its owner, managers and admins. The alerts are the very ones the Weather
+     * page shows (WeatherService::hazards), so both always agree. An identical
+     * notification is not repeated within 24 hours. Returns how many were created.
+     */
+    public function notifyHazards(Farm $farm, array $hazards): int
+    {
+        $serious = array_values(array_filter($hazards, fn ($hazard) => ($hazard['severity'] ?? '') === 'high'));
+        $created = 0;
+
+        foreach ($this->weatherRecipients($farm) as $userId) {
+            foreach ($serious as $hazard) {
+                if ($this->notify($userId, $farm, 'weather', "{$hazard['title']}: {$farm->name}", $hazard['message'], 'Urgent')) {
+                    $created++;
                 }
             }
         }
@@ -193,83 +199,44 @@ class AlertRuleEvaluator
     }
 
     /**
-     * Scan the forecast and return one summary per kind of extreme (worst slot of each kind).
+     * Make sure the notifications for a farm's weather are up to date, without
+     * needing the scheduler. At most one forecast lookup per farm every 30 minutes.
      */
+    public function syncFarmWeather(Farm $farm): int
+    {
+        if ($farm->latitude === null || $farm->longitude === null) {
+            return 0;
+        }
+        if (! Cache::add("weather-sync:{$farm->id}", true, now()->addMinutes(30))) {
+            return 0;
+        }
+
+        try {
+            return $this->notifyHazards($farm, $this->extremeHazards($farm));
+        } catch (\Throwable $e) {
+            Cache::forget("weather-sync:{$farm->id}");
+            Log::error("Weather sync failed for farm {$farm->id}: ".$e->getMessage());
+
+            return 0;
+        }
+    }
+
+    /** All weather alerts for a farm from a (briefly cached) forecast. */
     private function extremeHazards(Farm $farm): array
     {
-        $forecast = Cache::remember(
-            "forecast:{$farm->latitude}:{$farm->longitude}",
-            now()->addMinutes(30),
-            fn () => $this->weather->getForecast($farm->latitude, $farm->longitude)
-        );
+        $key = "forecast:{$farm->latitude}:{$farm->longitude}";
+        $forecast = Cache::get($key);
 
-        $worst = [];
+        if ($forecast === null) {
+            $forecast = $this->weather->getForecast($farm->latitude, $farm->longitude);
 
-        foreach ($forecast['list'] ?? [] as $slot) {
-            try {
-                $when = Carbon::parse($slot['dt_txt'] ?? 'now')->format('D j M');
-            } catch (\Throwable $e) {
-                $when = 'soon';
-            }
-
-            $temp = $slot['main']['temp'] ?? null;
-            $min = $slot['main']['temp_min'] ?? $temp;
-            $wind = $slot['wind']['speed'] ?? null;
-            $rain = $slot['rain']['3h'] ?? 0;
-            $code = (int) ($slot['weather'][0]['id'] ?? 0);
-            $pop = $slot['pop'] ?? 0;
-
-            if ($temp !== null && $temp >= self::HEAT_C && $temp > ($worst['heat']['value'] ?? -INF)) {
-                $worst['heat'] = ['value' => $temp, 'when' => $when];
-            }
-            if ($min !== null && $min <= self::COLD_C && $min < ($worst['cold']['value'] ?? INF)) {
-                $worst['cold'] = ['value' => $min, 'when' => $when];
-            }
-            if ($wind !== null && $wind >= self::WIND_MS && $wind > ($worst['wind']['value'] ?? -INF)) {
-                $worst['wind'] = ['value' => $wind, 'when' => $when];
-            }
-            if ($rain >= self::HEAVY_RAIN_MM && $rain > ($worst['rain']['value'] ?? -INF)) {
-                $worst['rain'] = ['value' => $rain, 'when' => $when];
-            }
-            if ($code >= 200 && $code <= 232 && $pop >= 0.5 && ! isset($worst['storm'])) {
-                $worst['storm'] = ['value' => 0, 'when' => $when];
+            // never keep a failed lookup, or one hiccup would hide alerts for 30 minutes
+            if (empty($forecast['error'])) {
+                Cache::put($key, $forecast, now()->addMinutes(30));
             }
         }
 
-        $hazards = [];
-
-        if (isset($worst['heat'])) {
-            $hazards[] = [
-                'title' => "Extreme heat expected: {$farm->name}",
-                'message' => 'Temperatures up to '.round($worst['heat']['value'])."°C expected around {$worst['heat']['when']}. Check irrigation and shade for livestock.",
-            ];
-        }
-        if (isset($worst['cold'])) {
-            $hazards[] = [
-                'title' => "Frost risk: {$farm->name}",
-                'message' => 'Temperatures as low as '.round($worst['cold']['value'])."°C expected around {$worst['cold']['when']}. Protect sensitive crops and young animals.",
-            ];
-        }
-        if (isset($worst['wind'])) {
-            $hazards[] = [
-                'title' => "Strong winds expected: {$farm->name}",
-                'message' => 'Winds up to '.round($worst['wind']['value'])." m/s expected around {$worst['wind']['when']}. Secure equipment and avoid spraying.",
-            ];
-        }
-        if (isset($worst['rain'])) {
-            $hazards[] = [
-                'title' => "Heavy rain expected: {$farm->name}",
-                'message' => 'About '.round($worst['rain']['value'])." mm of rain in 3 hours expected around {$worst['rain']['when']}. Watch for flooding and delay spraying or harvest.",
-            ];
-        }
-        if (isset($worst['storm'])) {
-            $hazards[] = [
-                'title' => "Thunderstorm expected: {$farm->name}",
-                'message' => "Thunderstorms are likely around {$worst['storm']['when']}. Keep workers and animals safe.",
-            ];
-        }
-
-        return $hazards;
+        return $this->weather->hazards($forecast);
     }
 
     /**
@@ -427,23 +394,20 @@ class AlertRuleEvaluator
             return [];
         }
 
-        $items = [];
+        $result = $this->weather->getAlerts($farm->latitude, $farm->longitude);
 
-        // Cap at 5 so a long forecast can't flood the user with notifications.
-        foreach (array_slice($this->weather->getAlerts($farm->latitude, $farm->longitude), 0, 5) as $alert) {
-            $when = isset($alert['date_time']) ? ' (around '.$alert['date_time'].')' : '';
-
-            $items[] = [
-                'title' => "Weather alert: {$farm->name}",
-                'message' => $alert['message'].$when,
-                'priority' => match (strtolower((string) ($alert['severity'] ?? ''))) {
-                    'high' => 'Urgent',
-                    'low' => 'Low',
-                    default => 'Normal',
-                },
-            ];
+        if (($result['error'] ?? false) || empty($result['alerts'])) {
+            return [];
         }
 
-        return $items;
+        // Cap at 5 so a long forecast can't flood the user with notifications.
+        return collect($result['alerts'])
+            ->take(5)
+            ->map(fn ($alert) => [
+                'title' => "{$alert['title']}: {$farm->name}",
+                'message' => $alert['message'],
+                'priority' => $alert['priority'],
+            ])
+            ->all();
     }
 }

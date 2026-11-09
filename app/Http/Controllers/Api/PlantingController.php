@@ -9,11 +9,13 @@ use Illuminate\Http\Request;
 
 class PlantingController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $plantings = Planting::with(['field', 'crop'])
+        // ?crop_id=3 lists only where that crop is planted (used by the crop profile)
+        $plantings = Planting::with(['field.farm:id,name', 'crop'])
+            ->when($request->query('crop_id'), fn ($q, $id) => $q->where('crop_id', $id))
             ->latest()
-            ->paginate(25);
+            ->paginate(min((int) $request->query('per_page', 25), 100));
 
         return response()->json($plantings);
     }
@@ -50,9 +52,8 @@ class PlantingController extends Controller
     {
         return response()->json([
             'data' => $planting->load([
-                'field',
+                'field.farm:id,name',
                 'crop',
-                'monitoring'
             ]),
         ]);
     }
