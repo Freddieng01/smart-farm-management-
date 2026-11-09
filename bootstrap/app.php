@@ -3,7 +3,9 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -25,6 +27,13 @@ return Application::configure(basePath: dirname(__DIR__))
         // Global handler to prevent technical leaks to the user
         $exceptions->render(function (\Throwable $e, Request $request) {
             if ($request->is('api/*')) {
+                // Validation errors (422) and "please sign in" (401) are normal answers, not system
+                // errors. Leave them to Laravel so the user sees the real message, e.g. "The email
+                // has already been taken."
+                if ($e instanceof ValidationException || $e instanceof AuthenticationException) {
+                    return null;
+                }
+
                 \Illuminate\Support\Facades\Log::error('[API ERROR] ' . $e->getMessage(), [
                     'exception' => get_class($e),
                     'trace' => $e->getTraceAsString(),
@@ -34,8 +43,9 @@ return Application::configure(basePath: dirname(__DIR__))
                 
                 return response()->json([
                     'status' => 'error',
-                    'message' => $status == 500 
-                        ? 'A system error occurred. Please try again later.' 
+                    // In local development (APP_DEBUG=true) show the real error; in production keep it generic.
+                    'message' => $status == 500
+                        ? (config('app.debug') ? $e->getMessage() : 'A system error occurred. Please try again later.')
                         : $e->getMessage(),
                 ], $status);
             }

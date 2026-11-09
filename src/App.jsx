@@ -11,19 +11,13 @@ import ForgotPassword from './pages/ForgotPassword.jsx';
 import ResetPassword from './pages/ResetPassword.jsx';
 
 import UserManagement from './pages/UserManagement.jsx';
-import FarmManagement from './pages/FarmManagement.jsx';
 import FarmProfile from './pages/FarmProfile.jsx';
 import TaskDetail from './pages/TaskDetail.jsx';
 import PlantingProfile from './pages/PlantingProfile.jsx';
 import CropProfile from './pages/CropProfile.jsx';
 import EmployeeProfile from './pages/EmployeeProfile.jsx';
-import LivestockManagement from './pages/LivestockManagement.jsx';
-import WeatherManagement from './pages/WeatherManagement.jsx';
 import NotificationsManagement from './pages/NotificationsManagement.jsx';
-import SalesManagement from './pages/SalesManagement.jsx';
-import FinancialManagement from './pages/FinancialManagement.jsx';
-import ReportsAnalytics from './pages/ReportsAnalytics.jsx';
-import { CropsHub, WaterHub, HarvestHub, OperationsHub, ResourcesHub } from './pages/Hubs.jsx';
+import { LandHub, CropsHub, WaterHub, HarvestHub, OperationsHub, ResourcesHub, MoneyHub } from './pages/Hubs.jsx';
 
 const ALL_ROLES = ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker', 'Accountant'];
 
@@ -49,8 +43,8 @@ function AppRoutes() {
 
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
 
-            {/* Farms: the list, then each farm's own profile (overview, fields, tasks, finance) */}
-            <Route path="/farms" element={page(['Admin', 'Farm-owner', 'Manager'], <FarmManagement />)} />
+            {/* Farms & Weather on one page, then each farm's own profile (overview, fields, tasks, finance) */}
+            <Route path="/farms" element={page(ALL_ROLES, <LandHub />)} />
             <Route path="/farms/:farmId" element={page(['Admin', 'Farm-owner', 'Manager'], <FarmProfile />)} />
             <Route path="/farms/:farmId/fields" element={page(['Admin', 'Farm-owner', 'Manager', 'Agronomist'], <FarmFieldsRedirect />)} />
 
@@ -60,7 +54,7 @@ function AppRoutes() {
             <Route path="/harvest" element={page(['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Accountant', 'Worker'], <HarvestHub />)} />
             <Route path="/tasks" element={page(['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'], <OperationsHub />)} />
             <Route path="/inventory" element={page(['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Accountant'], <ResourcesHub />)} />
-            <Route path="/finance" element={page(['Farm-owner', 'Manager', 'Accountant'], <FinancialManagement />)} />
+            <Route path="/finance" element={page(['Farm-owner', 'Manager', 'Accountant'], <MoneyHub />)} />
 
             {/* One employee's profile */}
             <Route path="/employees/:employeeId" element={page(['Farm-owner', 'Manager'], <EmployeeProfile />)} />
@@ -75,10 +69,6 @@ function AppRoutes() {
             <Route path="/tasks/:taskId" element={page(['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'], <TaskDetail />)} />
 
             {/* Stand-alone modules */}
-            <Route path="/livestock" element={page(['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'], <LivestockManagement />)} />
-            <Route path="/weather" element={page(ALL_ROLES, <WeatherManagement />)} />
-            <Route path="/sales" element={page(['Admin', 'Farm-owner', 'Manager', 'Accountant'], <SalesManagement />)} />
-            <Route path="/reports" element={page(['Farm-owner', 'Manager', 'Accountant'], <ReportsAnalytics />)} />
             <Route path="/notifications" element={page(ALL_ROLES, <NotificationsManagement />)} />
             <Route path="/users" element={page(['Admin'], <UserManagement />)} />
 

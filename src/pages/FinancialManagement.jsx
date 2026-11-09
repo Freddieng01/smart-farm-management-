@@ -32,7 +32,7 @@ const VIEW_TEXT = {
  *                separate Expense Tracking page, so the numbers always match)
  *  budgets       planned spending
  */
-function LedgerView({ view }) {
+export function LedgerView({ view }) {
     const { api } = useAuth();
     const tab = view === 'budgets' ? 'budgets' : 'transactions';
     const expensesOnly = view === 'expenses';

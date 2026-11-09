@@ -1,7 +1,19 @@
 import ModuleHub from '../components/ModuleHub.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
+import { canAccessModule } from '../config/permissions.js';
+
+import FarmManagement from './FarmManagement.jsx';
+import WeatherManagement from './WeatherManagement.jsx';
 
 import CropManagement from './CropManagement.jsx';
 import PlantingManagement from './PlantingManagement.jsx';
+import CropMonitoring from './CropMonitoring.jsx';
+import PestDiseaseManagement from './PestDiseaseManagement.jsx';
+import LivestockManagement from './LivestockManagement.jsx';
+
+import SalesManagement from './SalesManagement.jsx';
+import { LedgerView } from './FinancialManagement.jsx';
+import ReportsAnalytics from './ReportsAnalytics.jsx';
 
 import WaterSourceManagement from './WaterSourceManagement.jsx';
 import IrrigationScheduleManagement from './IrrigationScheduleManagement.jsx';
@@ -23,14 +35,46 @@ import SupplierManagement from './SupplierManagement.jsx';
 // Each hub puts related modules on one page as tabs. Tabs a role may not use
 // are left out automatically (see MODULE_ROLES in config/permissions.js).
 
-export function CropsHub() {
+// A role that can only open one tab of a combined page sees that tab's own
+// name as the page title (a Worker opens "Livestock", not "Crops & Livestock").
+export function LandHub() {
+    const { user } = useAuth();
+    const farms = canAccessModule(user?.role, '/farms');
+
     return (
         <ModuleHub
-            title="Crops & Planting"
-            subtitle="The crop catalogue and what is planted where. Open a crop to monitor it and track its pests and diseases."
+            title={farms ? 'Farms & Weather' : 'Weather'}
+            subtitle={
+                farms
+                    ? 'Your farms and their fields, plus the weather and forecast for each. Open a farm to see its fields, tasks and finances.'
+                    : 'Current conditions and the forecast for your farms.'
+            }
+            tabs={[
+                { key: 'farms', label: 'Farms', path: '/farms', element: <FarmManagement /> },
+                { key: 'weather', label: 'Weather', path: '/weather', adminViewOnly: true, element: <WeatherManagement /> },
+            ]}
+        />
+    );
+}
+
+export function CropsHub() {
+    const { user } = useAuth();
+    const crops = canAccessModule(user?.role, '/crops');
+
+    return (
+        <ModuleHub
+            title={crops ? 'Crops & Livestock' : 'Livestock'}
+            subtitle={
+                crops
+                    ? 'The crop catalogue, what is planted where, how it is growing, its pests and diseases, and your animals.'
+                    : 'Vaccinations, health, breeding and weight records for your animals.'
+            }
             tabs={[
                 { key: 'crops', label: 'Crops', path: '/crops', adminViewOnly: true, element: <CropManagement /> },
                 { key: 'plantings', label: 'Plantings', path: '/plantings', adminViewOnly: true, element: <PlantingManagement /> },
+                { key: 'monitoring', label: 'Crop monitoring', path: '/crop-monitoring', adminViewOnly: true, element: <CropMonitoring /> },
+                { key: 'pests', label: 'Pests & diseases', path: '/pest-disease', adminViewOnly: true, element: <PestDiseaseManagement /> },
+                { key: 'livestock', label: 'Livestock', path: '/livestock', adminViewOnly: true, element: <LivestockManagement /> },
             ]}
         />
     );
@@ -88,6 +132,23 @@ export function ResourcesHub() {
                 { key: 'inventory', label: 'Inventory & inputs', path: '/inventory', adminViewOnly: true, element: <InventoryManagement /> },
                 { key: 'equipment', label: 'Equipment', path: '/equipment', adminViewOnly: true, element: <EquipmentManagement /> },
                 { key: 'suppliers', label: 'Suppliers', path: '/suppliers', element: <SupplierManagement /> },
+            ]}
+        />
+    );
+}
+
+export function MoneyHub() {
+    return (
+        <ModuleHub
+            title="Sales, Finance & Reports"
+            subtitle="Orders and customers, every kwacha in and out, budgets, and the reports that pull it together."
+            defaultTab="transactions"
+            tabs={[
+                { key: 'sales', label: 'Sales & customers', path: '/sales', element: <SalesManagement /> },
+                { key: 'transactions', label: 'All transactions', path: '/finance', element: <LedgerView view="transactions" /> },
+                { key: 'expenses', label: 'Expenses', path: '/finance', element: <LedgerView view="expenses" /> },
+                { key: 'budgets', label: 'Budgets', path: '/finance', element: <LedgerView view="budgets" /> },
+                { key: 'reports', label: 'Reports & analytics', path: '/reports', element: <ReportsAnalytics /> },
             ]}
         />
     );
