@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useNotifications } from '../context/NotificationContext.jsx';
 import { useNavigate } from 'react-router-dom';
 import WeatherWidget from './WeatherWidget.jsx';
 import MapWidget from './MapWidget.jsx';
@@ -42,8 +43,6 @@ const actionIcons = {
     '/reports': 'chart',
 };
 
-// How the modules are grouped into tabs. Any page that is not listed here
-// still shows up, under "More", so new modules never disappear.
 const groups = [
     { title: 'Farm and land', paths: ['/farms', '/crops', '/plantings', '/crop-monitoring', '/pest-disease', '/livestock'] },
     { title: 'Water and weather', paths: ['/water-sources', '/irrigation-schedules', '/pump-monitoring', '/weather'] },
@@ -54,7 +53,6 @@ const groups = [
     { title: 'Administration', paths: ['/notifications', '/users'] },
 ];
 
-// The hero sky changes with the time of day (always in the brand greens).
 function getSky(date) {
     const hour = date.getHours() + date.getMinutes() / 60;
     let greeting = 'Good evening';
@@ -114,19 +112,77 @@ function Panel({ title, className = '', children }) {
     );
 }
 
+function RoleGreeting({ role, farmCount, fieldCount, loading }) {
+    if (loading) return <p className="mt-2 max-w-xl text-sm text-white/80 animate-pulse">Checking on the farm...</p>;
+
+    const greetings = {
+        'Admin': farmCount > 0 
+            ? `Monitoring the organization's ${farmCount} farm${farmCount === 1 ? '' : 's'} and ${fieldCount} field${fieldCount === 1 ? '' : 's'}.`
+            : `Let's start by onboarding your first farm.`,
+        'Accountant': farmCount > 0
+            ? `Reviewing financial performance and budgets for ${farmCount} farm${farmCount === 1 ? '' : 's'}.`
+            : `Awaiting financial data to begin auditing.`,
+        'Agronomist': fieldCount > 0
+            ? `Analyzing crop health and soil data across ${fieldCount} field${fieldCount === 1 ? '' : 's'}.`
+            : `Ready to analyze your first field.`,
+        'Worker': fieldCount > 0
+            ? `Ready for today's assignments across ${fieldCount} field${fieldCount === 1 ? '' : 's'}.`
+            : `Waiting for your first field assignment.`,
+        'Manager': farmCount > 0
+            ? `Overseeing operations and staff across ${farmCount} farm${farmCount === 1 ? '' : 's'}.`
+            : `Let's get your first farm operations set up.`,
+    };
+
+    const message = greetings[role] || `Keeping an eye on ${farmCount} farm${farmCount === 1 ? '' : 's'} and ${fieldCount} field${fieldCount === 1 ? '' : 's'}.`;
+    return <p className="mt-2 max-w-xl text-sm text-white/80">{message}</p>;
+}
+
+function WeatherMatrix({ farms, onSelectFarm, currentFarmId }) {
+    return (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {farms.map(farm => (
+                <button 
+                    key={farm.id}
+                    onClick={() => onSelectFarm(farm.id)}
+                    className={`flex items-center justify-between p-3 rounded-2xl border transition text-left ${
+                        currentFarmId === farm.id 
+                        ? 'bg-farm-50 border-farm-500 ring-1 ring-farm-500' 
+                        : 'bg-white border-slate-200 hover:border-farm-300'
+                    }`}
+                >
+                    <div className="min-w-0 overflow-hidden">
+                        <p className="text-sm font-semibold text-farm-900 truncate">{farm.name}</p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0 ml-2">
+                        <Icon name="cloudsun" className="h-4 w-4 text-farm-600" />
+                        <span className="text-sm font-medium text-slate-700">Check</span>
+                    </div>
+                </button>
+            ))}
+            {farms.length === 0 && <p className="text-sm text-slate-500 col-span-2">No farms available to monitor.</p>}
+        </div>
+    );
+}
+
 export default function Dashboard() {
     const { api, user, logout } = useAuth();
     const navigate = useNavigate();
+    const { unreadCount } = useNotifications();
     const [summary, setSummary] = useState(initialSummary);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [farmId, setFarmId] = useState(null);
+    const [farmsList, setFarmsList] = useState([]);
+    const [fieldsList, setFieldsList] = useState([]);
     const [now, setNow] = useState(() => new Date());
     const [query, setQuery] = useState('');
     const [searchOpen, setSearchOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('All');
 
-    // keep the sky in step with the clock
+    // Map Drill-down State
+    const [mapView, setMapView] = useState('farms'); // 'farms' | 'fields' | 'map'
+    const [selectedFarmForMap, setSelectedFarmForMap] = useState(null);
+
     useEffect(() => {
         const id = setInterval(() => setNow(new Date()), 60000);
         return () => clearInterval(id);
@@ -146,12 +202,11 @@ export default function Dashboard() {
     useEffect(() => {
         let ignore = false;
 
-        async function loadSummary() {
+        async function loadDashboardData() {
             setLoading(true);
             setError(null);
 
             try {
-<<<<<<< HEAD
                 const [summaryResult, farmsResult] = await Promise.allSettled([
                     api.get('/api/dashboard/summary'),
                     api.get('/api/weather/farms'),
@@ -159,13 +214,6 @@ export default function Dashboard() {
 
                 if (!ignore && summaryResult.status === 'fulfilled') {
                     const data = summaryResult.value.data.data || {};
-=======
-                const response = await api.get('/api/dashboard/summary');
-
-                if (!ignore) {
-                    const data = response.data.data || {};
-
->>>>>>> 212bc98 (Owner overview, reports in kwacha, invitation and dashboard updates)
                     setSummary({
                         ...initialSummary,
                         ...data,
@@ -175,18 +223,12 @@ export default function Dashboard() {
                     });
                 }
 
-<<<<<<< HEAD
                 if (!ignore && farmsResult.status === 'fulfilled') {
                     const farms = farmsResult.value.data.data || [];
                     setFarmsList(farms);
 
                     if (farms.length > 0) {
                         setFarmId(farms[0].id);
-=======
-                    if (data.infrastructure?.farms > 0) {
-                        const farmRes = await api.get('/api/farms');
-                        setFarmId(farmRes.data.data?.[0]?.id || null);
->>>>>>> 212bc98 (Owner overview, reports in kwacha, invitation and dashboard updates)
                     }
                 }
 
@@ -206,7 +248,7 @@ export default function Dashboard() {
             }
         }
 
-        loadSummary();
+        loadDashboardData();
 
         return () => {
             ignore = true;
@@ -215,14 +257,6 @@ export default function Dashboard() {
 
     const farmCount = summary.infrastructure?.farms ?? 0;
     const fieldCount = summary.infrastructure?.fields ?? 0;
-
-    let subtitle = 'Checking on the farm…';
-    if (!loading) {
-        subtitle =
-            farmCount > 0
-                ? `${today}. Keeping an eye on ${farmCount} farm${farmCount === 1 ? '' : 's'} and ${fieldCount} field${fieldCount === 1 ? '' : 's'}.`
-                : `${today}. Let’s get your first farm set up.`;
-    }
 
     const farmTone = 'bg-farm-50 text-farm-700';
     const moneyTone = 'bg-harvest-50 text-harvest-600';
@@ -235,7 +269,6 @@ export default function Dashboard() {
         { label: 'Total expenses', icon: 'wallet', prefix: 'K', tone: moneyTone, value: summary.financials?.total_expenses, roles: ['Farm-owner', 'Accountant'] },
         { label: 'Labour costs', icon: 'hardhat', prefix: 'K', tone: moneyTone, value: summary.financials?.total_labor_cost, roles: ['Farm-owner', 'Manager', 'Accountant'] },
         { label: 'Total production', icon: 'wheat', tone: farmTone, value: summary.production?.total_quantity, roles: ['Admin', 'Manager', 'Agronomist', 'Worker', 'Farm-owner'] },
-<<<<<<< HEAD
         { label: 'Yield records', icon: 'trend', tone: farmTone, value: summary.production?.yield_records, roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
     ].filter(card => card.roles.includes(user?.role));
 
@@ -270,37 +303,6 @@ export default function Dashboard() {
         ...action,
         roles: MODULE_ROLES[action.path] || [],
     })).filter(action => action.roles.includes(user?.role));
-=======
-        { label: 'Yield records', icon: 'trend', tone: farmTone, value: summary.production?.yield_records, roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-    ].filter(card => card.roles.includes(user?.role));
-
-    const actions = [
-        { label: 'Manage Farms', path: '/farms', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist'] },
-        { label: 'Livestock Management', path: '/livestock', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Notifications', path: '/notifications', roles: ['Admin', 'Farm-owner', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
-        { label: 'Suppliers & Procurement', path: '/suppliers', roles: ['Farm-owner', 'Manager', 'Accountant'] },
-        { label: 'Market & Sales', path: '/sales', roles: ['Farm-owner', 'Manager', 'Accountant'] },
-        { label: 'Storage & Post-Harvest', path: '/storage', roles: ['Admin', 'Manager', 'Accountant', 'Agronomist', 'Worker'] },
-        { label: 'Manage Employees', path: '/employees', roles: ['Farm-owner', 'Manager'] },
-        { label: 'Task Tracking', path: '/tasks', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Production Logs', path: '/production', roles: ['Admin', 'Manager', 'Agronomist'] },
-        { label: 'Crop Management', path: '/crops', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Planting Management', path: '/plantings', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Crop Monitoring', path: '/crop-monitoring', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Irrigation Schedules', path: '/irrigation-schedules', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Pest & Disease', path: '/pest-disease', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Weather', path: '/weather', roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Harvest Management', path: '/harvest', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Yield Records', path: '/yield-records', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Post-Harvest Handling', path: '/post-harvest-handling', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Expense Tracking', path: '/expenses', roles: ['Farm-owner', 'Manager', 'Accountant'] },
-        { label: 'Inventory & Inputs', path: '/inventory', roles: ['Admin', 'Manager', 'Agronomist', 'Worker'] },
-        { label: 'Equipment & Machinery', path: '/equipment', roles: ['Admin', 'Manager', 'Worker'] },
-        { label: 'Financial Management', path: '/finance', roles: ['Farm-owner', 'Accountant'] },
-        { label: 'Reports & Analytics', path: '/reports', roles: ['Farm-owner', 'Manager', 'Accountant'] },
-        { label: 'Manage Users', path: '/users', roles: ['Admin'] },
-    ].filter(action => action.roles.includes(user?.role));
->>>>>>> 212bc98 (Owner overview, reports in kwacha, invitation and dashboard updates)
 
     // Where each summary card takes you. The first page the user is allowed to open wins.
     const canOpen = (path) => actions.some((action) => action.path === (path.startsWith('/farms/') ? '/farms' : path));
@@ -358,7 +360,6 @@ export default function Dashboard() {
 
     const canSeeNotifications = actions.some((action) => action.path === '/notifications');
 
-<<<<<<< HEAD
     const handleSelectFarm = async (id) => {
         setSelectedFarmForMap(id);
         setMapView('fields');
@@ -375,8 +376,6 @@ export default function Dashboard() {
         else if (mapView === 'fields') setMapView('farms');
     };
 
-=======
->>>>>>> 212bc98 (Owner overview, reports in kwacha, invitation and dashboard updates)
     return (
         <main className="min-h-screen bg-farm-50 text-slate-800">
             <header className={`relative bg-gradient-to-b ${sky.gradient} text-white`}>
@@ -400,10 +399,15 @@ export default function Dashboard() {
                                 <button
                                     type="button"
                                     onClick={() => navigate('/notifications')}
-                                    className="grid h-10 w-10 place-items-center rounded-full bg-white/15 ring-1 ring-white/25 transition hover:bg-white/25"
-                                    aria-label="Notifications"
+                                    className="relative grid h-10 w-10 place-items-center rounded-full bg-white/15 ring-1 ring-white/25 transition hover:bg-white/25"
+                                    aria-label={unreadCount > 0 ? `Notifications (${unreadCount} unread)` : 'Notifications'}
                                 >
                                     <Icon name="bell" className="h-5 w-5" />
+                                {unreadCount > 0 && (
+    <span className="absolute -right-1 -top-1 grid min-w-[1.25rem] place-items-center rounded-full bg-red-500 px-1 text-[11px] font-semibold leading-5 text-white ring-2 ring-white/40">
+        {unreadCount > 99 ? '99+' : unreadCount}
+    </span>
+)}
                                 </button>
                             )}
                             <div className="hidden text-right leading-tight sm:block">
@@ -430,7 +434,7 @@ export default function Dashboard() {
                         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
                             {sky.greeting}, {firstName}
                         </h1>
-                        <p className="mt-2 max-w-xl text-sm text-white/80">{subtitle}</p>
+                        <RoleGreeting role={user?.role} farmCount={farmCount} fieldCount={fieldCount} loading={loading} />
                     </div>
 
                     <div className="relative mt-6 max-w-xl">
@@ -477,11 +481,20 @@ export default function Dashboard() {
                 {error && <p className="mb-6 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
 
                 <div className="grid items-start gap-6 lg:grid-cols-3 lg:grid-rows-[auto_1fr]">
-                    <div
-                        className={`lg:col-start-1 lg:row-start-1 ${canOpen('/weather') ? 'cursor-pointer' : ''}`}
-                        {...weatherLinkProps}
-                    >
-                        <WeatherWidget farmId={farmId} />
+                    <div className="lg:col-start-1 lg:row-start-1 space-y-6">
+                        <Panel title="Regional Weather Intelligence">
+                            <div className="space-y-6">
+                                <WeatherMatrix farms={farmsList} currentFarmId={farmId} onSelectFarm={(id) => setFarmId(id)} />
+                                {farmId && (
+                                    <div
+                                        className={`pt-6 border-t border-dashed border-slate-200 ${canOpen('/weather') ? 'cursor-pointer' : ''}`}
+                                        {...weatherLinkProps}
+                                    >
+                                        <WeatherWidget farmId={farmId} />
+                                    </div>
+                                )}
+                            </div>
+                        </Panel>
                     </div>
 
                     <div className="space-y-6 lg:col-span-2 lg:col-start-2 lg:row-span-2 lg:row-start-1">
@@ -511,21 +524,78 @@ export default function Dashboard() {
                             })}
                         </div>
 
-                        <Panel title="Farm location and fields">
-                            <MapWidget farmId={farmId} />
+                        <Panel title={
+                            <div className="flex items-center gap-2">
+                                <span>{
+                                    mapView === 'farms' ? 'Farm location and fields' : 
+                                    mapView === 'fields' ? `Fields in ${farmsList.find(f => f.id === selectedFarmForMap)?.name}` : 
+                                    'Field Map'
+                                }</span>
+                                {mapView !== 'farms' && (
+                                    <button 
+                                        onClick={goBackMap}
+                                        className="text-xs text-farm-600 hover:text-farm-800 underline"
+                                    >
+                                        &larr; back
+                                    </button>
+                                )}
+                            </div>
+                        }>
+                            {mapView === 'farms' && (
+                                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                                    {farmsList.map(farm => (
+                                        <button
+                                            key={farm.id}
+                                            onClick={() => handleSelectFarm(farm.id)}
+                                            className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50 hover:bg-farm-50 hover:border-farm-200 transition text-left"
+                                        >
+                                            <div className="min-w-0 overflow-hidden">
+                                                <p className="text-sm font-medium text-slate-800 truncate">{farm.name}</p>
+                                            </div>
+                                            <Icon name="chevron-right" className="h-4 w-4 text-slate-400 shrink-0 ml-2" />
+                                        </button>
+                                    ))}
+                                    {farmsList.length === 0 && <p className="text-sm text-slate-500 col-span-2 text-center py-4">No farms found. Please create one.</p>}
+                                </div>
+                            )}
+
+                            {mapView === 'fields' && (
+                                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                                    {fieldsList.map(field => (
+                                        <button
+                                            key={field.id}
+                                            onClick={() => handleSelectField(field)}
+                                            className="flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-slate-50 hover:bg-farm-50 hover:border-farm-200 transition text-left"
+                                        >
+                                            <div className="min-w-0 overflow-hidden">
+                                                <p className="text-sm font-medium text-slate-800 truncate">{field.name}</p>
+                                                <p className="text-xs text-slate-500">{field.size_hectares} hectares</p>
+                                            </div>
+                                            <Icon name="map-pin" className="h-4 w-4 text-slate-400 shrink-0 ml-2" />
+                                        </button>
+                                    ))}
+                                    {fieldsList.length === 0 && <p className="text-sm text-slate-500 col-span-2 text-center py-4">No fields found in this farm.</p>}
+                                </div>
+                            )}
+
+                            {mapView === 'map' && (
+                                <MapWidget farmId={selectedFarmForMap} />
+                            )}
                         </Panel>
                     </div>
 
                     <div className="lg:col-start-1 lg:row-start-2">
                         <Panel title="System status">
                             <dl className="space-y-3 text-sm">
-                                <div className="flex items-center justify-between gap-3">
-                                    <dt className="text-slate-500">System health</dt>
-                                    <dd className="flex items-center gap-2 font-medium text-farm-700">
-                                        <span className="h-2 w-2 rounded-full bg-farm-500" />
-                                        Online
-                                    </dd>
-                                </div>
+                                {['Admin', 'Manager'].includes(user?.role) && (
+                                    <div className="flex items-center justify-between gap-3">
+                                        <dt className="text-slate-500">System health</dt>
+                                        <dd className="flex items-center gap-2 font-medium text-farm-700">
+                                            <span className="h-2 w-2 rounded-full bg-farm-500" />
+                                            Online
+                                        </dd>
+                                    </div>
+                                )}
                                 <div className="flex items-center justify-between gap-3">
                                     <dt className="text-slate-500">Signed in as</dt>
                                     <dd className="font-medium text-slate-800">{user?.role || 'Unknown'}</dd>

@@ -90,18 +90,6 @@ The "Command Center" that aggregates data from all other modules into a single v
 | `/api/crop-productions` | `GET/POST/PUT/DEL` | All | Record harvest quantities and quality. |
 | `/api/farm-expenses` | `GET/POST/PUT/DEL` | Admin/Acc | Log costs for seeds, labour, and tools. |
 | `/api/dashboard/summary` | `GET` | All | Aggregated metrics for the main dashboard. |
-| `/api/owner/overview` | `GET` | Farm-owner | Accumulated business figures for the owner: profit or loss, income, expenses, monthly trend, per-farm results, amounts owed, budget. Accepts `year` and `farm_id`. |
-
-### Farm-owner view (business level)
-
-The farm owner is interested in the state of the business, not the daily farm work. Who fed which animal, which feed was used and task logs belong to the Manager.
-
-- **Reports & Analytics page:** for a Farm-owner it opens on a **Business overview** tab (profit or loss, income, expenses, monthly trend, per-farm results, amounts owed, budget) with a second tab for the existing **Detailed reports**. Other roles see the detailed reports as before.
-- **Endpoint:** `GET /api/owner/overview?year=2026&farm_id=1` (Farm-owner only; Admins are kept out of the owner's financial data).
-- **Profit and loss** come from the finance ledger (`financial_transactions`) for the calendar year, compared with the previous year.
-- **Loans are not profit.** `loan_received` and `loan_repayment` are excluded from income and expenses and shown separately as financing.
-- **Amounts owed** are a snapshot of today: unpaid customer invoices (with the overdue part) and delivered purchase orders not yet paid in full.
-- **Dashboard:** unchanged apart from the owner's module tiles. Day-to-day operational modules (livestock, tasks, crops, irrigation, harvest, storage, inventory, equipment and so on) and the "Yield records" card are not shown to the owner. API access is unchanged; to block it completely, remove `Farm-owner` from the relevant rows in `RoleAccess.php`.
 
 ---
 

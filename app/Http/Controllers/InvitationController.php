@@ -55,9 +55,7 @@ class InvitationController extends Controller
             ]);
         }
 
-        // Clear every earlier invitation for this email, including accepted ones whose user was later
-        // deleted. The email column is unique, and validation above already proved no account uses it.
-        UserInvitation::where('email', $validated['email'])->delete();
+        UserInvitation::where('email', $validated['email'])->whereNull('accepted_at')->delete();
 
         $plainToken = Str::random(64);
         $invitation = UserInvitation::create([
