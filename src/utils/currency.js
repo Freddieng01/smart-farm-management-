@@ -3,8 +3,12 @@
 export const CURRENCY_SYMBOL = 'K';
 export const CURRENCY_CODE = 'ZMW';
 
-export const money = (n) =>
-    `${CURRENCY_SYMBOL}${Number(n || 0).toLocaleString(undefined, {
+export const money = (n) => {
+    const value = Number(n || 0);
+    const text = Math.abs(value).toLocaleString(undefined, {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
-    })}`;
+    });
+    // a negative amount reads "-K1,250.00", not "K-1,250.00"
+    return `${value < 0 && text !== '0.00' ? '-' : ''}${CURRENCY_SYMBOL}${text}`;
+};

@@ -1,17 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import ModuleLayout from '../components/ModuleLayout.jsx';
-import { 
-    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, 
-    PieChart, Pie, Cell, LineChart, Line 
-} from 'recharts';
-import { useNavigate } from 'react-router-dom';
+import { money } from '../utils/currency.js';
+import OwnerOverview from '../components/OwnerOverview.jsx';
 
 const input = 'rounded-full border border-farm-200 px-3 py-2 text-sm outline-none focus:border-farm-500 focus:ring-2 focus:ring-farm-500/20';
-const money = (n) => `$${Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const label = (s) => s.replace(/_/g, ' ');
-
-const COLORS = ['#315f2b', '#4a7c44', '#8dbb81', '#b7d6ae', '#d9e8c6', '#f0f5e9'];
 
 function Card({ title, value, tone }) {
     return (
@@ -41,9 +35,8 @@ function Breakdown({ title, data }) {
     );
 }
 
-export default function ReportsAnalytics() {
+function DetailedReports() {
     const { api } = useAuth();
-    const navigate = useNavigate();
     const [farms, setFarms] = useState([]);
     const [farmId, setFarmId] = useState('');
     const [from, setFrom] = useState('');
@@ -92,46 +85,26 @@ export default function ReportsAnalytics() {
 
     useEffect(() => { load(); }, [load]);
 
-    // Data preparation for charts
-    const expenseChartData = pl ? Object.entries(pl.expense_by_category).map(([name, value]) => ({
-        name: label(name),
-        value: Number(value)
-    })) : [];
-
-    const budgetChartData = bva.map(r => ({
-        name: label(r.category),
-        planned: Number(r.planned_amount),
-        actual: Number(r.actual_amount)
-    }));
-
-    const mainFinancialData = summary ? [
-        { name: 'Income', value: Number(summary.total_income) },
-        { name: 'Expenses', value: Number(summary.total_expenses) },
-    ] : [];
-
     return (
-        <ModuleLayout
-          title="Reports &amp; Analytics"
-          subtitle="Visual intelligence for profit and loss, budget performance and operational costs."
-        >
+        <>
             <div className="mx-auto max-w-7xl">
 
                 <div className="mb-6 flex flex-wrap items-end gap-3">
-                    <div className="flex-1 min-w-[150px]">
+                    <div>
                         <label className="block text-xs font-medium text-slate-500">Farm</label>
                         <select className={input} value={farmId} onChange={(e) => setFarmId(e.target.value)}>
                             {farms.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
                         </select>
                     </div>
-                    <div className="flex-1 min-w-[150px]">
+                    <div>
                         <label className="block text-xs font-medium text-slate-500">From</label>
                         <input type="date" className={input} value={from} onChange={(e) => setFrom(e.target.value)} />
                     </div>
-                    <div className="flex-1 min-w-[150px]">
+                    <div>
                         <label className="block text-xs font-medium text-slate-500">To</label>
                         <input type="date" className={input} value={to} onChange={(e) => setTo(e.target.value)} />
                     </div>
-                    <button className="rounded-full border border-farm-200 px-3 py-2 text-sm text-slate-500 hover:bg-white transition"
+                    <button className="rounded-full border border-farm-200 px-3 py-2 text-sm text-slate-500 hover:bg-white"
                         onClick={() => { setFrom(''); setTo(''); }}>Clear dates</button>
                 </div>
 
@@ -155,53 +128,6 @@ export default function ReportsAnalytics() {
                     </>
                 )}
 
-                <div className="mt-8 grid gap-6 md:grid-cols-2">
-                    {/* Financial Overview Bar Chart */}
-                    <div className="rounded-3xl bg-white p-6 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
-                        <h3 className="mb-6 text-base font-semibold text-farm-900">Income vs Expenses</h3>
-                        <div className="h-64 w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={mainFinancialData}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                                    <Tooltip 
-                                        cursor={{fill: '#f8fafc'}} 
-                                        contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'}} 
-                                    />
-                                    <Bar dataKey="value" fill="#315f2b" radius={[6, 6, 0, 0]} />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-
-                    {/* Expense Breakdown Pie Chart */}
-                    <div className="rounded-3xl bg-white p-6 shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
-                        <h3 className="mb-6 text-base font-semibold text-farm-900">Expense Distribution</h3>
-                        <div className="h-64 w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie 
-                                        data={expenseChartData} 
-                                        innerRadius={60} 
-                                        outerRadius={80} 
-                                        paddingAngle={5} 
-                                        dataKey="value"
-                                    >
-                                        {expenseChartData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip 
-                                        contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'}} 
-                                    />
-                                    <Legend verticalAlign="bottom" height={36}/>
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-                </div>
-
                 {pl && (
                     <div className="mt-6 grid gap-4 md:grid-cols-2">
                         <Breakdown title="Income by category" data={pl.income_by_category} />
@@ -224,15 +150,7 @@ export default function ReportsAnalytics() {
                 )}
 
                 <div className="mt-6 overflow-x-auto rounded-3xl bg-white shadow-[0_2px_16px_rgba(15,60,35,0.07)]">
-                    <div className="flex items-center justify-between px-5 pt-5">
-                        <h3 className="text-base font-semibold text-farm-900">Budget vs Actual</h3>
-                        <button 
-                            onClick={() => navigate('/expenses')}
-                            className="text-xs text-farm-600 hover:text-farm-800 font-medium"
-                        >
-                            Investigate Spends &rarr;
-                        </button>
-                    </div>
+                    <h3 className="px-5 pt-5 text-base font-semibold text-farm-900">Budget vs actual</h3>
                     <table className="mt-3 w-full text-left text-sm">
                         <thead className="bg-farm-50 text-farm-700 text-xs"><tr>
                             <th className="px-5 py-3 font-medium">Category</th>
@@ -245,12 +163,12 @@ export default function ReportsAnalytics() {
                             {bva.length === 0 ? (
                                 <tr><td colSpan="5" className="px-5 py-8 text-center text-slate-500">No budgets for this farm.</td></tr>
                             ) : bva.map((r) => (
-                                <tr key={r.budget_id} className="hover:bg-slate-50 transition">
-                                    <td className="px-5 py-3 capitalize text-farm-900 font-medium">{label(r.category)}</td>
+                                <tr key={r.budget_id}>
+                                    <td className="px-5 py-3 capitalize text-farm-900">{label(r.category)}</td>
                                     <td className="px-5 py-3 text-slate-500">{r.period_start} → {r.period_end}</td>
                                     <td className="px-5 py-3">{money(r.planned_amount)}</td>
                                     <td className="px-5 py-3">{money(r.actual_amount)}</td>
-                                    <td className={`px-5 py-3 font-semibold ${r.variance < 0 ? 'text-red-700' : 'text-farm-700'}`}>
+                                    <td className={`px-5 py-3 font-medium ${r.variance < 0 ? 'text-red-700' : 'text-farm-700'}`}>
                                         {money(r.variance)} {r.variance < 0 ? '(over)' : '(under)'}
                                     </td>
                                 </tr>
@@ -259,6 +177,43 @@ export default function ReportsAnalytics() {
                     </table>
                 </div>
             </div>
+        </>
+    );
+}
+
+export default function ReportsAnalytics() {
+    const { user } = useAuth();
+    const isOwner = user?.role === 'Farm-owner';
+    const [tab, setTab] = useState('overview');
+
+    return (
+        <ModuleLayout
+          title="Reports &amp; Analytics"
+          subtitle={isOwner
+            ? 'How the business is doing: profit or loss, income, expenses and what is owed.'
+            : 'Profit and loss, cost per hectare, inventory value and budget performance.'}
+        >
+            {isOwner ? (
+                <div className="mx-auto max-w-7xl">
+                    <div className="mb-6 flex gap-2 border-b border-farm-100">
+                        {[['overview', 'Business overview'], ['detailed', 'Detailed reports']].map(([key, text]) => (
+                            <button
+                                key={key}
+                                type="button"
+                                onClick={() => setTab(key)}
+                                className={`px-4 py-2 text-sm font-medium ${tab === key ? 'border-b-2 border-farm-700 text-farm-700' : 'text-slate-500'}`}
+                            >
+                                {text}
+                            </button>
+                        ))}
+                    </div>
+                    {tab === 'overview'
+                        ? <OwnerOverview onOpenDetails={() => setTab('detailed')} />
+                        : <DetailedReports />}
+                </div>
+            ) : (
+                <DetailedReports />
+            )}
         </ModuleLayout>
     );
 }
