@@ -48,6 +48,11 @@ function formatTime(unixSeconds) {
     return new Date(unixSeconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
+function formatMetric(value, suffix = '') {
+    const number = Number(value);
+    return Number.isFinite(number) ? `${Math.round(number)}${suffix}` : 'Unavailable';
+}
+
 function SunArc({ sunrise, sunset }) {
     const nowSeconds = Date.now() / 1000;
     const progress = (nowSeconds - sunrise) / (sunset - sunrise);
@@ -118,7 +123,12 @@ const WeatherWidget = ({ farmId }) => {
                     throw currentResult.reason;
                 }
 
-                setWeather(currentResult.value.data.weather);
+                const currentWeather = currentResult.value.data.weather;
+                if (!currentWeather || currentWeather.error) {
+                    throw new Error(currentWeather?.message || 'Weather data is currently unavailable.');
+                }
+
+                setWeather(currentWeather);
                 setFarmName(currentResult.value.data.farm || '');
                 setForecast(
                     forecastResult.status === 'fulfilled'
@@ -131,7 +141,7 @@ const WeatherWidget = ({ farmId }) => {
                         : []
                 );
             } catch (err) {
-                setError(err.response?.data?.message || 'Weather data is currently unavailable.');
+                setError(err.response?.data?.message || err.message || 'Weather data is currently unavailable.');
                 setDetail(err.response?.data?.error || null);
             } finally {
                 setLoading(false);
@@ -208,11 +218,10 @@ const WeatherWidget = ({ farmId }) => {
                         <span className="truncate">{farmName || 'Your farm'}</span>
                     </p>
                     <p className="mt-3 text-5xl font-semibold tracking-tight text-farm-900 tabular-nums">
-                        {Math.round(weather.main?.temp)}
-                        <span className="text-3xl font-medium text-slate-400">&deg;C</span>
+                        {formatMetric(weather.main?.temp, '°C')}
                     </p>
                     <p className="mt-1 text-sm text-slate-500 tabular-nums">
-                        H: {Math.round(weather.main?.temp_max)}&deg;&nbsp;&nbsp;L: {Math.round(weather.main?.temp_min)}&deg;
+                        H: {formatMetric(weather.main?.temp_max, '°C')}&nbsp;&nbsp;L: {formatMetric(weather.main?.temp_min, '°C')}
                     </p>
                 </div>
                 <div className="text-center">
@@ -224,19 +233,19 @@ const WeatherWidget = ({ farmId }) => {
             <dl className="mt-5 grid grid-cols-4 gap-2 border-t border-dashed border-slate-200 pt-4">
                 <div>
                     <dt className="text-xs text-slate-500">Humidity</dt>
-                    <dd className="mt-0.5 text-sm font-semibold text-farm-900 tabular-nums">{weather.main?.humidity}%</dd>
+                    <dd className="mt-0.5 text-sm font-semibold text-farm-900 tabular-nums">{formatMetric(weather.main?.humidity, '%')}</dd>
                 </div>
                 <div>
                     <dt className="text-xs text-slate-500">Rain</dt>
-                    <dd className="mt-0.5 text-sm font-semibold text-farm-900 tabular-nums">{weather.rain?.['1h'] ?? 0} mm</dd>
+                    <dd className="mt-0.5 text-sm font-semibold text-farm-900 tabular-nums">{formatMetric(weather.rain?.['1h'], ' mm')}</dd>
                 </div>
                 <div>
                     <dt className="text-xs text-slate-500">Pressure</dt>
-                    <dd className="mt-0.5 text-sm font-semibold text-farm-900 tabular-nums">{weather.main?.pressure} hPa</dd>
+                    <dd className="mt-0.5 text-sm font-semibold text-farm-900 tabular-nums">{formatMetric(weather.main?.pressure, ' hPa')}</dd>
                 </div>
                 <div>
                     <dt className="text-xs text-slate-500">Wind</dt>
-                    <dd className="mt-0.5 text-sm font-semibold text-farm-900 tabular-nums">{weather.wind?.speed} m/s</dd>
+                    <dd className="mt-0.5 text-sm font-semibold text-farm-900 tabular-nums">{formatMetric(weather.wind?.speed, ' m/s')}</dd>
                 </div>
             </dl>
 

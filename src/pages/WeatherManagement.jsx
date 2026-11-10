@@ -32,6 +32,7 @@ export default function WeatherManagement() {
         return (
             err?.response?.data?.message ||
             err?.response?.data?.error ||
+            err?.message ||
             fallback
         );
     };
@@ -82,6 +83,10 @@ export default function WeatherManagement() {
                         params: { farm_id: selectedFarm },
                     }),
                 ]);
+
+            if (currentResponse.data?.weather?.error) {
+                throw new Error(currentResponse.data.weather.message || 'Weather data is currently unavailable.');
+            }
 
             setCurrentWeather(currentResponse.data);
             setForecast(forecastResponse.data);
@@ -424,8 +429,9 @@ export default function WeatherManagement() {
                     farms.length === 0 &&
                     !error && (
                         <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-2xl p-4">
-                            No farms are available. Create a farm with GPS
-                            coordinates before using Weather Management.
+                            {['Farm-owner', 'Manager'].includes(user?.role)
+                                ? 'No farms are available. Create a farm with GPS coordinates before using Weather Management.'
+                                : 'No farms are available to this account yet. Ask a Farm-owner or Manager to assign a farm with GPS coordinates.'}
                         </div>
                     )}
             </div>

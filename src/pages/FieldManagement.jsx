@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { useParams } from 'react-router-dom';
 import ModuleLayout from '../components/ModuleLayout.jsx';
 
-export default function FieldManagement() {
+export default function FieldManagement({ onFieldSelect, selectedFieldId }) {
     const { api } = useAuth();
     const { user } = useAuth();
     const { farmId } = useParams();
@@ -111,8 +111,16 @@ export default function FieldManagement() {
                                 <tr><td colSpan="4" className="px-6 py-10 text-center text-slate-500">No fields registered for this farm.</td></tr>
                             ) : (
                                 fields.map((field) => (
-                                    <tr key={field.id} className="hover:bg-farm-50 transition">
-                                        <td className="px-6 py-4 font-medium text-farm-900">{field.name}</td>
+                                    <tr key={field.id} className={`transition ${selectedFieldId === field.id ? 'bg-farm-50' : 'hover:bg-farm-50'}`}>
+                                        <td className="px-6 py-4 font-medium text-farm-900">
+                                            <button
+                                                type="button"
+                                                onClick={() => onFieldSelect?.(field)}
+                                                className="text-left hover:underline"
+                                            >
+                                                {field.name}
+                                            </button>
+                                        </td>
                                         <td className="px-6 py-4 text-slate-500">{field.soil_type || 'Not specified'}</td>
                                         <td className="px-6 py-4 text-slate-500">{field.size_hectares} ha</td>
                                         <td className="px-6 py-4 text-right space-x-3">

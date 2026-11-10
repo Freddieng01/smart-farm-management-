@@ -46,6 +46,12 @@ class WeatherController extends Controller
                 $longitude
             );
 
+            if (! empty($weather['error'])) {
+                return response()->json([
+                    'message' => $weather['message'] ?? 'Weather service is currently unavailable.',
+                ], 502);
+            }
+
             return response()->json([
                 'farm' => $farm->name,
                 'weather' => $weather,
@@ -74,6 +80,12 @@ class WeatherController extends Controller
                 $latitude,
                 $longitude
             );
+
+            if (! empty($forecast['error'])) {
+                return response()->json([
+                    'message' => $forecast['message'] ?? 'Weather forecast is currently unavailable.',
+                ], 502);
+            }
 
             return response()->json([
                 'farm' => $farm->name,

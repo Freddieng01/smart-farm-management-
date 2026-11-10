@@ -32,7 +32,7 @@ function AppRoutes() {
 
     // `roles` is only a fallback: the real list for each page comes from
     // config/permissions.js (ProtectedRoute reads it from the address).
-    const page = (roles, element) => <ProtectedRoute allowedRoles={roles}>{element}</ProtectedRoute>;
+    const page = (_roles, element) => <ProtectedRoute>{element}</ProtectedRoute>;
 
     return (
         <Routes>
@@ -45,7 +45,7 @@ function AppRoutes() {
 
             {/* Farms & Weather on one page, then each farm's own profile (overview, fields, tasks, finance) */}
             <Route path="/farms" element={page(ALL_ROLES, <LandHub />)} />
-            <Route path="/farms/:farmId" element={page(['Admin', 'Farm-owner', 'Manager'], <FarmProfile />)} />
+            <Route path="/farms/:farmId" element={page(['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Accountant'], <FarmProfile />)} />
             <Route path="/farms/:farmId/fields" element={page(['Admin', 'Farm-owner', 'Manager', 'Agronomist'], <FarmFieldsRedirect />)} />
 
             {/* Pages that group related modules as tabs */}

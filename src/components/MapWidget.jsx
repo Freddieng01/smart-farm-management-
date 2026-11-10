@@ -85,7 +85,7 @@ function parseBoundary(boundary) {
     }
 }
 
-const MapWidget = ({ farmId, onFieldsChanged }) => {
+const MapWidget = ({ farmId, onFieldsChanged, selectedFieldId }) => {
     const { api, user } = useAuth();
     const [farm, setFarm] = useState(null);
     const [fields, setFields] = useState([]);
@@ -163,6 +163,9 @@ const MapWidget = ({ farmId, onFieldsChanged }) => {
     }
 
     const center = [latitude, longitude];
+    const visibleFields = selectedFieldId
+        ? fields.filter((field) => Number(field.id) === Number(selectedFieldId))
+        : fields;
 
     return (
         <div className="relative h-[500px] w-full rounded-xl overflow-hidden shadow-md border border-gray-200">
@@ -188,7 +191,7 @@ const MapWidget = ({ farmId, onFieldsChanged }) => {
                         Main Farm Hub
                     </Popup>
                 </Marker>
-                {fields.map((field) => {
+                {visibleFields.map((field) => {
                     const coords = parseBoundary(field.boundary_polygon);
                     if (!coords) return null;
 

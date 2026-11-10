@@ -73,9 +73,14 @@ function Overview({ farm }) {
                 </section>
 
                 <section className={`${card} overflow-hidden lg:col-span-2`}>
-                    <h2 className="px-6 pt-5 text-base font-semibold text-farm-900">Location and fields</h2>
+                    <h2 className="px-6 pt-5 text-base font-semibold text-farm-900">Farm location</h2>
                     <div className="p-6 pt-4">
-                        <MapWidget farmId={farm.id} />
+                        <p className="text-sm text-slate-600">
+                            {hasLocation(farm)
+                                ? `${Number(farm.latitude).toFixed(4)}, ${Number(farm.longitude).toFixed(4)}`
+                                : 'This farm has not been mapped yet.'}
+                        </p>
+                        <p className="mt-2 text-sm text-slate-500">Open the Fields tab to select a field and view its boundary on the map.</p>
                     </div>
                 </section>
             </div>
@@ -88,17 +93,38 @@ function Overview({ farm }) {
 function FarmFields({ farmId }) {
     // bumping the key reloads the list when a field is drawn on the map
     const [version, setVersion] = useState(0);
+    const [selectedFieldId, setSelectedFieldId] = useState(null);
 
     return (
         <div className="space-y-6">
+            <div className="flex items-center justify-between gap-3">
+                <Link to={`/farms/${farmId}?tab=overview`} className="text-sm font-medium text-farm-700 hover:underline">
+                    Back to farm overview
+                </Link>
+                <span className="text-sm text-slate-500">Select a field to view its map</span>
+            </div>
+            <FieldManagement
+                key={version}
+                selectedFieldId={selectedFieldId}
+                onFieldSelect={(field) => setSelectedFieldId(field.id)}
+            />
             <section className={`${card} overflow-hidden`}>
-                <h2 className="px-6 pt-5 text-base font-semibold text-farm-900">Field map</h2>
-                <p className="px-6 text-sm text-slate-500">Each green shape is a field. Farm-owners and Managers can plot a new one on the map.</p>
-                <div className="p-6 pt-4">
-                    <MapWidget farmId={farmId} onFieldsChanged={() => setVersion((v) => v + 1)} />
-                </div>
+                {selectedFieldId ? (
+                    <>
+                        <h2 className="px-6 pt-5 text-base font-semibold text-farm-900">Field map</h2>
+                        <p className="px-6 text-sm text-slate-500">Showing the selected field boundary.</p>
+                        <div className="p-6 pt-4">
+                            <MapWidget
+                                farmId={farmId}
+                                selectedFieldId={selectedFieldId}
+                                onFieldsChanged={() => setVersion((v) => v + 1)}
+                            />
+                        </div>
+                    </>
+                ) : (
+                    <p className="px-6 py-8 text-center text-sm text-slate-500">Select a field above to view it on the map.</p>
+                )}
             </section>
-            <FieldManagement key={version} />
         </div>
     );
 }
@@ -345,11 +371,12 @@ export default function FarmProfile() {
             title={farm?.name || (error ? 'Farm' : 'Loading farm...')}
             subtitle="Everything about this farm in one place."
             backTo={{ to: '/farms', label: 'All farms' }}
+            defaultTab="fields"
             tabs={[
                 {
                     key: 'overview',
                     label: 'Overview',
-                    roles: ['Admin', 'Farm-owner', 'Manager'],
+                    roles: ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Accountant'],
                     element: error
                         ? <p role="alert" className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>
                         : farm

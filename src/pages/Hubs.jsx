@@ -40,14 +40,19 @@ import SupplierManagement from './SupplierManagement.jsx';
 export function LandHub() {
     const { user } = useAuth();
     const farms = canAccessModule(user?.role, '/farms');
+    const subtitleByRole = {
+        Admin: 'Review the farm registry and system weather information.',
+        'Farm-owner': 'Manage your farms, fields and weather information.',
+        Manager: 'Review assigned farms, fields and weather information.',
+        Agronomist: 'Review farm fields, agronomy work and weather conditions.',
+        Accountant: 'Review farm context and weather for financial planning.',
+    };
 
     return (
         <ModuleHub
             title={farms ? 'Farms & Weather' : 'Weather'}
             subtitle={
-                farms
-                    ? 'Your farms and their fields, plus the weather and forecast for each. Open a farm to see its fields, tasks and finances.'
-                    : 'Current conditions and the forecast for your farms.'
+                subtitleByRole[user?.role] || 'Current conditions and the forecast for your farms.'
             }
             tabs={[
                 { key: 'farms', label: 'Farms', path: '/farms', element: <FarmManagement /> },

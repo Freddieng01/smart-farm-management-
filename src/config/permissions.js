@@ -1,7 +1,8 @@
 export const ROLES = ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker', 'Accountant'];
 
 export const MODULE_ROLES = {
-    '/farms': ['Admin', 'Farm-owner', 'Manager'],
+    '/farms': ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Accountant'],
+    '/farms/:farmId': ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Accountant'],
     '/farms/:farmId/fields': ['Admin', 'Farm-owner', 'Manager', 'Agronomist'],
     '/livestock': ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'],
     '/notifications': ['Admin', 'Farm-owner', 'Manager', 'Accountant', 'Agronomist', 'Worker'],
@@ -73,6 +74,16 @@ export function canAccessModule(role, path) {
 export function rolesForPath(path) {
     if (path.startsWith('/farms/') && path.endsWith('/fields')) {
         return MODULE_ROLES['/farms/:farmId/fields'];
+    }
+
+    if (/^\/farms\/[^/]+$/.test(path)) {
+        return MODULE_ROLES['/farms/:farmId'];
+    }
+
+    const profileModules = ['/crops', '/plantings', '/tasks', '/employees'];
+    const profileModule = profileModules.find((module) => path.startsWith(`${module}/`));
+    if (profileModule) {
+        return MODULE_ROLES[profileModule] || [];
     }
 
     if (HUB_MODULES[path]) {

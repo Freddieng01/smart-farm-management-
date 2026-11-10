@@ -2,11 +2,13 @@
 
 return [
     'modules' => [
-        'farms' => ['Admin', 'Farm-owner', 'Manager'],
+        // Admin manages the platform and Accountants need read access to the
+        // farm context used by finance; neither role can change farm settings.
+        'farms' => ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Accountant'],
         'fields' => ['Admin', 'Farm-owner', 'Manager', 'Agronomist'],
         'employees' => ['Farm-owner', 'Manager'],
         'tasks' => ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'],
-        'agronomy' => ['Admin', 'Farm-owner', 'Manager', 'Agronomist'],
+        'agronomy' => ['Farm-owner', 'Manager', 'Agronomist'],
         'operations' => ['Admin', 'Farm-owner', 'Manager', 'Agronomist', 'Worker'],
         'inventory' => ['Admin', 'Farm-owner', 'Manager', 'Agronomist'],
         'equipment' => ['Admin', 'Farm-owner', 'Manager'],

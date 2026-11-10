@@ -20,6 +20,14 @@ export default function FarmManagement() {
         total_acreage: '',
         owner_id: '',
     });
+    const canManageFarms = ['Farm-owner', 'Manager'].includes(user?.role);
+    const subtitleByRole = {
+        Admin: 'Review the farm registry and open a farm profile.',
+        'Farm-owner': 'Manage your farms and select one to open its profile.',
+        Manager: 'Review and update assigned farms. Select a farm to open its profile.',
+        Agronomist: 'Select a farm to review its fields and agronomy work.',
+        Accountant: 'Select a farm to review its financial records.',
+    };
 
     useEffect(() => {
         fetchFarms();
@@ -104,9 +112,9 @@ export default function FarmManagement() {
     return (
         <ModuleLayout
           title="Farm Management"
-          subtitle="Register your farms. Select a farm to open its profile."
+          subtitle={subtitleByRole[user?.role] || 'Select a farm to open its profile.'}
           actions={<>
-{['Admin', 'Farm-owner'].includes(user?.role) && (
+{canManageFarms && (
                         <button
                             onClick={() => handleOpenModal()}
                             className="rounded-full bg-harvest-400 px-5 py-2 text-sm font-medium text-farm-900 transition hover:bg-harvest-500 disabled:opacity-60"
@@ -135,7 +143,9 @@ export default function FarmManagement() {
                             {loading ? (
                                 <tr><td colSpan="5" className="px-6 py-10 text-center text-slate-500">Loading farms...</td></tr>
                             ) : farms.length === 0 ? (
-                                <tr><td colSpan="5" className="px-6 py-10 text-center text-slate-500">No farms registered yet.</td></tr>
+                                <tr><td colSpan="5" className="px-6 py-10 text-center text-slate-500">
+                                    {canManageFarms ? 'No farms registered yet.' : 'No farms are assigned or available to view.'}
+                                </td></tr>
                             ) : (
                                 farms.map((farm) => (
                                     <tr
@@ -162,7 +172,7 @@ export default function FarmManagement() {
                                             >
                                                 View profile
                                             </button>
-                                            {['Admin', 'Farm-owner', 'Manager'].includes(user?.role) && (
+                                            {canManageFarms && (
                                                 <button
                                                     onClick={() => handleOpenModal(farm)}
                                                     className="text-farm-700 hover:underline"
@@ -170,7 +180,7 @@ export default function FarmManagement() {
                                                     Edit
                                                 </button>
                                             )}
-                                            {user?.role === 'Admin' && (
+                                            {canManageFarms && (
                                                 <button
                                                     onClick={() => handleDelete(farm.id)}
                                                     className="text-red-600 hover:underline"

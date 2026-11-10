@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
 import WeatherWidget from './WeatherWidget.jsx';
-import MapWidget from './MapWidget.jsx';
 import FarmScene from './FarmScene.jsx';
 import Icon from './Icon.jsx';
 import TodayPanel from './TodayPanel.jsx';
@@ -108,6 +107,7 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [farmId, setFarmId] = useState(null);
+    const [farmName, setFarmName] = useState(null);
     const [now, setNow] = useState(() => new Date());
     const [query, setQuery] = useState('');
     const [searchOpen, setSearchOpen] = useState(false);
@@ -158,6 +158,7 @@ export default function Dashboard() {
                     const farms = farmsResult.value.data.data || [];
                     if (farms.length > 0) {
                         setFarmId(farms[0].id);
+                        setFarmName(farms[0].name || null);
                     }
                 }
 
@@ -422,7 +423,20 @@ export default function Dashboard() {
                         </div>
 
                         <Panel title="Farm location and fields">
-                            <MapWidget farmId={farmId} />
+                            <p className="text-sm text-slate-600">
+                                {farmId
+                                    ? 'Open the selected farm to review its fields first, then choose a field to view its map.'
+                                    : 'Select a farm to review its fields and field maps.'}
+                            </p>
+                            {farmId && canOpen(`/farms/${farmId}`) && (
+                                <button
+                                    type="button"
+                                    onClick={() => navigate(`/farms/${farmId}?tab=fields`)}
+                                    className="mt-4 rounded-full bg-farm-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-farm-800"
+                                >
+                                    Open fields
+                                </button>
+                            )}
                         </Panel>
                     </div>
 
@@ -442,7 +456,9 @@ export default function Dashboard() {
                                 </div>
                                 <div className="flex items-center justify-between gap-3">
                                     <dt className="text-slate-500">Farm selected</dt>
-                                    <dd className="font-medium text-slate-800">{farmId ? `Farm #${farmId}` : 'None'}</dd>
+                                    <dd className="font-medium text-slate-800">
+                                        {farmId ? (farmName || `Farm #${farmId}`) : 'None'}
+                                    </dd>
                                 </div>
                             </dl>
                         </Panel>
