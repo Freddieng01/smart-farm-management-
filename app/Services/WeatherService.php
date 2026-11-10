@@ -19,6 +19,13 @@ class WeatherService
 
     public function getCurrentWeather(float $latitude, float $longitude): array
     {
+        if ($this->apiKey === '') {
+            return [
+                'error' => true,
+                'message' => 'Weather service is not configured. Set OPENWEATHER_API_KEY in the .env file.',
+            ];
+        }
+
         try {
             $response = Http::timeout(10)->get(
                 $this->baseUrl . '/weather',
@@ -50,6 +57,13 @@ class WeatherService
 
     public function getForecast(float $latitude, float $longitude): array
     {
+        if ($this->apiKey === '') {
+            return [
+                'error' => true,
+                'message' => 'Weather service is not configured. Set OPENWEATHER_API_KEY in the .env file.',
+            ];
+        }
+
         try {
             $response = Http::timeout(10)->get(
                 $this->baseUrl . '/forecast',
